@@ -1,3 +1,5 @@
+module CreateInfo where
+
 import System.ShQQ
 import Text.Printf
 import Data.List.Split
@@ -7,7 +9,7 @@ import Control.Applicative
 import IntCoor
 
 -- atomNumber = 17
-atomtype = ["C","C","C","C","C","N","H","C","H","H","H","H","H","H","H","H","H"]
+-- atomtype = ["C","C","C","C","C","N","H","C","H","H","H","H","H","H","H","H","H"]
 chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] ::[Int]
 
 
@@ -22,7 +24,7 @@ data Dinamica = Dinamica {
           } deriving Show
 
 -- Creates info files from molcas output
-main = do
+createInfo = do
        outs <- readShell "ls *.out"
        let outputs = lines outs
        mapM_ genInfoFile outputs
@@ -60,7 +62,7 @@ genInfoFile fn = do
         dividedGeometries   = chunksOf atomNumber (concat separateString)
         toDouble            = map (map (\x -> read x :: Double)) dividedGeometries
         chargeTrFragmentI   = map pred chargeTrFragment
-        sumUp4CT x          = map (x!!) chargeTrFragmentI
+        sumUp4CT x          = sum $ map (x!!) chargeTrFragmentI
         chargeTr'           = unlines $ map show (map sumUp4CT toDouble)
         wholefile           = atomNS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile

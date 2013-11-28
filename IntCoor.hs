@@ -63,15 +63,18 @@ vecnorm v =  sqrt  $  v `vecdot` v
 
 -- =================> BOND, ANGLE AND DIHEDRAL <=========
 
-dif2 :: [Vec Double] -> Double
-dif2 [p1,p2,p3] = sqrt $ (p1 - p2) `vecdot` (p3 - p2)
-
 bond :: [Vec Double] -> Double
 bond [p1,p2] = vecnorm $ p1 - p2
 
 angle :: [Vec Double] -> Double
-angle [p1,p2,p3] = (180.0/pi*) . acos $ arg
-  where arg = dif2 [p1,p2,p3] / ((p1 - p2) `vecdot` (p2 - p3))
+angle [p1,p2,p3] = let 
+      ab = p1 - p2
+      bc = p3 - p2
+      numerator = vecdot ab bc
+      denominat = (vecnorm ab) * (vecnorm bc) 
+      fromRadToGrad = 180.0/pi
+      gradiant  = acos (numerator/denominat)
+      in fromRadToGrad * gradiant
 
 dihedral :: [Vec Double] -> Double
 dihedral [p1,p2,p3,p4] =
