@@ -36,13 +36,14 @@ createDATA fn = do
         tauV      = zipWith (\x y -> (x+y)*0.5) betaV ccccV
         deltaV    = zipWith (-) ccccV betaV
         blaV      = blaD atomN a
-        st        = map show
-        dynV      = DinamicV isS1 justHop (st cT) (st betaV) (st ccccV) (st tauV) (st deltaV) (st blaV)
+--        st        = map show
+        prt       = map (\x -> printf "%.3f" x :: String)
+        dynV      = DinamicV isS1 justHop (prt cT) (prt betaV) (prt ccccV) (prt tauV) (prt deltaV) (prt blaV)
     writeFile dataname $ printDinColumn dynV
 
 --printDinColumn :: DinamicV -> String
 printDinColumn dE = let trans = transposeDynV dE
-                    in unlines $ map unwords trans
+                    in unlines $ map (" " ++) $ map unwords trans
 
 transposeDynV dE = getZipList $ (\a b c d e f g h -> a:b:c:d:e:f:g:h:[]) <$> ZipList (getBetaDih dE) <*> ZipList (getCcccDih dE) <*> ZipList (getTau dE) <*> ZipList (getDeltaOp dE) <*> ZipList (getBlaV dE) <*> ZipList (getS1OrS2 dE) <*> ZipList (getHopYesNo dE) <*> ZipList (getCT dE)
 
