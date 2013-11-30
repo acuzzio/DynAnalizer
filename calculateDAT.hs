@@ -3,12 +3,15 @@ import Text.Printf
 import Data.List.Split
 import Data.List
 import Control.Applicative
+import Data.Char (isDigit)
 
 import IntCoor
 import CreateInfo
 
 data DinamicV = DinamicV {
-          getS1OrS2      :: [String]
+          getDynN        :: [String]
+         ,getStepN       :: [String]
+         ,getS1OrS2      :: [String]
          ,getHopYesNo    :: [String]
          ,getCT          :: [String]
          ,getBetaDih     :: [String]
@@ -27,6 +30,9 @@ main = do
 createDATA fn = do
     a             <- rdInfoFile fn
     let dataname  = (takeWhile (/= '.') fn ) ++ ".data"
+        dynNum    = dropWhile (not. isDigit) $ takeWhile (/= '.') fn 
+        dynN      = take (length isS1) $ repeat dynNum
+        stepN     = take (length isS1) $ map show [1..200]
         isS1      = rootDiscov a
         atomN     = getAtomN a 
         justHop   = justHopd a
@@ -38,14 +44,14 @@ createDATA fn = do
         blaV      = blaD atomN a
 --        st        = map show
         prt       = map (\x -> printf "%.3f" x :: String)
-        dynV      = DinamicV isS1 justHop (prt cT) (prt betaV) (prt ccccV) (prt tauV) (prt deltaV) (prt blaV)
+        dynV      = DinamicV dynN stepN isS1 justHop (prt cT) (prt betaV) (prt ccccV) (prt tauV) (prt deltaV) (prt blaV)
     writeFile dataname $ printDinColumn dynV
 
 --printDinColumn :: DinamicV -> String
 printDinColumn dE = let trans = transposeDynV dE
                     in unlines $ map (" " ++) $ map unwords trans
 
-transposeDynV dE = getZipList $ (\a b c d e f g h -> a:b:c:d:e:f:g:h:[]) <$> ZipList (getBetaDih dE) <*> ZipList (getCcccDih dE) <*> ZipList (getTau dE) <*> ZipList (getDeltaOp dE) <*> ZipList (getBlaV dE) <*> ZipList (getS1OrS2 dE) <*> ZipList (getHopYesNo dE) <*> ZipList (getCT dE)
+transposeDynV dE = getZipList $ (\aaa aa a b c d e f g h -> aaa:aa:a:b:c:d:e:f:g:h:[]) <$> ZipList (getDynN dE) <*> ZipList (getStepN dE) <*> ZipList (getBetaDih dE) <*> ZipList (getCcccDih dE) <*> ZipList (getTau dE) <*> ZipList (getDeltaOp dE) <*> ZipList (getBlaV dE) <*> ZipList (getS1OrS2 dE) <*> ZipList (getHopYesNo dE) <*> ZipList (getCT dE)
 
 energyDiff :: Dinamica -> [Double]
 energyDiff dyn = let (pop1,pop2,s0,s1,dynDyn) = getEnergies dyn
