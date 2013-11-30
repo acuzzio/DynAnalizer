@@ -51,7 +51,7 @@ createDATA fn = do
 printDinColumn dE = let trans = transposeDynV dE
                     in unlines $ map (" " ++) $ map unwords trans
 
-transposeDynV dE = getZipList $ (\aaa aa a b c d e f g h -> aaa:aa:a:b:c:d:e:f:g:h:[]) <$> ZipList (getDynN dE) <*> ZipList (getStepN dE) <*> ZipList (getBetaDih dE) <*> ZipList (getCcccDih dE) <*> ZipList (getTau dE) <*> ZipList (getDeltaOp dE) <*> ZipList (getBlaV dE) <*> ZipList (getS1OrS2 dE) <*> ZipList (getHopYesNo dE) <*> ZipList (getCT dE)
+transposeDynV dE = getZipList $ (\aaa aa a b c d e f g h -> aaa:aa:a:b:c:d:e:f:g:h:[]) <$> ZipList (getDynN dE) <*> ZipList (getStepN dE) <*> ZipList (getBetaDih dE) <*> ZipList (getCcccDih dE) <*> ZipList (getTau dE) <*> ZipList (getDeltaOp dE) <*> ZipList (getBlaV dE) <*> ZipList (getCT dE) <*> ZipList (getS1OrS2 dE) <*> ZipList (getHopYesNo dE) 
 
 energyDiff :: Dinamica -> [Double]
 energyDiff dyn = let (pop1,pop2,s0,s1,dynDyn) = getEnergies dyn
