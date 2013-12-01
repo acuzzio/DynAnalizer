@@ -53,6 +53,13 @@ printDinColumn dE = let trans = transposeDynV dE
 
 transposeDynV dE = getZipList $ (\aaa aa a b c d e f g h -> aaa:aa:a:b:c:d:e:f:g:h:[]) <$> ZipList (getDynN dE) <*> ZipList (getStepN dE) <*> ZipList (getBetaDih dE) <*> ZipList (getCcccDih dE) <*> ZipList (getTau dE) <*> ZipList (getDeltaOp dE) <*> ZipList (getBlaV dE) <*> ZipList (getCT dE) <*> ZipList (getS1OrS2 dE) <*> ZipList (getHopYesNo dE) 
 
+joinDATA :: IO ()
+joinDATA = do 
+    outs <- readShell "ls *.data"
+    let outputs = lines outs
+    dataContent  <- mapM readFile outputs
+    writeFile "all.data" $ intercalate "  \n" dataContent  
+
 energyDiff :: Dinamica -> [Double]
 energyDiff dyn = let (pop1,pop2,s0,s1,dynDyn) = getEnergies dyn
                  in zipWith (-) s1 s0
@@ -119,7 +126,7 @@ blaD aN dyn = let
     in blaDV
 
 blaPSB3 :: [Vec Double] -> Double
-blaPSB3 list = let  -- atoms 1 2 + 3 4 + 5 6 / 3 
+blaPSB3 list = let  -- atoms ((bond 1 2 + bond 3 4 + bond 5 6) / 3 ) - ((bond 2 3 + bond 4 5) / 2)
         doubles = (bond [list!!0,list!!1] + bond [list!!2,list!!3] + bond [list!!4,list!!5]) / 3
         singles = (bond [list!!1,list!!2] + bond [list!!3,list!!4]) / 2
         res = singles - doubles
