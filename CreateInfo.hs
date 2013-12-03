@@ -23,7 +23,7 @@ data Dinamica = Dinamica {
 
 -- Creates info files from molcas output
 createInfo = do
-       outs <- readShell "ls *.out"
+       outs <- readShell "ls outs/*.out"
        let outputs = lines outs
        mapM_ (genInfoFile chargeTrFragment) outputs
 

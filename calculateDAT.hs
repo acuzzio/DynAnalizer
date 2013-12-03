@@ -7,6 +7,7 @@ import Data.Char (isDigit)
 
 import IntCoor
 import CreateInfo
+import Inputs
 
 data DinamicV = DinamicV {
           getDynN        :: [String]
@@ -22,23 +23,23 @@ data DinamicV = DinamicV {
           } deriving Show
 
 main = do 
-     outs <- readShell "ls *.info"
+     outs <- readShell $ "ls outs/*.info"
      let outputs = lines outs
-     mapM_ createDATA outputs
+     mapM_ (createDATA betaList ccccList) outputs
 
 --createData :: FilePath -> IO DinamicV
-createDATA fn = do
+createDATA betaList ccccList fn = do
     a             <- rdInfoFile fn
     let dataname  = (takeWhile (/= '.') fn ) ++ ".data"
         dynNum    = dropWhile (not. isDigit) $ takeWhile (/= '.') fn 
         dynN      = take (length isS1) $ repeat dynNum
-        stepN     = take (length isS1) $ map show [1..200]
+        stepN     = take (length isS1) $ map show [1..]
         isS1      = rootDiscov a
         atomN     = getAtomN a 
         justHop   = justHopd a
         cT        = getCharTran a
-        betaV     = diHedro [8,3,4,7] atomN a 
-        ccccV     = diHedro [2,3,4,5] atomN a
+        betaV     = diHedro betaList atomN a 
+        ccccV     = diHedro ccccList atomN a
         tauV      = zipWith (\x y -> (x+y)*0.5) betaV ccccV
         deltaV    = zipWith (-) ccccV betaV
         blaV      = blaD atomN a
