@@ -22,8 +22,8 @@ data DinamicV = DinamicV {
          ,getBlaV        :: [String]
           } deriving Show
 
-main = do 
-     outs <- readShell $ "ls outs/*.info"
+createDatas = do 
+     outs <- readShell $ "ls */*.info"
      let outputs = lines outs
      mapM_ (createDATA betaList ccccList) outputs
 

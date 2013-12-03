@@ -5,6 +5,8 @@ import Text.Printf
 import Data.List.Split
 import Data.List
 import Control.Applicative
+import Control.Monad
+import Control.Concurrent.Async
 
 import IntCoor
 import Inputs
@@ -27,6 +29,12 @@ createInfo = do
        let outputs = lines outs
        mapM_ (genInfoFile chargeTrFragment) outputs
 
+createInfoP = do
+       outs <- readShell "ls */*.out"
+       let outputs = lines outs
+       pids <- mapM (\x -> async $ genInfoFile chargeTrFragment x) outputs
+       mapM wait pids
+
 
 rdInfoFile  :: String -> IO(Dinamica)
 rdInfoFile fn = do
@@ -42,7 +50,7 @@ rdInfoFile fn = do
         charT  = map (\x-> read x :: Double) h
     return $ Dinamica fn atomN aT tuplaEnerPop coord1 oscStr charT
 
-genInfoFile :: [Int] -> String -> IO()
+genInfoFile :: [Int] -> String -> IO ()
 genInfoFile chargeTrFragment fn = do
     atomNS                  <- readShell $ "grep -B3 'InterNuclear Distances' " ++ fn ++ " | head -1 | awk '{print $1}'"
     let atomNumber          = read atomNS :: Int
