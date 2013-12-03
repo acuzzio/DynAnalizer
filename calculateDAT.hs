@@ -69,7 +69,7 @@ tempFunction = do
         getCCCC  = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
         getHOP0  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y0")) stringZ
         getHOP1  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
-        getAVGD  = map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
+        getAVGD  = map (map (\a -> read (a!!3) :: Double)) $ transpose $ map (filter (\x-> x!!8 == "S1")) stringZ
         avg xs   = (sum xs)/(fromIntegral $ length xs)
         avgZip   = zip [1..] $ map avg getAVGD
         form (a,b) = [show a,show b]
@@ -78,6 +78,13 @@ tempFunction = do
         cccc     = writeF getCCCC
         ccccHOP0 = writeF getHOP0
         ccccHOP1 = writeF getHOP1
+        -- SUPER DUPER CODE ["9","17","52","56","65","75","83"]
+    writeFile "quanticStuff" $ unlines $ map unwords $ map form $ zip [0..] $ map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
+    putStrLn "Not Isomerize:"
+    putStrLn $ show $ length $ filter (\x -> x < 90 && x > -90) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
+    putStrLn "Isomerize:"
+    putStrLn $ show $ length $ filter (\x -> x > 90) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
+        -- END OF SUPERDUPER
     writeFile "CCCC" cccc
     writeFile "CCCCHOPS0" ccccHOP0
     writeFile "CCCCHOPS1" ccccHOP1
@@ -130,11 +137,16 @@ corrDihedro :: [Double] -> [Double]
 corrDihedro (a:b:[]) = a : (correct a b) : []
 corrDihedro (a:b:xs) = a : corrDihedro ((correct a b) : xs)
 
+corrDihedro2 :: [Double] -> [Double]
+corrDihedro2 xl = let shiftDown x = if x > 90.0 then x-360.0 else x
+                  in map shiftDown xl
+
 diHedro :: [Int] -> Int -> Dinamica -> [Double]
 diHedro aL aN dyn = let 
+    aLIndex = map pred aL
     dihedr  = chunksOf aN $ getCoordinates dyn
-    dihedrV = map dihedral $ map (\x -> map ( x !!) aL) dihedr
-    in dihedrV
+    dihedrV = map dihedral $ map (\x -> map ( x !!) aLIndex) dihedr
+    in corrDihedro2 dihedrV
 
 bonD :: [Int] -> Int -> Dinamica -> [Double]
 bonD aL aN dyn = let
