@@ -53,12 +53,35 @@ printDinColumn dE = let trans = transposeDynV dE
 
 transposeDynV dE = getZipList $ (\aaa aa a b c d e f g h -> aaa:aa:a:b:c:d:e:f:g:h:[]) <$> ZipList (getDynN dE) <*> ZipList (getStepN dE) <*> ZipList (getBetaDih dE) <*> ZipList (getCcccDih dE) <*> ZipList (getTau dE) <*> ZipList (getDeltaOp dE) <*> ZipList (getBlaV dE) <*> ZipList (getCT dE) <*> ZipList (getS1OrS2 dE) <*> ZipList (getHopYesNo dE) 
 
-joinDATA :: IO ()
-joinDATA = do 
+joinAllDATA :: IO ()
+joinAllDATA = do 
     outs <- readShell "ls *.data"
     let outputs = lines outs
     dataContent  <- mapM readFile outputs
     writeFile "all.data" $ intercalate "  \n" dataContent  
+
+tempFunction :: IO()
+tempFunction = do 
+    outs         <- readShell "ls *.data"
+    let outputs  = lines outs
+    dataContent  <- mapM readFile outputs
+    let stringZ  = map (map words) $ map lines dataContent
+        getCCCC  = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
+        getHOP0  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y0")) stringZ
+        getHOP1  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
+        getAVGD  = map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
+        avg xs   = (sum xs)/(fromIntegral $ length xs)
+        avgZip   = zip [1..] $ map avg getAVGD
+        form (a,b) = [show a,show b]
+        ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
+        writeF x = intercalate "  \n"$ map unlines $ map (map unwords) x
+        cccc     = writeF getCCCC
+        ccccHOP0 = writeF getHOP0
+        ccccHOP1 = writeF getHOP1
+    writeFile "CCCC" cccc
+    writeFile "CCCCHOPS0" ccccHOP0
+    writeFile "CCCCHOPS1" ccccHOP1
+    writeFile "CCCCS1AVG" ccccAVG
 
 energyDiff :: Dinamica -> [Double]
 energyDiff dyn = let (pop1,pop2,s0,s1,dynDyn) = getEnergies dyn

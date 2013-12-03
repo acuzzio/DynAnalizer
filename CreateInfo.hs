@@ -7,10 +7,8 @@ import Data.List
 import Control.Applicative
 
 import IntCoor
+import Inputs
 
--- atomNumber = 17
--- atomtype = ["C","C","C","C","C","N","H","C","H","H","H","H","H","H","H","H","H"]
-chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] ::[Int]
 
 
 data Dinamica = Dinamica {
@@ -27,7 +25,7 @@ data Dinamica = Dinamica {
 createInfo = do
        outs <- readShell "ls *.out"
        let outputs = lines outs
-       mapM_ genInfoFile outputs
+       mapM_ (genInfoFile chargeTrFragment) outputs
 
 
 rdInfoFile  :: String -> IO(Dinamica)
@@ -44,8 +42,8 @@ rdInfoFile fn = do
         charT  = map (\x-> read x :: Double) h
     return $ Dinamica fn atomN aT tuplaEnerPop coord1 oscStr charT
 
-genInfoFile :: String -> IO()
-genInfoFile fn = do
+genInfoFile :: [Int] -> String -> IO()
+genInfoFile chargeTrFragment fn = do
     atomNS                  <- readShell $ "grep -B3 'InterNuclear Distances' " ++ fn ++ " | head -1 | awk '{print $1}'"
     let atomNumber          = read atomNS :: Int
         grepLength          = show $ atomNumber + 3
