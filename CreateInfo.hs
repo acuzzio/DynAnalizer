@@ -25,12 +25,12 @@ data Dinamica = Dinamica {
 
 -- Creates info files from molcas output
 createInfo = do
-       outs <- readShell "ls outs/*.out"
+       outs <- readShell $ "ls " ++ folder ++ "/*.out"
        let outputs = lines outs
        mapM_ (genInfoFile chargeTrFragment) outputs
 
 createInfoP = do
-       outs <- readShell "ls */*.out"
+       outs <- readShell "ls " ++ folder ++ "/*.out"
        let outputs = lines outs
        pids <- mapM (\x -> async $ genInfoFile chargeTrFragment x) outputs
        mapM wait pids

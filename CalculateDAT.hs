@@ -23,7 +23,7 @@ data DinamicV = DinamicV {
           } deriving Show
 
 createDatas = do 
-     outs <- readShell $ "ls */*.info"
+     outs <- readShell $ "ls " ++ folder ++ "/*.info"
      let outputs = lines outs
      mapM_ (createDATA betaList ccccList) outputs
 
