@@ -29,12 +29,12 @@ createInfo = do
        let outputs = lines outs
        mapM_ (genInfoFile chargeTrFragment) outputs
 
-createInfoP = do
-       outs <- readShell "ls */*.out"
-       let outputs = lines outs
-       pids <- mapM (\x -> async $ genInfoFile chargeTrFragment x) outputs
-       mapM_ wait pids
+   
 
+createInfoP = do
+   outs <- readShell "ls */*.out"
+   let outputs = lines outs
+   mapM_ (\x -> withAsync (genInfoFile chargeTrFragment x) wait) outputs
 
 rdInfoFile  :: String -> IO(Dinamica)
 rdInfoFile fn = do
