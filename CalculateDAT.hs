@@ -31,7 +31,7 @@ createDatas = do
 createDATA betaList ccccList fn = do
     a             <- rdInfoFile fn
     let dataname  = (takeWhile (/= '.') fn ) ++ ".data"
-        dynNum    = dropWhile (not. isDigit) $ takeWhile (/= '.') fn 
+        dynNum    = reverse $ takeWhile (isDigit) $ reverse $ takeWhile (/= '.') fn
         dynN      = take (length isS1) $ repeat dynNum
         stepN     = take (length isS1) $ map show [1..]
         isS1      = rootDiscov a
