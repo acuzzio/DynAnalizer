@@ -30,7 +30,7 @@ createInfo = do
        mapM_ (genInfoFile chargeTrFragment) outputs
    
 createInfoP = do
-       outs <- readShell "ls outs/*.out"
+       outs <- readShell "ls */*.out"
        let outputs = lines outs
            chunks  = chunksOf 10 outputs
        sequence_ $ processFiles `fmap` chunks
