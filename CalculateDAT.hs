@@ -22,7 +22,7 @@ data DinamicV = DinamicV {
          ,getBlaV        :: [String]
           } deriving Show
 
-createDatas = do 
+main = do 
      outs <- readShell $ "ls " ++ folder ++ "/*.info"
      let outputs = lines outs
      mapM_ (createDATA betaList ccccList) outputs
@@ -56,10 +56,10 @@ transposeDynV dE = getZipList $ (\aaa aa a b c d e f g h -> aaa:aa:a:b:c:d:e:f:g
 
 joinAllDATA :: IO ()
 joinAllDATA = do 
-    outs <- readShell "ls *.data"
+    outs <- readShell $ "ls " ++ folder ++ "/*.data"
     let outputs = lines outs
     dataContent  <- mapM readFile outputs
-    writeFile "all.data" $ intercalate "  \n" dataContent  
+    writeFile (folder ++ "-all.data") $ intercalate "  \n" dataContent  
 
 tempFunction :: IO()
 tempFunction = do 
