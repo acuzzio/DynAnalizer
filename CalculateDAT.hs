@@ -158,13 +158,16 @@ bonD aL aN dyn = let
 blaD :: Int -> Dinamica -> [Double]
 blaD aN dyn = let
     blaDs = chunksOf aN $ getCoordinates dyn
-    blaDV = map blaPSB3 blaDs
+    blaDV = map (blaPSB3 blaList) blaDs
     in blaDV
 
-blaPSB3 :: [Vec Double] -> Double
-blaPSB3 list = let  -- atoms ((bond 1 2 + bond 3 4 + bond 5 6) / 3 ) - ((bond 2 3 + bond 4 5) / 2)
-        doubles = (bond [list!!0,list!!1] + bond [list!!2,list!!3] + bond [list!!4,list!!5]) / 3
-        singles = (bond [list!!1,list!!2] + bond [list!!3,list!!4]) / 2
-        res = singles - doubles
+blaPSB3 :: [[(Int,Int)]] -> [Vec Double] -> Double
+blaPSB3 blaList list = let
+        (a:b:c:[])      = blaList !! 0 
+        (d:e:[])        = blaList !! 1
+        blaBond (fS,sN) = bond [list!!(pred fS),list!!(pred sN)]
+        doubles         = (blaBond a + blaBond b + blaBond c) / 3
+        singles         = (blaBond d + blaBond e) / 2
+        res             = singles - doubles
         in res
 
