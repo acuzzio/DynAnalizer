@@ -45,8 +45,16 @@ createDATA betaList ccccList fn = do
         blaV      = blaD atomN a
 --        st        = map show
         prt       = map (\x -> printf "%.3f" x :: String)
-        dynV      = DinamicV dynN stepN isS1 justHop (prt cT) (prt betaV) (prt ccccV) (prt tauV) (prt deltaV) (prt blaV)
+        pr        = printWellSpacedColumn . prt
+        pw        = printWellSpacedColumn
+        dynV      = DinamicV (pw dynN) (pw stepN) isS1 justHop (pr cT) (pr betaV) (pr ccccV) (pr tauV) (pr deltaV) (pr blaV)
     writeFile dataname $ printDinColumn dynV
+
+printWellSpacedColumn xs = let 
+    matchLength n str = if length str == n then str else matchLength n $ " " ++ str
+    maxLength = maximum $ map length xs
+    in map (matchLength maxLength) xs
+
 
 --printDinColumn :: DinamicV -> String
 printDinColumn dE = let trans = transposeDynV dE
