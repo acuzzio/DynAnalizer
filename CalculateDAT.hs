@@ -71,7 +71,7 @@ joinAllDATA = do
 
 tempFunction :: IO()
 tempFunction = do 
-    outs         <- readShell "ls *.data"
+    outs         <- readShell $ "ls " ++ folder ++ "/*.data"
     let outputs  = lines outs
     dataContent  <- mapM readFile outputs
     let stringZ  = map (map words) $ map lines dataContent
@@ -87,12 +87,17 @@ tempFunction = do
         cccc     = writeF getCCCC
         ccccHOP0 = writeF getHOP0
         ccccHOP1 = writeF getHOP1
-        -- SUPER DUPER CODE ["9","17","52","56","65","75","83"]
-    writeFile "quanticStuff" $ unlines $ map unwords $ map form $ zip [0..] $ map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
+        -- SUPER DUPER CODE
+        hopOrNot = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
+        countTrue xs = sum $ map (\x -> if x == True then 1 else 0) xs
+        notHopped   = countTrue hopOrNot
+        hopped      = (length hopOrNot) - (countTrue hopOrNot)
+    putStrLn $ "Hopped:     " ++ (show hopped)
+    putStrLn $ "Not Hopped: " ++ (show notHopped)
     putStrLn "Not Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x < 90 && x > -90) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
+    putStrLn $ show $ length $ filter (\x -> x < -90 && x > -270) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
     putStrLn "Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x > 90) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
+    putStrLn $ show $ length $ filter (\x -> x > -90) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
         -- END OF SUPERDUPER
     writeFile "CCCC" cccc
     writeFile "CCCCHOPS0" ccccHOP0
