@@ -80,7 +80,7 @@ tempFunction = do
         getHOP1  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
         getAVGD  = map (map (\a -> read (a!!3) :: Double)) $ transpose $ map (filter (\x-> x!!8 == "S1")) stringZ
         avg xs   = (sum xs)/(fromIntegral $ length xs)
-        avgZip   = zip [1..] $ map avg getAVGD
+        avgZip   = zip [1..] $ map avg getAVGD -- steps starts from 1
         form (a,b) = [show a,show b]
         ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
         writeF x = intercalate "  \n"$ map unlines $ map (map unwords) x
@@ -99,9 +99,9 @@ tempFunction = do
     putStrLn $ "Not Hopped: " ++ (show notHopped)
     putStrLn $ unwords $ map show whoNotHop
     putStrLn "Not Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x < -90 && x > -270) $ (\x -> x!!196) $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
+    putStrLn $ show $ length $ filter (\x -> x < -90.0 && x > -270.0) $ (\x -> x!!196) $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
     putStrLn "Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x > -90) $ (\x -> x!!196)  $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
+    putStrLn $ show $ length $ filter (\x -> x > -90.0) $ (\x -> x!!196)  $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
         -- END OF SUPERDUPER
     writeFile "CCCC" cccc
     writeFile "CCCCHOPS0" ccccHOP0
@@ -188,3 +188,46 @@ blaPSB3 blaList list = let
         res             = singles - doubles
         in res
 
+reportMassimo :: IO()
+reportMassimo = do
+    outs         <- readShell $ "ls " ++ folder ++ "/*.data"
+    let outputs  = lines outs
+    dataContent  <- mapM readFile outputs
+    let stringZ  = map (map words) $ map lines dataContent
+        checkLN  = zip [0..] $ map length stringZ
+        filtered = unwords $ map (show . fst) $ filter (\x -> snd x < 200) checkLN
+        getCCCC  = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
+        getHOP0  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y0")) stringZ
+        getHOP1  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
+        form (a,b) = [show a,show b]
+        writeF x = intercalate "  \n"$ map unlines $ map (map unwords) x
+        hopOrNot = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
+        isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
+        counter x= if x > -90.0 then 1 else 0
+        whoNotHop= map fst $ filter (\x-> snd x == True) $ zip [0..] hopOrNot
+        notHopIso  = sum $ map counter $ map last $ isomYorN whoNotHop
+        notHopnIso = (length whoNotHop) - notHopIso
+        whoHop   = map fst $ filter (\x-> snd x == False) $ zip [0..] hopOrNot
+        hopIso     = sum $ map counter $ map last $ isomYorN whoHop     
+        hopNIso    = (length whoHop) - hopIso
+    putStrLn $ "Hop and Iso -> " ++ (show hopIso)
+    putStrLn $ "Hop not Iso -> " ++ (show hopNIso)
+    putStrLn $ "NoHop and Iso -> " ++ (show notHopIso)
+    putStrLn $ "NoHop not Iso -> " ++ (show notHopnIso)
+    putStrLn $ "Total -> " ++ (show (hopNIso + hopIso + notHopnIso + notHopIso))
+    putStrLn $ "Check out short trajectories: " ++ filtered
+    writeFile "CCCC" $ writeF getCCCC
+    writeFile "CCCCHOPS0" $ writeF getHOP0
+    writeFile "CCCCHOPS1" $ writeF getHOP1
+
+--averageSublist :: [[[String]]] -> [Int] -> Int -> Int -> [Double]
+averageSublist stringOne trajxs index thres = let
+        rightTrajectories = map (stringOne !!) trajxs
+        rightValue        = map (map (\x -> x!!index)) rightTrajectories
+        rightFloat        = map (map (\x -> read x :: Double)) rightValue
+        avg xs   = (sum xs)/(fromIntegral $ length xs)
+        in map avg $ take thres $ transpose rightFloat
+
+
+
+ 
