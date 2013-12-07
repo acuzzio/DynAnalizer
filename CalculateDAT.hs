@@ -87,17 +87,21 @@ tempFunction = do
         cccc     = writeF getCCCC
         ccccHOP0 = writeF getHOP0
         ccccHOP1 = writeF getHOP1
-        -- SUPER DUPER CODE
+        -- SUPER DUPER CODE   
         hopOrNot = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
+        whoNotHop    = map fst $filter (\x-> snd x == True) $ zip [0..] hopOrNot  
         countTrue xs = sum $ map (\x -> if x == True then 1 else 0) xs
         notHopped   = countTrue hopOrNot
         hopped      = (length hopOrNot) - (countTrue hopOrNot)
+        longitudine = unlines $ map (unwords . form) $ zip [0..] $ map length stringZ
+    putStrLn longitudine
     putStrLn $ "Hopped:     " ++ (show hopped)
     putStrLn $ "Not Hopped: " ++ (show notHopped)
+    putStrLn $ unwords $ map show whoNotHop
     putStrLn "Not Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x < -90 && x > -270) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
+    putStrLn $ show $ length $ filter (\x -> x < -90 && x > -270) $ (\x -> x!!196) $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
     putStrLn "Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x > -90) $ last $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
+    putStrLn $ show $ length $ filter (\x -> x > -90) $ (\x -> x!!196)  $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
         -- END OF SUPERDUPER
     writeFile "CCCC" cccc
     writeFile "CCCCHOPS0" ccccHOP0
