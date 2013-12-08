@@ -190,37 +190,48 @@ blaPSB3 blaList list = let
 
 reportMassimo :: IO()
 reportMassimo = do
-    outs         <- readShell $ "ls " ++ folder ++ "/*.data"
-    let outputs  = lines outs
-    dataContent  <- mapM readFile outputs
-    let stringZ  = map (map words) $ map lines dataContent
-        checkLN  = zip [0..] $ map length stringZ
-        filtered = unwords $ map (show . fst) $ filter (\x -> snd x < 200) checkLN
-        getCCCC  = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
-        getHOP0  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y0")) stringZ
-        getHOP1  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
-        form (a,b) = [show a,show b]
-        writeF x = intercalate "  \n"$ map unlines $ map (map unwords) x
-        hopOrNot = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
+    outs            <- readShell $ "ls " ++ folder ++ "/*.data"
+    let outputs     = lines outs
+    dataContent     <- mapM readFile outputs
+    let stringZ     = map (map words) $ map lines dataContent
+        checkLN     = zip [0..] $ map length stringZ
+        filtered    = unwords $ map (show . fst) $ filter (\x -> snd x < 200) checkLN
+        getCCCC     = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
+        getHOP0     = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y0")) stringZ
+        getHOP1     = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
+        form (a,b)  = [show a,show b]
+        hopOrNot    = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
-        counter x= if x > -90.0 then 1 else 0
-        whoNotHop= map fst $ filter (\x-> snd x == True) $ zip [0..] hopOrNot
-        notHopIso  = sum $ map counter $ map last $ isomYorN whoNotHop
-        notHopnIso = (length whoNotHop) - notHopIso
-        whoHop   = map fst $ filter (\x-> snd x == False) $ zip [0..] hopOrNot
-        hopIso     = sum $ map counter $ map last $ isomYorN whoHop     
-        hopNIso    = (length whoHop) - hopIso
-    putStrLn $ "Hop and Iso -> " ++ (show hopIso)
-    putStrLn $ "Hop not Iso -> " ++ (show hopNIso)
-    putStrLn $ "NoHop and Iso -> " ++ (show notHopIso)
-    putStrLn $ "NoHop not Iso -> " ++ (show notHopnIso)
-    putStrLn $ "Total -> " ++ (show (hopNIso + hopIso + notHopnIso + notHopIso))
-    putStrLn $ "Check out short trajectories: " ++ filtered
-    writeFile "CCCC" $ writeF getCCCC
-    writeFile "CCCCHOPS0" $ writeF getHOP0
-    writeFile "CCCCHOPS1" $ writeF getHOP1
+        counter x   = if x > -90.0 then 1 else 0
+        whoNotHop   = map fst $ filter (\x-> snd x == True) $ zip [0..] hopOrNot
+        notHopIsoC  = sum $ map counter $ map last $ isomYorN whoNotHop
+        notHopnIsoC = (length whoNotHop) - notHopIsoC
+        whoHop      = map fst $ filter (\x-> snd x == False) $ zip [0..] hopOrNot
+        whoHopAndIs = map fst $ filter (\x-> snd x > -90.0) $ zip whoHop $ map last $ isomYorN whoHop
+        whoHopAndNo = map fst $ filter (\x-> snd x < -90.0) $ zip whoHop $ map last $ isomYorN whoHop
 
---averageSublist :: [[[String]]] -> [Int] -> Int -> Int -> [Double]
+        hopIsoC     = sum $ map counter $ map last $ isomYorN whoHop     
+        hopNIsoC    = (length whoHop) - hopIsoC
+    putStrLn $ "Hop and Iso -> " ++ (show hopIsoC)
+    putStrLn $ "Hop not Iso -> " ++ (show hopNIsoC)
+    putStrLn $ "NoHop and Iso -> " ++ (show notHopIsoC)
+    putStrLn $ "NoHop not Iso -> " ++ (show notHopnIsoC)
+    let total = hopNIsoC + hopIsoC + notHopnIsoC + notHopIsoC
+    putStrLn $ "Total -> " ++ (show total)
+    let rateHOP = fromIntegral (hopIsoC * 100) / (fromIntegral (hopIsoC+hopNIsoC))
+        printZ x = printf "%.3f" x :: String
+    putStrLn $ "only Hopped Iso/notIso -> " ++ (printZ rateHOP) ++ "%"
+--    putStrLn $ "only Hopped Iso/notIso -> " ++ (show rateHOP) ++ "%"
+    let rateTOT = fromIntegral (hopIsoC * 100) / fromIntegral (total)
+    putStrLn $ "Total Iso/notIso -> " ++ (show rateTOT) ++ "%"
+    putStrLn $ "Check out short trajectories: " ++ filtered
+    let writeF x    = intercalate "  \n"$ map unlines $ map (map unwords) x
+    putStrLn "Cancella sta linea va"
+--    writeFile "CCCC" $ writeF getCCCC
+--    writeFile "CCCCHOPS0" $ writeF getHOP0
+--    writeFile "CCCCHOPS1" $ writeF getHOP1
+
+averageSublist :: [[[String]]] -> [Int] -> Int -> Int -> [Double]
 averageSublist stringOne trajxs index thres = let
         rightTrajectories = map (stringOne !!) trajxs
         rightValue        = map (map (\x -> x!!index)) rightTrajectories
