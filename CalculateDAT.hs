@@ -198,13 +198,13 @@ reportMassimo = do
         messaGe     = if filtered == "" then "Everything OK" else "Check out short trajectories: " ++ filtered
     putStrLn messaGe
     let getCCCC     = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
-        getHOP0     = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y0")) stringZ
-        getHOP1     = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
+        getHOP root = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y" ++ (show root))) stringZ
+        nRootI      = nRoot - 1
+        getHOPs     = map getHOP $ [0..nRootI]
         form (a,b)  = [show a,show b]
         writeF x    = intercalate "  \n"$ map unlines $ map (map unwords) x
---    writeFile "CCCC" $ writeF getCCCC
---    writeFile "CCCCHOPS0" $ writeF getHOP0
---    writeFile "CCCCHOPS1" $ writeF getHOP1
+    writeFile "CCCC" $ writeF getCCCC
+    mapM_ (\x -> writeFile ("CCCCHOPS" ++ (show x)) $ writeF (getHOPs !! x)) [0..nRootI]
     let hopOrNot    = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
         counter x   = if x > -90.0 then 1 else 0

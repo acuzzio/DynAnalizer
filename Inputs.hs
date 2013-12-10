@@ -24,10 +24,11 @@ module Inputs where
 --betaList = [8,3,4,9] :: [Int]
 --blaList  = [[(1,2),(3,4),(5,7)],[(2,3),(4,5)]] :: [[(Int,Int)]]
 
-folder = "e-Samer"
+folder   = "e-Samer"
 chargeTrFragment = [1, 2, 3] ::[Int]
 ccccList = [2,3,4,5] :: [Int]
 betaList = [8,3,4,7] :: [Int]
 blaList  = [[(1,2),(3,4),(5,6)],[(2,3),(4,5)]] :: [[(Int,Int)]]
+nRoot    = 3 :: Int
 
 
