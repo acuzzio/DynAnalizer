@@ -111,12 +111,12 @@ tempFunction = do
 
 justHopd :: Dinamica -> Int -> [String]
 justHopd dynam rlxD = let 
-    rightLabel a    = "Y" ++ (dropWhile(\x -> x=='S')) a 
+    state a         = dropWhile ('S'==) a 
     listaRoot       = rootDiscov dynam rlxD
     changE (x:[])   = "no":[]
     changE (x:xs)   = if x == (head xs) 
                         then "no" : changE xs 
-                        else rightLabel (head xs) : changE xs
+                        else ((state x) ++  (state (head xs))) : changE xs
     cngTF           = changE listaRoot
     in cngTF
 
@@ -198,14 +198,21 @@ reportMassimo = do
         messaGe     = if filtered == "" then "Everything OK" else "Check out short trajectories: " ++ filtered
     putStrLn messaGe
     let getCCCC     = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
-        getHOP root = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y" ++ (show root))) stringZ
         nRootI      = nRoot - 1
-        getHOPs     = map getHOP $ [0..nRootI]
-        form (a,b)  = [show a,show b]
+        allJumps    = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y] 
+        getHOP root = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == root)) stringZ
+        getHOPs     = map getHOP $ allJumps
         writeF x    = intercalate "  \n"$ map unlines $ map (map unwords) x
+--        avgDihedral = map (map (\a -> read (a!!3) :: Double)) $ transpose $ map (filter (\x-> x!!8 == "S1")) stringZ
+        avgDihedral = map (map (\a -> read (a!!3) :: Double)) $ map (filter (\x -> x!!8=="S1")) $ transpose stringZ
+        avg xs   = (sum xs)/(fromIntegral $ length xs)
+        avgZip   = zip [1..] $ map avg avgDihedral -- steps starts from 1
+        form (a,b) = [show a,show b]
+        ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
     writeFile "CCCC" $ writeF getCCCC
-    mapM_ (\x -> writeFile ("CCCCHOPS" ++ (show x)) $ writeF (getHOPs !! x)) [0..nRootI]
-    let hopOrNot    = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
+    writeFile "CCCCS1AVG" ccccAVG
+    mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+    let hopOrNot    = map (all (\x -> x /= "10")) $ map (map (\x-> x!!9)) stringZ 
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
         counter x   = if x > -90.0 then 1 else 0
         whoNotHop   = map fst $ filter (\x-> snd x == True) $ zip [0..] hopOrNot
@@ -214,7 +221,6 @@ reportMassimo = do
         whoHop      = map fst $ filter (\x-> snd x == False) $ zip [0..] hopOrNot
         whoHopAndIs = map fst $ filter (\x-> snd x > -90.0) $ zip whoHop $ map last $ isomYorN whoHop
         whoHopAndNo = map fst $ filter (\x-> snd x < -90.0) $ zip whoHop $ map last $ isomYorN whoHop
-
         hopIsoC     = sum $ map counter $ map last $ isomYorN whoHop     
         hopNIsoC    = (length whoHop) - hopIsoC
     putStrLn $ "Hop and Iso -> " ++ (show hopIsoC)
