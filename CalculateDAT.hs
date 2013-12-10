@@ -31,12 +31,13 @@ main = do
 createDATA betaList ccccList fn = do
     a             <- rdInfoFile fn
     let dataname  = (takeWhile (/= '.') fn ) ++ ".data"
+        rlxR      = getStartRlxRt a
         dynNum    = reverse $ takeWhile (isDigit) $ reverse $ takeWhile (/= '.') fn
+        isS1      = rootDiscov a rlxR
         dynN      = take (length isS1) $ repeat dynNum
         stepN     = take (length isS1) $ map show [1..]
-        isS1      = rootDiscov a
         atomN     = getAtomN a 
-        justHop   = justHopd a
+        justHop   = justHopd a rlxR
         cT        = getCharTran a
         betaV     = diHedro betaList atomN a 
         ccccV     = diHedro ccccList atomN a
@@ -101,31 +102,34 @@ tempFunction = do
     putStrLn "Not Isomerize:"
     putStrLn $ show $ length $ filter (\x -> x < -90.0 && x > -270.0) $ (\x -> x!!196) $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
     putStrLn "Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x > -90.0) $ (\x -> x!!196)  $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
+    putStrLn $ show $ length $ filter (\x -> x > -90.0) $ (\x -> x!!196) $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
         -- END OF SUPERDUPER
     writeFile "CCCC" cccc
     writeFile "CCCCHOPS0" ccccHOP0
     writeFile "CCCCHOPS1" ccccHOP1
     writeFile "CCCCS1AVG" ccccAVG
 
-energyDiff :: Dinamica -> [Double]
-energyDiff dyn = let (pop1,pop2,s0,s1,dynDyn) = getEnergies dyn
-                 in zipWith (-) s1 s0
+justHopd :: Dinamica -> Int -> [String]
+justHopd dynam rlxD = let 
+    rightLabel a    = "Y" ++ (dropWhile(\x -> x=='S')) a 
+    listaRoot       = rootDiscov dynam rlxD
+    changE (x:[])   = "no":[]
+    changE (x:xs)   = if x == (head xs) 
+                        then "no" : changE xs 
+                        else rightLabel (head xs) : changE xs
+    cngTF           = changE listaRoot
+    in cngTF
 
-justHopd :: Dinamica -> [String]
-justHopd dyn = let (pop1,pop2,s0,s1,dynDyn) = getEnergies dyn
-                   changed (x:[]) = "no":[]
-                   changed (x:xs) = if x==(head xs) 
-                                       then "no" : changed xs 
-                                       else if x == True then "Y0" : changed xs else "Y1" : changed xs
-                   truefalse = zipWith (==) s1 dynDyn
-                   cngTF     = changed truefalse
-               in "no":"no":cngTF
-
-rootDiscov :: Dinamica -> [String]
-rootDiscov dyn = let (pop1,pop2,s0,s1,dynDyn) = getEnergies dyn
-                     first = zipWith (\x y -> if x==y then "S1" else "S0") s1 dynDyn                      
-                 in "S1":"S1":first
+rootDiscov :: Dinamica -> Int -> [String]
+rootDiscov dynam rlxD = let 
+     energy         = getEnergies dynam
+     rootS          = div (length energy - 1) 2
+     [popu,ene,dyn] = chunksOf rootS energy
+     startingRootS  = "S" ++ (show $ pred rlxD) -- first two steps... no tully no party
+     getI ls nu     = snd $ head $ dropWhile (\x-> fst x /= nu) $ zip ls [0..]
+     rightRootI     = zipWith getI (transpose ene) (head dyn)
+     rightRootS     = map (\x -> "S" ++ (show x)) rightRootI 
+     in startingRootS:startingRootS:rightRootS
 
 printWellAverages :: [[Double]] -> String
 printWellAverages xs = unlines $ map unwords (map (map show) $ take 200 (transpose xs))
@@ -137,11 +141,6 @@ avgListaListe :: [[Double]] -> [Double]
 avgListaListe xss = let avg xs = (sum xs)/(fromIntegral $ length xs) 
                     in map avg $ transpose xss
 
-hoppedYesNo :: Dinamica -> Bool
-hoppedYesNo dyn = let
-  (_,_,_,s1Energies,dynEnergies) = getEnergies dyn
-  in if s1Energies/=dynEnergies then True else False
-  
 correct :: Double -> Double -> Double
 correct x y = let
               a = abs $ x - y

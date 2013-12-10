@@ -16,8 +16,10 @@ import Inputs
 data Dinamica = Dinamica {
           getOutputNam   :: String,
           getAtomN       :: Int,
+          getRootN       :: Int,
+          getStartRlxRt  :: Int,
           getAtomT       :: [String],
-          getEnergies    :: ([Double],[Double],[Double],[Double],[Double]),
+          getEnergies    :: [[Double]],
           getCoordinates :: [Vec Double],
           getOscStr      :: [Double],
           getCharTran    :: [Double]
@@ -29,41 +31,48 @@ createInfo = do
        let outputs = lines outs
        mapM_ (genInfoFile chargeTrFragment) outputs
 
-rdInfoFile  :: String -> IO(Dinamica)
+rdInfoFile  :: FilePath -> IO(Dinamica)
 rdInfoFile fn = do
     cont <- readFile fn
-    let (aN:aT:a:b:c:d:e:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+    let (aN:rNS:rlxS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
         atomN  = read (head aN) :: Int
-        enepop = a:b:c:d:e:[]
-        floats = map (map (\x -> read x :: Double)) enepop
-        tupla  (a:b:c:d:e:[]) = (a,b,c,d,e)
-        tuplaEnerPop = tupla floats
+        rN     = read (head rNS) :: Int
+        rlx    = read (head rlxS) :: Int
+        enepop = splitWhen (== "SUBDIVISION") ene 
+        eneflo = map (map (\x -> read x :: Double)) enepop
         coord1 = parseTriplet $ unlines f
         oscStr = map (\x-> read x :: Double) g
         charT  = map (\x-> read x :: Double) h
-    return $ Dinamica fn atomN aT tuplaEnerPop coord1 oscStr charT
+    return $ Dinamica fn atomN rN rlx aT eneflo coord1 oscStr charT
 
 genInfoFile :: [Int] -> String -> IO ()
 genInfoFile chargeTrFragment fn = do
-    atomNS                  <- readShell $ "grep -B3 'InterNuclear Distances' " ++ fn ++ " | head -1 | awk '{print $1}'"
+    atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
+    rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
+    rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
     let atomNumber          = read atomNS :: Int
+        rootN               = read rootNS :: Int
+        rlxRtN              = read rlxRtS :: Int
         grepLength          = show $ atomNumber + 3
+        numberFields        = (rootN * 2) + 1
     atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " ' Cartesian Coordinates' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}'"
-    energiesPop             <- mapM (\a -> readShell $ "grep Gnuplot " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}' | awk 'NR % 200 == 0'") [2,3,4,5,6]
+--    energiesPop             <- mapM (\a -> readShell $ "grep Gnuplot " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}' | awk 'NR % 200 == 0'") [2,3,4,5,6]
+    energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the sring gnuplot
     coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
     chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: 1/ {flag=1;next} /Expectation values of various properties for root number:  1/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
     let infoname            = (takeWhile (/= '.') fn ) ++ ".info"
         div                 = "DIVISION\n"
+        subDiv              = "SUBDIVISION\n"
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
-        energiesPop'        = concat $ intersperse div energiesPop
+        energiesPop'        = concat $ intersperse subDiv energiesPop
         separateString      = fmap words $ lines chargeTr
         dividedGeometries   = chunksOf atomNumber (concat separateString)
         toDouble            = map (map (\x -> read x :: Double)) dividedGeometries
         chargeTrFragmentI   = map pred chargeTrFragment
         sumUp4CT x          = sum $ map (x!!) chargeTrFragmentI
         chargeTr'           = unlines $ map show (map sumUp4CT toDouble)
-        wholefile           = atomNS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
+        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
 
 parseTriplet :: String -> [Vec Double]
