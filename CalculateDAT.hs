@@ -70,44 +70,11 @@ joinAllDATA = do
     dataContent  <- mapM readFile outputs
     writeFile (folder ++ "-all.data") $ intercalate "  \n" dataContent  
 
-tempFunction :: IO()
-tempFunction = do 
-    outs         <- readShell $ "ls " ++ folder ++ "/*.data"
-    let outputs  = lines outs
-    dataContent  <- mapM readFile outputs
-    let stringZ  = map (map words) $ map lines dataContent
-        getCCCC  = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
-        getHOP0  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y0")) stringZ
-        getHOP1  = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == "Y1")) stringZ
-        getAVGD  = map (map (\a -> read (a!!3) :: Double)) $ transpose $ map (filter (\x-> x!!8 == "S1")) stringZ
-        avg xs   = (sum xs)/(fromIntegral $ length xs)
-        avgZip   = zip [1..] $ map avg getAVGD -- steps starts from 1
-        form (a,b) = [show a,show b]
-        ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
-        writeF x = intercalate "  \n"$ map unlines $ map (map unwords) x
-        cccc     = writeF getCCCC
-        ccccHOP0 = writeF getHOP0
-        ccccHOP1 = writeF getHOP1
-        -- SUPER DUPER CODE   
-        hopOrNot = map (all (\x -> x == "no")) $ map (map (\x-> x!!9)) stringZ
-        whoNotHop    = map fst $filter (\x-> snd x == True) $ zip [0..] hopOrNot  
-        countTrue xs = sum $ map (\x -> if x == True then 1 else 0) xs
-        notHopped   = countTrue hopOrNot
-        hopped      = (length hopOrNot) - (countTrue hopOrNot)
-        longitudine = unlines $ map (unwords . form) $ zip [0..] $ map length stringZ
-    putStrLn longitudine
-    putStrLn $ "Hopped:     " ++ (show hopped)
-    putStrLn $ "Not Hopped: " ++ (show notHopped)
-    putStrLn $ unwords $ map show whoNotHop
-    putStrLn "Not Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x < -90.0 && x > -270.0) $ (\x -> x!!196) $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ
-    putStrLn "Isomerize:"
-    putStrLn $ show $ length $ filter (\x -> x > -90.0) $ (\x -> x!!196) $ map (map (\a -> read (a!!3) :: Double)) $ transpose stringZ 
-        -- END OF SUPERDUPER
-    writeFile "CCCC" cccc
-    writeFile "CCCCHOPS0" ccccHOP0
-    writeFile "CCCCHOPS1" ccccHOP1
-    writeFile "CCCCS1AVG" ccccAVG
+readData :: FilePath -> IO [[String]]
+readData fn = do 
+        dataContent  <- readFile fn
+        return $ map words $ lines dataContent
+
 
 justHopd :: Dinamica -> Int -> [String]
 justHopd dynam rlxD = let 
@@ -209,9 +176,9 @@ reportMassimo = do
         avgZip   = zip [1..] $ map avg avgDihedral -- steps starts from 1
         form (a,b) = [show a,show b]
         ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
-    writeFile "CCCC" $ writeF getCCCC
-    writeFile "CCCCS1AVG" ccccAVG
-    mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+--    writeFile "CCCC" $ writeF getCCCC
+--    writeFile "CCCCS1AVG" ccccAVG
+--    mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
     let hopOrNot    = map (all (\x -> x /= "10")) $ map (map (\x-> x!!9)) stringZ 
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
         counter x   = if x > -90.0 then 1 else 0
@@ -223,6 +190,9 @@ reportMassimo = do
         whoHopAndNo = map fst $ filter (\x-> snd x < -90.0) $ zip whoHop $ map last $ isomYorN whoHop
         hopIsoC     = sum $ map counter $ map last $ isomYorN whoHop     
         hopNIsoC    = (length whoHop) - hopIsoC
+        aveRAGES    = map (\x -> averageSublist stringZ x 3 200) [whoNotHop,whoHopAndIs,whoHopAndNo] -- 3 is cccc, 200 is first 200 substeps
+        printZ x    = (printf "%.2f" x) :: String
+    writeFile "CCCCAVERAGES" $ unlines $ map unwords $ map (map printZ) $ transpose aveRAGES
     putStrLn $ "Hop and Iso -> " ++ (show hopIsoC)
     putStrLn $ "Hop not Iso -> " ++ (show hopNIsoC)
     putStrLn $ "NoHop and Iso -> " ++ (show notHopIsoC)
@@ -230,7 +200,6 @@ reportMassimo = do
     let total = hopNIsoC + hopIsoC + notHopnIsoC + notHopIsoC
     putStrLn $ "Total -> " ++ (show total)
     let rateHOP = (fromIntegral (hopIsoC * 100) / (fromIntegral (hopIsoC+hopNIsoC))) :: Double
-        printZ x = (printf "%.2f" x) :: String
     putStrLn $ "only Hopped Iso/notIso -> " ++ (printZ rateHOP) ++ "%"
     let rateTOT = (fromIntegral (hopIsoC * 100) / fromIntegral (total)) :: Double
     putStrLn $ "Total Iso/notIso -> " ++ (printZ rateTOT) ++ "%"
