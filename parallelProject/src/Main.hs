@@ -9,7 +9,6 @@ import Data.Char (isDigit)
 
 import IntCoor
 import CreateInfo
-import Inputs
 
 
 main = createInfoP
