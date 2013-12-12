@@ -170,15 +170,14 @@ reportMassimo = do
         getHOP root = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == root)) stringZ
         getHOPs     = map getHOP $ allJumps
         writeF x    = intercalate "  \n"$ map unlines $ map (map unwords) x
---        avgDihedral = map (map (\a -> read (a!!3) :: Double)) $ transpose $ map (filter (\x-> x!!8 == "S1")) stringZ
         avgDihedral = map (map (\a -> read (a!!3) :: Double)) $ map (filter (\x -> x!!8=="S1")) $ transpose stringZ
         avg xs   = (sum xs)/(fromIntegral $ length xs)
         avgZip   = zip [1..] $ map avg avgDihedral -- steps starts from 1
         form (a,b) = [show a,show b]
         ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
---    writeFile "CCCC" $ writeF getCCCC
---    writeFile "CCCCS1AVG" ccccAVG
---    mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+    writeFile "CCCC" $ writeF getCCCC
+    writeFile "CCCCS1AVG" ccccAVG
+    mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
     let hopOrNot    = map (all (\x -> x /= "10")) $ map (map (\x-> x!!9)) stringZ 
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
         counter x   = if x > -90.0 then 1 else 0
