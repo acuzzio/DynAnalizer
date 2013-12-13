@@ -128,7 +128,7 @@ corrDihedro (a:b:[]) = a : (correct a b) : []
 corrDihedro (a:b:xs) = a : corrDihedro ((correct a b) : xs)
 
 corrDihedro2 :: [Double] -> [Double]
-corrDihedro2 xl = let shiftDown x = if x > 90.0 then x-360.0 else x
+corrDihedro2 xl = let shiftDown x = if x > upperLimit then x-360.0 else x
                   in map shiftDown xl
 
 diHedro :: [Int] -> Int -> Dinamica -> [Double]
