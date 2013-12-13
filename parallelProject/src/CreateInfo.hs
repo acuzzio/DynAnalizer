@@ -9,7 +9,6 @@ import Control.Monad
 import Control.Concurrent.Async
 
 import IntCoor
-import Inputs
 
   
 data Dinamica = Dinamica {
@@ -25,14 +24,14 @@ data Dinamica = Dinamica {
           } deriving Show
 
 createInfoP = do
-       outs <- readShell "ls */*.out"
+       outs <- readShell "ls *.out"
        let outputs = lines outs
            chunks  = chunksOf 10 outputs
        sequence_ $ processFiles `fmap` chunks
 
 processFiles :: [FilePath] -> IO ()
 processFiles outputs = do
-       pids <- mapM (\x -> async $genInfoFile chargeTrFragment x) outputs
+       pids <- mapM (\x -> async $ genInfoFile x) outputs
        mapM_ wait pids
 
 rdInfoFile  :: FilePath -> IO(Dinamica)
@@ -49,8 +48,8 @@ rdInfoFile fn = do
         charT  = map (\x-> read x :: Double) h
     return $ Dinamica fn atomN rN rlx aT eneflo coord1 oscStr charT
 
-genInfoFile :: [Int] -> String -> IO ()
-genInfoFile chargeTrFragment fn = do
+genInfoFile :: String -> IO ()
+genInfoFile fn = do
     atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
     rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
     rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
@@ -60,7 +59,6 @@ genInfoFile chargeTrFragment fn = do
         grepLength          = show $ atomNumber + 3
         numberFields        = (rootN * 2) + 1
     atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " ' Cartesian Coordinates' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}'"
---    energiesPop             <- mapM (\a -> readShell $ "grep Gnuplot " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}' | awk 'NR % 200 == 0'") [2,3,4,5,6]
     energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the sring gnuplot
     coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
@@ -70,12 +68,7 @@ genInfoFile chargeTrFragment fn = do
         subDiv              = "SUBDIVISION\n"
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
-        separateString      = fmap words $ lines chargeTr
-        dividedGeometries   = chunksOf atomNumber (concat separateString)
-        toDouble            = map (map (\x -> read x :: Double)) dividedGeometries
-        chargeTrFragmentI   = map pred chargeTrFragment
-        sumUp4CT x          = sum $ map (x!!) chargeTrFragmentI
-        chargeTr'           = unlines $ map show (map sumUp4CT toDouble)
+        chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr        
         wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
 

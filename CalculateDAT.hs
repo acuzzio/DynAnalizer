@@ -38,7 +38,7 @@ createDATA betaList ccccList fn = do
         stepN     = take (length isS1) $ map show [1..]
         atomN     = getAtomN a 
         justHop   = justHopd a rlxR
-        cT        = getCharTran a
+        cT        = calculateCT atomN $ getCharTran a
         betaV     = diHedro betaList atomN a 
         ccccV     = diHedro ccccList atomN a
         tauV      = zipWith (\x y -> (x+y)*0.5) betaV ccccV
@@ -75,6 +75,12 @@ readData fn = do
         dataContent  <- readFile fn
         return $ map words $ lines dataContent
 
+calculateCT :: Int -> [Double] -> [Double]
+calculateCT a xs = let 
+     dividedGeometries   = chunksOf a xs
+     chargeTrFragmentI   = map pred chargeTrFragment
+     sumUp4CT x          = sum $ map (x!!) chargeTrFragmentI
+     in map sumUp4CT dividedGeometries
 
 justHopd :: Dinamica -> Int -> [String]
 justHopd dynam rlxD = let 

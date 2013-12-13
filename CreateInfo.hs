@@ -56,7 +56,6 @@ genInfoFile chargeTrFragment fn = do
         grepLength          = show $ atomNumber + 3
         numberFields        = (rootN * 2) + 1
     atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " ' Cartesian Coordinates' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}'"
---    energiesPop             <- mapM (\a -> readShell $ "grep Gnuplot " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}' | awk 'NR % 200 == 0'") [2,3,4,5,6]
     energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the sring gnuplot
     coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
@@ -66,12 +65,7 @@ genInfoFile chargeTrFragment fn = do
         subDiv              = "SUBDIVISION\n"
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
-        separateString      = fmap words $ lines chargeTr
-        dividedGeometries   = chunksOf atomNumber (concat separateString)
-        toDouble            = map (map (\x -> read x :: Double)) dividedGeometries
-        chargeTrFragmentI   = map pred chargeTrFragment
-        sumUp4CT x          = sum $ map (x!!) chargeTrFragmentI
-        chargeTr'           = unlines $ map show (map sumUp4CT toDouble)
+        chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
         wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
 

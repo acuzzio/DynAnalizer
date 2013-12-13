@@ -1,4 +1,4 @@
-name:                DynAnalizer
+name:                CreateInfo
 
 -- The package version.  See the Haskell package versioning policy (PVP) 
 -- for standards guiding when and how versions should be incremented.
@@ -35,7 +35,7 @@ Flag debug
     Default:False
 
 
-executable DynAnalizer
+executable CreateInfo
   ghc == 7.* 
   ghc-options:
     -O2
