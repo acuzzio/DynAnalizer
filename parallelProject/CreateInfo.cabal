@@ -54,4 +54,4 @@ executable CreateInfo
 
   hs-source-dirs:      src 
   main-is: Main.hs
-  other-modules: CreateInfo, Inputs, IntCoor
+  other-modules: CreateInfo, IntCoor
