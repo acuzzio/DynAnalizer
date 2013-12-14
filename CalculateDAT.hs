@@ -186,13 +186,13 @@ reportMassimo = do
     mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
     let hopOrNot    = map (all (\x -> x /= "10")) $ map (map (\x-> x!!9)) stringZ 
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
-        counter x   = if x > -90.0 then 1 else 0
+        counter x   = if isomCond x then 1 else 0
         whoNotHop   = map fst $ filter (\x-> snd x == True) $ zip [0..] hopOrNot
         notHopIsoC  = sum $ map counter $ map last $ isomYorN whoNotHop
         notHopnIsoC = (length whoNotHop) - notHopIsoC
         whoHop      = map fst $ filter (\x-> snd x == False) $ zip [0..] hopOrNot
-        whoHopAndIs = map fst $ filter (\x-> snd x > -90.0) $ zip whoHop $ map last $ isomYorN whoHop
-        whoHopAndNo = map fst $ filter (\x-> snd x < -90.0) $ zip whoHop $ map last $ isomYorN whoHop
+        whoHopAndIs = map fst $ filter (\x-> isomCond $ snd x) $ zip whoHop $ map last $ isomYorN whoHop
+        whoHopAndNo = map fst $ filter (\x-> not . isomCond $ snd x ) $ zip whoHop $ map last $ isomYorN whoHop
         hopIsoC     = sum $ map counter $ map last $ isomYorN whoHop     
         hopNIsoC    = (length whoHop) - hopIsoC
         aveRAGES    = map (\x -> averageSublist stringZ x 3 200) [whoNotHop,whoHopAndIs,whoHopAndNo] -- 3 is cccc, 200 is first 200 substeps
