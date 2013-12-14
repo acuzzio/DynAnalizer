@@ -206,6 +206,8 @@ reportMassimo = do
     putStrLn $ "Total -> " ++ (show total)
     let rateHOP = (fromIntegral (hopIsoC * 100) / (fromIntegral (hopIsoC+hopNIsoC))) :: Double
     putStrLn $ "only Hopped Iso/notIso -> " ++ (printZ rateHOP) ++ "%"
+    let rateNOH = (fromIntegral (notHopIsoC * 100) / (fromIntegral (notHopIsoC+notHopnIsoC))) :: Double 
+    putStrLn $ "only NON Hopped Iso/notIso -> " ++ (printZ rateNOH) ++ "%"
     let rateTOT = (fromIntegral (hopIsoC * 100) / fromIntegral (total)) :: Double
     putStrLn $ "Total Iso/notIso -> " ++ (printZ rateTOT) ++ "%"
 

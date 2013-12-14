@@ -23,8 +23,8 @@ nRoot      = 2 :: Int
 --ccccList   = [2,3,4,5] :: [Int]
 --betaList   = [8,3,4,9] :: [Int]
 --blaList    = [[(1,2),(3,4),(5,7)],[(2,3),(4,5)]] :: [[(Int,Int)]]
---upperLimit = 180.0
---isomCond x = x > 90.0 || x < -90.0
+--upperLimit = 90.0 
+--isomCond x = x < -90.0
 --nRoot      = 2 :: Int
 
 --folder     = "d-casscf-Cis"
@@ -32,8 +32,8 @@ nRoot      = 2 :: Int
 --ccccList   = [2,3,4,5] :: [Int]
 --betaList   = [8,3,4,9] :: [Int]
 --blaList    = [[(1,2),(3,4),(5,7)],[(2,3),(4,5)]] :: [[(Int,Int)]]
---upperLimit = 180.0
---isomCond x = x > 90.0 || x < -90.0
+--upperLimit = 90.0
+--isomCond x = x < -90.0
 --nRoot      = 2 :: Int
 
 --folder   = "e-Samer"

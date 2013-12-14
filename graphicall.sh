@@ -24,6 +24,7 @@ cat > gnuplot.script << MOROKUMA
 set title "Averages"
 set output 'averages.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 25"
+set yrange [-270:90]
 set view map
 plot "CCCCAVERAGES" u 1 t "no Isom", "" u 2 t "Isom", "" u 3 t "no Hop"
 MOROKUMA
@@ -31,3 +32,6 @@ MOROKUMA
 gnuplot < gnuplot.script
 rm gnuplot.script
 
+
+#TRANS
+#set yrange [-270:90]
