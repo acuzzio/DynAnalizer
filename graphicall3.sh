@@ -12,7 +12,7 @@ set xrange [0:200]
 set yrange [-270:90]
 set zrange [0:800]
 set view map
-splot "${fn}Density" u 1:2:3 w pm3d, "CCCCHOP10" u 2:3:(0) w p pt 7 ps 2 t "Hop S1->S0", "CCCCHOP01" u 2:3:(0) w p pt 7 ps 2 t "Hop S0->S1", "CCCCS1AVG" u 1:2:(0) w points
+splot "${fn}Density" u 1:2:3 w pm3d, "CCCCHOP10" u 2:3:(0) w p pt 7 ps 2 t "Hop S1->S0", "CCCCHOP01" u 2:3:(0) w p pt 7 ps 2 t "Hop S0->S1", "CCCCHOP21" u 2:3:(0) w p pt 7 ps 2 t "Hop S1->S0", "CCCCHOP12" u 2:3:(0) w p pt 7 ps 2 t "Hop S0->S1", "CCCCS1AVG" u 1:2:(0) w points
 MOROKUMA
 ###############################################
 gnuplot < gnuplot.script
