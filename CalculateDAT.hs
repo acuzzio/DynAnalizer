@@ -27,6 +27,7 @@ main = do
      let outputs = lines outs
      mapM_ (createDATA betaList ccccList) outputs
 
+
 --createData :: FilePath -> IO DinamicV
 createDATA betaList ccccList fn = do
     a             <- rdInfoFile fn
@@ -220,5 +221,21 @@ averageSublist stringOne trajxs index thres = let
         in map avg $ take thres $ transpose rightFloat
 
 
+genTrajectory :: FilePath -> IO()
+genTrajectory fn = do
+  a <- rdInfoFile fn
+  let dynname   = (takeWhile (/= '.') fn ) ++ ".md.xyz"
+      atomT     = getAtomT a
+      coords    = chunksOf atomN $ map (unwords . (map show) . runVec) $ getCoordinates a
+      atomN     = getAtomN a
+      header x  = (show atomN) ++ "\n \n" ++ x
+      coordsAndType = zipWith (zipWith (\x y -> x ++ " " ++ y)) (repeat atomT) coords
+      divided   = concat $ map (header . unlines) coordsAndType
+  writeFile dynname divided
 
+genTrajectories :: IO()
+genTrajectories = do
+   outs <- readShell $ "ls " ++ folder ++ "/*.info"
+   let outputs = lines outs
+   mapM_ genTrajectory outputs
  

@@ -73,4 +73,3 @@ parseTriplet :: String -> [Vec Double]
 parseTriplet = fmap (Vec .fmap (readDouble) . words) . lines
      where readDouble = \x -> 0.529177249 * (read x :: Double)
 
-
