@@ -232,16 +232,15 @@ genTrajectories = do
    let outputs = lines outs
    mapM_ genTrajectory outputs
 
-chargeTsingle :: Double -> IO()
-chargeTsingle thresh = do
-    stringZ         <- readerData 
+chargeTsingle :: [[[String]]] -> String -> Double -> IO()
+chargeTsingle stringZ filtername thresh = do
     let upper       = map (filter (\x -> read2 (x!!7) > thresh)) stringZ
         lower       = map (filter (\x -> read2 (x!!7) < thresh)) stringZ
-    writeFile ("CCCCcT" ++ (show thresh) ++ "HI") $ writeF upper
-    writeFile ("CCCCcT" ++ (show thresh) ++ "LO") $ writeF lower
+    writeFile ("CCCCcT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upper
+    writeFile ("CCCCcT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lower
 
-chargeTmap :: [Double] -> IO()
-chargeTmap list = mapM_ chargeTsingle list
+chargeTmap :: [[[String]]] -> String -> [Double] -> IO()
+chargeTmap stringZ filtername list = mapM_ (chargeTsingle stringZ filtername) list
 
 readerData = do
     outs            <- readShell $ "ls " ++ folder ++ "/*.data"
