@@ -8,6 +8,8 @@ import Data.Char (isDigit)
 import IntCoor
 import CreateInfo
 import Inputs
+import Mapped
+import Functions
 
 data DinamicV = DinamicV {
           getDynN        :: [String]
@@ -26,7 +28,6 @@ main = do
      outs <- readShell $ "ls " ++ folder ++ "/*.info"
      let outputs = lines outs
      mapM_ (createDATA betaList ccccList) outputs
-
 
 --createData :: FilePath -> IO DinamicV
 createDATA betaList ccccList fn = do
@@ -163,28 +164,19 @@ blaPSB3 blaList list = let
 
 reportMassimo :: IO()
 reportMassimo = do
-    outs            <- readShell $ "ls " ++ folder ++ "/*.data"
-    let outputs     = lines outs
-    dataContent     <- mapM readFile outputs
-    let stringZ     = map (map words) $ map lines dataContent
-        checkLN     = zip [0..] $ map length stringZ
+    stringZ <- readerData 
+    let checkLN     = zip [0..] $ map length stringZ
         filtered    = unwords $ map (show . fst) $ filter (\x -> snd x < 200) checkLN
         messaGe     = if filtered == "" then "Everything OK" else "Check out short trajectories: " ++ filtered
     putStrLn messaGe
-    let getCCCC     = map (map (\a -> [a!!0,a!!1,a!!3])) stringZ
-        nRootI      = nRoot - 1
-        allJumps    = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y] 
-        getHOP root = map (map (\a -> [a!!0,a!!1,a!!3])) $ filter (\x -> x /= []) $ map (filter (\x-> x!!9 == root)) stringZ
-        getHOPs     = map getHOP $ allJumps
-        writeF x    = intercalate "  \n"$ map unlines $ map (map unwords) x
+    let writeF x    = intercalate "  \n"$ map unlines $ map (map unwords) x
         avgDihedral = map (map (\a -> read (a!!3) :: Double)) $ map (filter (\x -> x!!8=="S1")) $ transpose stringZ
         avg xs   = (sum xs)/(fromIntegral $ length xs)
         avgZip   = zip [1..] $ map avg avgDihedral -- steps starts from 1
         form (a,b) = [show a,show b]
         ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
-    writeFile "CCCC" $ writeF getCCCC
+    writeFile "CCCC" $ writeF stringZ
     writeFile "CCCCS1AVG" ccccAVG
-    mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
     let hopOrNot    = map (all (\x -> x /= "10")) $ map (map (\x-> x!!9)) stringZ 
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
         counter x   = if isomCond x then 1 else 0
@@ -220,7 +212,6 @@ averageSublist stringOne trajxs index thres = let
         avg xs   = (sum xs)/(fromIntegral $ length xs)
         in map avg $ take thres $ transpose rightFloat
 
-
 genTrajectory :: FilePath -> IO()
 genTrajectory fn = do
   a <- rdInfoFile fn
@@ -238,4 +229,31 @@ genTrajectories = do
    outs <- readShell $ "ls " ++ folder ++ "/*.info"
    let outputs = lines outs
    mapM_ genTrajectory outputs
- 
+
+chargeTsingle :: Double -> IO()
+chargeTsingle thresh = do
+    stringZ         <- readerData 
+    let upper       = map (filter (\x -> read2 (x!!7) > thresh)) stringZ
+        lower       = map (filter (\x -> read2 (x!!7) < thresh)) stringZ
+    writeFile ("CCCCcT" ++ (show thresh) ++ "HI") $ writeF upper
+    writeFile ("CCCCcT" ++ (show thresh) ++ "LO") $ writeF lower
+
+chargeTmap :: [Double] -> IO()
+chargeTmap list = mapM_ chargeTsingle list
+
+readerData = do
+    outs            <- readShell $ "ls " ++ folder ++ "/*.data"
+    let outputs     = lines outs
+    dataContent     <- mapM readFile outputs
+    return $ map (map words) $ map lines dataContent  
+
+hopS :: IO ()
+hopS = do
+  stringZ         <- readerData 
+  let nRootI      = nRoot - 1 
+      allJumps    = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y]
+      getHOP root = filter (\x -> x /= []) $ map (filter (\x-> x!!9 == root)) stringZ
+      getHOPs     = map getHOP $ allJumps
+  mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+
+

@@ -11,8 +11,6 @@ import Control.Concurrent.Async
 import IntCoor
 import Inputs
 
-
-
 data Dinamica = Dinamica {
           getOutputNam   :: String,
           getAtomN       :: Int,
