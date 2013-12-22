@@ -203,6 +203,8 @@ reportMassimo = do
     putStrLn $ "only NON Hopped Iso/notIso -> " ++ (printZ rateNOH) ++ "%"
     let rateTOT = (fromIntegral (hopIsoC * 100) / fromIntegral (total)) :: Double
     putStrLn $ "Total Iso/notIso -> " ++ (printZ rateTOT) ++ "%"
+    hopS
+    mapped stringZ 3 "CCCCDensity"
 
 averageSublist :: [[[String]]] -> [Int] -> Int -> Int -> [Double]
 averageSublist stringOne trajxs index thres = let
