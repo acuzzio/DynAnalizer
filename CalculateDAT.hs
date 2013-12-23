@@ -205,6 +205,10 @@ reportMassimo = do
     putStrLn $ "Total Iso/notIso -> " ++ (printZ rateTOT) ++ "%"
     hopS
     mapped stringZ 3 "CCCCDensity"
+    chargeTmap stringZ "TOT" [0.4,0.5,0.6]
+    let sZeroOnly = map (filter (\x -> x!!8 == "S0")) stringZ
+    chargeTmap sZeroOnly "S0" [0.4,0.5,0.6]
+
 
 averageSublist :: [[[String]]] -> [Int] -> Int -> Int -> [Double]
 averageSublist stringOne trajxs index thres = let
@@ -242,6 +246,7 @@ chargeTsingle stringZ filtername thresh = do
 chargeTmap :: [[[String]]] -> String -> [Double] -> IO()
 chargeTmap stringZ filtername list = mapM_ (chargeTsingle stringZ filtername) list
 
+readerData :: IO [[[String]]]
 readerData = do
     outs            <- readShell $ "ls " ++ folder ++ "/*.data"
     let outputs     = lines outs

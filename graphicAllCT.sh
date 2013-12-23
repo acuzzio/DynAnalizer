@@ -1,27 +1,29 @@
 #!/bin/bash
+for i in TOT S0
+do
 for thr in 0.4 0.5 0.6 
 do
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
-set title "$fn"
-set output '${fn}side.png'
+set title "${thr}$i"
+set output '${i}${thr}Ct.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 12"
-plot "CCCCcT0.4HI" u 2:4 w p pt 7 ps 0.5 linecolor rgb "black", "CCCCcT0.4LO" u 2:4 w p pt 7 ps 0.5 linecolor rgb "red"
+plot "CCCCcT${thr}LO$i" u 2:4 w p pt 7 ps 1.5 linecolor rgb "black" t "CT lower than ${thr}", "CCCCcT${thr}HI$i" u 2:4 w p pt 7 ps 1.5 linecolor rgb "red" t "CT bigger than ${thr}"
 MOROKUMA
 ###############################################
-
 gnuplot < gnuplot.script
 rm gnuplot.script
-
-################# Figure 1 ####################
+################# Figure 2 ####################
 cat > gnuplot.script << MOROKUMA
-set title "$fn"
-set output '${fn}Up.png'
+set title "${thr}${i}Tra"
+set output 'Tra${i}${thr}Ct.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 12"
-
+set yrange [0:200]
+plot "CCCCcT${thr}LO$i" u 1:2 w p pt 7 ps 1.5 linecolor rgb "black" t "CT lower than ${thr}", "CCCCcT${thr}HI$i" u 1:2 w p pt 7 ps 1.5 linecolor rgb "red" t "CT bigger than ${thr}"
 MOROKUMA
 ###############################################
-
 gnuplot < gnuplot.script
 rm gnuplot.script
+
+done
 done
