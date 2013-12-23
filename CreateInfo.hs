@@ -16,6 +16,7 @@ data Dinamica = Dinamica {
           getAtomN       :: Int,
           getRootN       :: Int,
           getStartRlxRt  :: Int,
+          getDT          :: Double,
           getAtomT       :: [String],
           getEnergies    :: [[Double]],
           getCoordinates :: [Vec Double],
@@ -32,25 +33,28 @@ createInfo = do
 rdInfoFile  :: FilePath -> IO(Dinamica)
 rdInfoFile fn = do
     cont <- readFile fn
-    let (aN:rNS:rlxS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
-        atomN  = read (head aN) :: Int
-        rN     = read (head rNS) :: Int
+    let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+        atomN  = read (head aN)   :: Int
+        rN     = read (head rNS)  :: Int
         rlx    = read (head rlxS) :: Int
+        dT     = read (head dTS)  :: Double
         enepop = splitWhen (== "SUBDIVISION") ene 
         eneflo = map (map (\x -> read x :: Double)) enepop
         coord1 = parseTriplet $ unlines f
         oscStr = map (\x-> read x :: Double) g
         charT  = map (\x-> read x :: Double) h
-    return $ Dinamica fn atomN rN rlx aT eneflo coord1 oscStr charT
+    return $ Dinamica fn atomN rN rlx dT aT eneflo coord1 oscStr charT
 
 genInfoFile :: [Int] -> String -> IO ()
 genInfoFile chargeTrFragment fn = do
     atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
     rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
     rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
+    dTS                     <- readShell $ "head -200 " ++ fn ++ " | grep -i -A1 dt | tail -1 | awk '{print $1}'" 
     let atomNumber          = read atomNS :: Int
         rootN               = read rootNS :: Int
         rlxRtN              = read rlxRtS :: Int
+        dT                  = read dTS    :: Double
         grepLength          = show $ atomNumber + 3
         numberFields        = (rootN * 2) + 1
     atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " ' Cartesian Coordinates' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}'"
@@ -64,7 +68,7 @@ genInfoFile chargeTrFragment fn = do
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
         chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
-        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
+        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
 
 parseTriplet :: String -> [Vec Double]

@@ -10,6 +10,7 @@ import CreateInfo
 import Inputs
 import Mapped
 import Functions
+import GnuplotZ
 
 data DinamicV = DinamicV {
           getDynN        :: [String]
@@ -261,5 +262,6 @@ hopS = do
       getHOP root = filter (\x -> x /= []) $ map (filter (\x-> x!!9 == root)) stringZ
       getHOPs     = map getHOP $ allJumps
   mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+
 
 
