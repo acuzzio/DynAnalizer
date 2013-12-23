@@ -9,32 +9,38 @@ import Text.ParserCombinators.Parsec (parseFromFile)
 import Data.Functor.Identity
 
 import CreateInfo
+import Inputs
 
 data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
 
 energiesPopulation = do
-       a <- readShell "ls *.info"
+       a <- readShell $ "ls " ++ folder ++ "/*.info"
        let files = lines a
        mapM_ graficami files
 
 graficami file = do
    dina <- rdInfoFile file
-   print dina
+   let popEne = getEnergies dina
+       dt     = getDT dina 
+       rlxRoot= getStartRlxRt dina
+   writeGnuplots dt rlxRoot file popEne 
+   system "gnuplot < gnuplotScript"
+   system "rm sdafrffile* gnuplotScript"
+   print "done"
 
-writeGnuplots :: String -> FilePath -> [String] -> IO()
-writeGnuplots dt file xss = do
-      let values    = transpose $ map words xss
-          rlxRoot   = findRlxRT values
-          valuesS   = map unlines values
+writeGnuplots :: Double -> Int -> FilePath -> [[Double]] -> IO()
+writeGnuplots dt rlxRoot file xss = do
+      let valuesS   = map (unlines . (map show)) xss
           filenames = map (\x -> "sdafrffile" ++ (show x)) [1..]
-          lengthV   = length values
+          lengthV   = length valuesS
 --      print values
       zipWithM writeFile filenames valuesS
       createGnuplotFile file dt lengthV rlxRoot
 
-createGnuplotFile :: FilePath -> String -> Int -> Int -> IO()
-createGnuplotFile file dt n rlxRt = do
+createGnuplotFile :: FilePath -> Double -> Int -> Int -> IO()
+createGnuplotFile file dt' n rlxRt = do
       let fileZ  = takeWhile (/='.') file
+          dt     = show dt'
           hexColo= ["#E5E5E5","#778899","#A9A9A9","#5F9EA0","#778899","#B0C4DE"]
           colors = ["green","red","blue","yellow","blueviolet","darkgoldenrod"]
           tag    = map (\x -> "S" ++ (show x)) [0..]
