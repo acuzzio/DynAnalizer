@@ -41,8 +41,9 @@ createGnuplotFile :: FilePath -> Double -> Int -> Int -> IO()
 createGnuplotFile file dt' n rlxRt = do
       let fileZ  = takeWhile (/='.') file
           dt     = show dt'
-          hexColo= ["#E5E5E5","#F0F8FF","#F0FFFF","#778899","#A9A9A9","#5F9EA0","#778899","#B0C4DE"]
-          colors = ["green","red","cyan","blue","yellow","blueviolet","darkgoldenrod"]
+-- wanna new colors? http://hexcolorgenerator.com/          
+          hexColo= ["#FFF7F7","#F7FFF7","#E5FFFF","#FFF7F7","#FFFFF7","#F9F7FF","#FFF7FF"]
+          colors = ["#FF0600","#06FF00","#00FFFF","#FFB400","#FFF600","#4E00FF","#FF00FC"]
           tag    = map (\x -> "S" ++ (show x)) [0..]
           header = "set title \"" ++ fileZ ++ " Population and Energies\"\nset xlabel \"fs\"\nset key outside\nset format y \"%6.3f\"\nset y2range[0:1.001]\nset output '" ++ fileZ ++ "EnergiesPopulation.png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\nplot "
           states = div (n-1) 2
