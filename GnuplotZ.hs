@@ -100,9 +100,6 @@ pBAD fn xs = do
 
 errorMsg = "a list of 2 -> bond\na list of 3 -> angle\na list of 4 -> dihedral"
 
-fn = "e-Samer/geom000.info"
-list = [1,2] :: [Int]
-
 extractBAD :: FilePath -> [Int] -> ([Vec Double] -> Double) -> String -> IO () 
 extractBAD fn atomL fun label = do 
   dina <- rdInfoFile fn
