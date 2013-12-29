@@ -13,4 +13,8 @@ fromIntegral2 x = fromIntegral x :: Double
 writeF :: [[[String]]] -> String
 writeF x  = intercalate "  \n"$ map unlines $ map (map unwords) x
 
+avgListaListe :: [[Double]] -> [Double]
+avgListaListe xss = let avg xs = (sum xs)/(fromIntegral $ length xs)
+                    in map avg $ transpose xss
+
 printZ x    = (printf "%.2f" x) :: String

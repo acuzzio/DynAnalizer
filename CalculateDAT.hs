@@ -115,10 +115,6 @@ printWellAverages xs = unlines $ map unwords (map (map show) $ take 200 (transpo
 printWellList :: [Double] -> IO()
 printWellList xs = putStrLn $ unlines $ map show xs
 
-avgListaListe :: [[Double]] -> [Double]
-avgListaListe xss = let avg xs = (sum xs)/(fromIntegral $ length xs) 
-                    in map avg $ transpose xss
-
 correct :: Double -> Double -> Double
 correct x y = let
               a = abs $ x - y
