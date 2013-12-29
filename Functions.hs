@@ -7,6 +7,9 @@ import Text.Printf
 read2 :: String -> Double
 read2 x = read x :: Double
 
+fromIntegral2 :: Int -> Double
+fromIntegral2 x = fromIntegral x :: Double
+
 writeF :: [[[String]]] -> String
 writeF x  = intercalate "  \n"$ map unlines $ map (map unwords) x
 
