@@ -73,7 +73,7 @@ genInfoFile fn = do
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
         chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr        
-        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
+        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
 
 parseTriplet :: String -> [Vec Double]

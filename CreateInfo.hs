@@ -45,8 +45,8 @@ rdInfoFile fn = do
         charT  = map (\x-> read x :: Double) h
     return $ Dinamica fn atomN rN rlx dT aT eneflo coord1 oscStr charT
 
-genInfoFile :: [Int] -> String -> IO ()
-genInfoFile chargeTrFragment fn = do
+genInfoFile :: String -> IO ()
+genInfoFile fn = do
     atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
     rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
     rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
