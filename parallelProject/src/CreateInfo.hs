@@ -27,7 +27,7 @@ data Dinamica = Dinamica {
 createInfoP = do
        outs <- readShell "ls */*.out"
        let outputs = lines outs
-           chunks  = chunksOf 10 outputs
+           chunks  = chunksOf 5 outputs
        sequence_ $ processFiles `fmap` chunks
 
 processFiles :: [FilePath] -> IO ()
