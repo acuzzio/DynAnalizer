@@ -7,6 +7,7 @@ import Data.List
 import Control.Applicative
 import Control.Monad
 import Control.Concurrent.Async
+import System.Process
 
 import IntCoor
 
@@ -26,9 +27,15 @@ data Dinamica = Dinamica {
 
 createInfoP = do
        outs <- readShell "ls */*.out"
-       let outputs = lines outs
-           chunks  = chunksOf 10 outputs
+       pwd  <- readShell "pwd"
+       let outputs  = lines outs
+           foldName = reverse $ takeWhile (\x-> x/='/') $ reverse $ head $ lines pwd -- dull again, but works like a charm
+           chunks   = chunksOf 10 outputs
        sequence_ $ processFiles `fmap` chunks
+       writeFile "shellforTakeATar.sh" $ shellZ foldName
+       
+
+shellZ name = "mkdir temptemp\ncp */*.info temptemp/\ncd temptemp/\ntar -zcvf " ++ name ++ ".tgz *\nmv " ++ name ++ ".tgz ../"
 
 processFiles :: [FilePath] -> IO ()
 processFiles outputs = do
