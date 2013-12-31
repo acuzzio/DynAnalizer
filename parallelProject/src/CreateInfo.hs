@@ -38,7 +38,7 @@ createInfoP = do
        system "rm shellforTakeATar.sh"
        
 
-shellZ name = "mkdir temptemp\ncp */*.info temptemp/\ncd temptemp/\ntar -zcvf " ++ name ++ ".tgz *\nmv " ++ name ++ ".tgz ../"
+shellZ name = "mkdir temptemp\ncp */*.info temptemp/\ncd temptemp/\ntar -zcvf " ++ name ++ ".tgz *\nmv " ++ name ++ ".tgz ../i\ncd ..\nrm -r temptemp"
 
 processFiles :: [FilePath] -> IO ()
 processFiles outputs = do
