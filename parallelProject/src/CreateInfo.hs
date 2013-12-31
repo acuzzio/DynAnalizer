@@ -33,6 +33,9 @@ createInfoP = do
            chunks   = chunksOf 10 outputs
        sequence_ $ processFiles `fmap` chunks
        writeFile "shellforTakeATar.sh" $ shellZ foldName
+       system "chmod 744 shellforTakeATar.sh"
+       system "./shellforTakeATar.sh"
+       system "rm shellforTakeATar.sh"
        
 
 shellZ name = "mkdir temptemp\ncp */*.info temptemp/\ncd temptemp/\ntar -zcvf " ++ name ++ ".tgz *\nmv " ++ name ++ ".tgz ../"
