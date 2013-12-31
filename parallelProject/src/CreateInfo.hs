@@ -34,11 +34,11 @@ createInfoP = do
        sequence_ $ processFiles `fmap` chunks
        writeFile "shellforTakeATar.sh" $ shellZ foldName
        system "chmod 744 shellforTakeATar.sh"
---       system "./shellforTakeATar.sh"
---       system "rm shellforTakeATar.sh"
+       system "./shellforTakeATar.sh"
+       system "rm shellforTakeATar.sh"
        
 
-shellZ name = "mkdir temptemp\ncp */*.info temptemp/\ncd temptemp/\ntar -zcvf " ++ name ++ ".tgz *\nmv " ++ name ++ ".tgz ../i\ncd ..\nrm -r temptemp"
+shellZ name = "mkdir temptemp\ncp */*.info temptemp/\ncd temptemp/\ntar -zcvf " ++ name ++ ".tgz *\nmv " ++ name ++ ".tgz ../\ncd ..\nrm -r temptemp"
 
 processFiles :: [FilePath] -> IO ()
 processFiles outputs = do
