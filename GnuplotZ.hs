@@ -16,14 +16,14 @@ import Functions
 
 data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
 
-plotEnergiesPopulation :: IO ()
-plotEnergiesPopulation = do
+plotEnergiesPopulations :: IO ()
+plotEnergiesPopulations = do
        a <- readShell $ "ls " ++ folder ++ "/*.info"
        let files = lines a
-       mapM_ graficami files
+       mapM_ plotEnergiesPopulation files
 
-graficami :: FilePath -> IO ()
-graficami file = do
+plotEnergiesPopulation :: FilePath -> IO ()
+plotEnergiesPopulation file = do
    dina <- rdInfoFile file
    let popEne = getEnergies dina
        dt     = getDT dina 
@@ -88,10 +88,10 @@ plotBondAngleDihedrals :: [Int] -> IO()
 plotBondAngleDihedrals xs = do
    a <- readShell $ "ls " ++ folder ++ "/*.info"
    let files = lines a        
-   mapM_ (\x -> pBAD x xs) files
+   mapM_ (\x -> plotBondAngleDihedral x xs) files
 
-pBAD :: FilePath -> [Int] -> IO()
-pBAD fn xs = do
+plotBondAngleDihedral :: FilePath -> [Int] -> IO()
+plotBondAngleDihedral fn xs = do
    case length xs of
         2         -> extractBAD fn xs bond "Bond"
         3         -> extractBAD fn xs angle "Angle"

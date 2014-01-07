@@ -15,22 +15,22 @@ import Functions
 import GnuplotZ
 
 data DinamicV = DinamicV {
-          getDynN        :: [String]
-         ,getStepN       :: [String]
-         ,getS1OrS2      :: [String]
-         ,getHopYesNo    :: [String]
-         ,getCT          :: [String]
-         ,getBetaDih     :: [String]
-         ,getCcccDih     :: [String]
-         ,getTau         :: [String]
-         ,getDeltaOp     :: [String]
-         ,getBlaV        :: [String]
-          } deriving Show
+     getDynN        :: [String]
+    ,getStepN       :: [String]
+    ,getS1OrS2      :: [String]
+    ,getHopYesNo    :: [String]
+    ,getCT          :: [String]
+    ,getBetaDih     :: [String]
+    ,getCcccDih     :: [String]
+    ,getTau         :: [String]
+    ,getDeltaOp     :: [String]
+    ,getBlaV        :: [String]
+     } deriving Show
 
 createDATAs = do 
-     outs <- readShell $ "ls " ++ folder ++ "/*.info"
-     let outputs = lines outs
-     mapM_ (createDATA betaList ccccList) outputs
+   outs <- readShell $ "ls " ++ folder ++ "/*.info"
+   let outputs = lines outs
+   mapM_ (createDATA betaList ccccList) outputs
 
 --createData :: FilePath -> IO DinamicV
 createDATA betaList ccccList fn = do
@@ -44,8 +44,8 @@ createDATA betaList ccccList fn = do
         atomN     = getAtomN a 
         justHop   = justHopd a rlxR
         cT        = calculateCT atomN $ getCharTran a
-        betaV     = diHedro betaList atomN a 
-        ccccV     = diHedro ccccList atomN a
+        betaV     = corrDihedro2 $ diHedro betaList atomN a 
+        ccccV     = corrDihedro2 $ diHedro ccccList atomN a
         tauV      = zipWith (\x y -> (x+y)*0.5) betaV ccccV
         deltaV    = zipWith (-) ccccV betaV
         blaV      = blaD atomN a
@@ -77,15 +77,38 @@ joinAllDATA = do
 
 readData :: FilePath -> IO [[String]]
 readData fn = do 
-        dataContent  <- readFile fn
-        return $ map words $ lines dataContent
+    dataContent  <- readFile fn
+    return $ map words $ lines dataContent
+
+fn = "h-Gabriel-planar/geom000.info"
+
+--rotationDirections :: IO()
+rotationDirections  = do
+    outs <- readShell $ "ls " ++ folder ++ "/*.info"
+    let outputs = lines outs
+    mapM_ rotationDirection outputs
+
+rotationDirection fn = do
+    a             <- rdInfoFile fn
+    let atomN     = getAtomN a 
+        rlxR      = getStartRlxRt a
+        ccccV     = diHedro ccccList atomN a
+        justHop   = justHopd a rlxR
+        zipList   = zip ccccV justHop
+        firstEl   = head zipList
+        hopOnly   = safeLast $ filter (\x -> snd x == "10") zipList
+        lastEl    = last zipList
+    print   $ map fst [firstEl, hopOnly, lastEl] 
+
+safeLast [] = (4000.0,"toRemove") -- 4000 is just a Double flag... obviously a dihedral cannot be 4000, so I use it as a filter
+safeLast x  = last x
 
 calculateCT :: Int -> [Double] -> [Double]
 calculateCT a xs = let 
-     dividedGeometries   = chunksOf a xs
-     chargeTrFragmentI   = map pred chargeTrFragment
-     sumUp4CT x          = sum $ map (x!!) chargeTrFragmentI
-     in map sumUp4CT dividedGeometries
+    dividedGeometries   = chunksOf a xs
+    chargeTrFragmentI   = map pred chargeTrFragment
+    sumUp4CT x          = sum $ map (x!!) chargeTrFragmentI
+    in map sumUp4CT dividedGeometries
 
 justHopd :: Dinamica -> Int -> [String]
 justHopd dynam rlxD = let 
@@ -100,14 +123,14 @@ justHopd dynam rlxD = let
 
 rootDiscov :: Dinamica -> Int -> [String]
 rootDiscov dynam rlxD = let 
-     energy         = getEnergies dynam
-     rootS          = div (length energy - 1) 2
-     [popu,ene,dyn] = chunksOf rootS energy
-     startingRootS  = "S" ++ (show $ pred rlxD) -- first two steps... no tully no party
-     getI ls nu     = snd $ head $ dropWhile (\x-> fst x /= nu) $ zip ls [0..]
-     rightRootI     = zipWith getI (transpose ene) (head dyn)
-     rightRootS     = map (\x -> "S" ++ (show x)) rightRootI 
-     in startingRootS:startingRootS:rightRootS
+    energy         = getEnergies dynam
+    rootS          = div (length energy - 1) 2
+    [popu,ene,dyn] = chunksOf rootS energy
+    startingRootS  = "S" ++ (show $ pred rlxD) -- first two steps... no tully no party
+    getI ls nu     = snd $ head $ dropWhile (\x-> fst x /= nu) $ zip ls [0..]
+    rightRootI     = zipWith getI (transpose ene) (head dyn)
+    rightRootS     = map (\x -> "S" ++ (show x)) rightRootI 
+    in startingRootS:startingRootS:rightRootS
 
 printWellAverages :: [[Double]] -> String
 printWellAverages xs = unlines $ map unwords (map (map show) $ take 200 (transpose xs))
@@ -117,12 +140,12 @@ printWellList xs = putStrLn $ unlines $ map show xs
 
 correct :: Double -> Double -> Double
 correct x y = let
-              a = abs $ x - y
-              b = abs $ x - (y + 360)
-              c = abs $ x - (y - 360)
-              f = minimum [a,b,c]
-              in if a == f
-                 then y else if b == f then (y + 360) else (y - 360) 
+    a = abs $ x - y
+    b = abs $ x - (y + 360)
+    c = abs $ x - (y - 360)
+    f = minimum [a,b,c]
+    in if a == f
+       then y else if b == f then (y + 360) else (y - 360) 
 
 corrDihedro :: [Double] -> [Double]
 corrDihedro (a:b:[]) = a : (correct a b) : []
@@ -137,7 +160,7 @@ diHedro aL aN dyn = let
     aLIndex = map pred aL
     dihedr  = chunksOf aN $ getCoordinates dyn
     dihedrV = map dihedral $ map (\x -> map ( x !!) aLIndex) dihedr
-    in corrDihedro2 dihedrV
+    in dihedrV
 
 bonD :: [Int] -> Int -> Dinamica -> [Double]
 bonD aL aN dyn = let
@@ -153,21 +176,21 @@ blaD aN dyn = let
 
 blaPSB3 :: [[(Int,Int)]] -> [Vec Double] -> Double
 blaPSB3 blaList list = let
-        (a:b:c:[])      = blaList !! 0 
-        (d:e:[])        = blaList !! 1
-        blaBond (fS,sN) = bond [list!!(pred fS),list!!(pred sN)]
-        doubles         = (blaBond a + blaBond b + blaBond c) / 3
-        singles         = (blaBond d + blaBond e) / 2
-        res             = singles - doubles
-        in res
+    (a:b:c:[])      = blaList !! 0 
+    (d:e:[])        = blaList !! 1
+    blaBond (fS,sN) = bond [list!!(pred fS),list!!(pred sN)]
+    doubles         = (blaBond a + blaBond b + blaBond c) / 3
+    singles         = (blaBond d + blaBond e) / 2
+    res             = singles - doubles
+    in res
 
 averageSublist :: [[[String]]] -> [Int] -> Int -> Int -> [Double]
 averageSublist stringOne trajxs index thres = let
-        rightTrajectories = map (stringOne !!) trajxs
-        rightValue        = map (map (\x -> x!!index)) rightTrajectories
-        rightFloat        = map (map (\x -> read x :: Double)) rightValue
-        avg xs   = (sum xs)/(fromIntegral $ length xs)
-        in map avg $ take thres $ transpose rightFloat
+    rightTrajectories = map (stringOne !!) trajxs
+    rightValue        = map (map (\x -> x!!index)) rightTrajectories
+    rightFloat        = map (map (\x -> read x :: Double)) rightValue
+    avg xs   = (sum xs)/(fromIntegral $ length xs)
+    in map avg $ take thres $ transpose rightFloat
 
 genTrajectory :: FilePath -> IO()
 genTrajectory fn = do
