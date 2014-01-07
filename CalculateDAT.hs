@@ -88,6 +88,9 @@ rotationDirections  = do
     let outputs = lines outs
     mapM_ rotationDirection outputs
 
+safeLast [] = (9999.9,"toRemove") -- 4000 is just a Double flag... obviously a dihedral cannot be 9999.9, so I use it as a filter
+safeLast x  = last x
+
 rotationDirection fn = do
     a             <- rdInfoFile fn
     let atomN     = getAtomN a 
@@ -98,11 +101,23 @@ rotationDirection fn = do
         firstEl   = head zipList
         hopOnly   = safeLast $ filter (\x -> snd x == "10") zipList
         lastEl    = last zipList
-    print   $ map fst [firstEl, hopOnly, lastEl] 
+    print $ map fst [firstEl, hopOnly, lastEl] 
 
-safeLast [] = (4000.0,"toRemove") -- 4000 is just a Double flag... obviously a dihedral cannot be 4000, so I use it as a filter
-safeLast x  = last x
-
+-- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 
+isDihCloser :: Double -> Int -> Int -> Int
+isDihCloser float first second = let
+   integ      = floor float :: Int
+   a          = integ - 179
+   b          = integ + 180
+   downward y = if y > 180 then y - 360 else y
+   upward   y = if y <= (-180) then y + 360 else y
+   posOrNeg   = if signum float == 1 then map downward [a..b] else map upward [a..b]
+   Just fir   = elemIndex first posOrNeg
+   Just sec   = elemIndex second posOrNeg
+   one        = abs (179 - fir) -- float will always be at index 179 in this array
+   two        = abs (179 - sec)
+   in if one < two then first else second
+   
 calculateCT :: Int -> [Double] -> [Double]
 calculateCT a xs = let 
     dividedGeometries   = chunksOf a xs
