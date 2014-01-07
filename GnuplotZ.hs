@@ -113,7 +113,8 @@ extractBAD fn atomL fun label = do
       smLab  = zipWith (++) (getAtomT dina) (map show [1..])
       rightL = label ++ " " ++ (unwords $ map (smLab!!) atomLI)
       fnLabe = fileN ++ (filter (/= ' ') rightL) 
-      header = "set title \"" ++ rightL ++ "\"\nset xlabel \"fs\"\nset key off\nset format y \"%6.2f\"\nset output '" ++ fileN ++ (filter (/= ' ') rightL) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\nplot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u ($0*" ++ (fromAUtoFemtoDT (show dt)) ++ "):1 w lines"
+      limRan = if label == "Dihedral" then "set yrange [-180:180]\n" else ""
+      header = "set title \"" ++ rightL ++ "\"\nset xlabel \"fs\"\nset key off\nset format y \"%6.2f\"\nset output '" ++ fileN ++ (filter (/= ' ') rightL) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ limRan ++ "plot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u ($0*" ++ (fromAUtoFemtoDT (show dt)) ++ "):1 w lines"
   writeFile (fnLabe ++ "gnuplotScript") header
   writeFile (fnLabe ++ "GnupValues") $ unlines $ map show values
   system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")

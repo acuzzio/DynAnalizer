@@ -101,7 +101,15 @@ rotationDirection fn = do
         firstEl   = head zipList
         hopOnly   = safeLast $ filter (\x -> snd x == "10") zipList
         lastEl    = last zipList
-    print $ map fst [firstEl, hopOnly, lastEl] 
+--    print $ map fst [firstEl, hopOnly, lastEl] 
+    print $ wiseOrNot (fst hopOnly) fn
+
+wiseOrNot x fn = if x == 9999.9 
+                 then fn ++ " -> " ++ "This traj did non HOP" 
+                 else let 
+                      y = isDihCloser x (-90) 90
+                      z = if y == 90 then "        GIU" else "SU"
+                      in fn ++ " -> " ++ z
 
 -- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 
 isDihCloser :: Double -> Int -> Int -> Int
@@ -114,7 +122,7 @@ isDihCloser float first second = let
    posOrNeg   = if signum float == 1 then map downward [a..b] else map upward [a..b]
    Just fir   = elemIndex first posOrNeg
    Just sec   = elemIndex second posOrNeg
-   one        = abs (179 - fir) -- float will always be at index 179 in this array
+   one        = abs (179 - fir) -- integ will always be at index 179 in this array
    two        = abs (179 - sec)
    in if one < two then first else second
    
