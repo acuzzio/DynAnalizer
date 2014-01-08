@@ -1,5 +1,6 @@
 --import Text.Printf
 import System.ShQQ
+import System.Process
 --import Text.Printf
 --import Data.List.Split
 import Data.List
@@ -61,12 +62,28 @@ reportMassimo = do
     let sZeroOnly = map (filter (\x -> x!!8 == "S0")) stringZ
     chargeTmap sZeroOnly "S0" [0.4,0.5,0.6]
 
-calculateLifeTime root = do
-    tupla <- averageLifetime root
-    let result = barbattiFitting tupla
+calculateLifeTime :: Int -> Int -> Int -> IO ()
+calculateLifeTime root limitFrom limitTo = do
+    tupla        <- averageLifetime root
+    let diff     = limitTo - limitFrom
+        adjTupla = take diff $ drop limitFrom tupla 
+        result   = barbattiFitting adjTupla
     print result
 
+graphicLifeTime root = do
+    tupla            <- averageLifetime root
+    let transf (x,y) = show x ++ " " ++ show y
+        fnLabe = "AverageOnState" ++ (show root)
+        header       = "set title \"" ++ folder ++ "\"\nset xlabel \"steps\"\nset key off\nset output '" ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\nplot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u 1:2 w lines"
+    writeFile (fnLabe ++ "gnuplotScript") header
+    writeFile (fnLabe ++ "GnupValues") $ unlines $ map transf tupla
+    system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
+    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
+    putStrLn $ "done"
+
+
 -- this is the most accurate one, that calculates the medium popoulation to be used with root INDEX, 1 or 2
+averageLifetime :: Int -> IO [(Double, Double)]
 averageLifetime state = do
     outs            <- readShell $ "ls " ++ folder ++ "/*.info"
     let outputs     = lines outs
@@ -79,6 +96,7 @@ averageLifetime state = do
     return tupla
 
 -- to be used with "S1" or "S2"
+averageDynIntoState :: String -> IO [(Double, Double)]
 averageDynIntoState state = do
     stringZ <- readerData
     let transposed = transpose stringZ 
@@ -89,7 +107,7 @@ averageDynIntoState state = do
     return $ zip (map fromIntegral2 [1..]) toDoubl
 
 -- equation 9 and 10 http://mathworld.wolfram.com/LeastSquaresFittingExponential.html
---exponentialFitting :: [(Double, Double)] -> [Double]
+exponentialFitting :: [(Double, Double)] -> [Double]
 exponentialFitting tuplas = let 
     xs = map fst tuplas
     ys = map snd tuplas
@@ -103,6 +121,7 @@ exponentialFitting tuplas = let
     in [exp (fitA),fitB]
 
 -- solve normal exponents regression first, then t1 and t2 from this paper (page 2794 - Nonadiabatic Photodynamics of a retinal model in polar and nonpolar environment, Ruckenbauer) are as in the code, where a and b are the same as this general formula - > y = A exp (Bx) :
+barbattiFitting :: [(Double, Double)] -> Double
 barbattiFitting tuplas = let
     [a,b] = exponentialFitting tuplas
     t1    = -(( log a ) / b )
