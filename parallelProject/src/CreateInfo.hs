@@ -7,11 +7,10 @@ import Data.List
 import Control.Applicative
 import Control.Monad
 import Control.Concurrent.Async
-import System.Process
 
 import IntCoor
+import Inputs
 
-  
 data Dinamica = Dinamica {
           getOutputNam   :: String,
           getAtomN       :: Int,
@@ -25,32 +24,18 @@ data Dinamica = Dinamica {
           getCharTran    :: [Double]
           } deriving Show
 
-createInfoP = do
-       outs <- readShell "ls */*.out"
-       pwd  <- readShell "pwd"
-       let outputs  = lines outs
-           foldName = reverse $ takeWhile (\x-> x/='/') $ reverse $ head $ lines pwd -- dull again, but works like a charm
-           chunks   = chunksOf 10 outputs
-       sequence_ $ processFiles `fmap` chunks
-       writeFile "shellforTakeATar.sh" $ shellZ foldName
-       system "chmod 744 shellforTakeATar.sh"
-       system "./shellforTakeATar.sh"
-       system "rm shellforTakeATar.sh"
-       
-
-shellZ name = "mkdir temptemp\ncp */*.info temptemp/\ncd temptemp/\ntar -zcvf " ++ name ++ ".tgz *\nmv " ++ name ++ ".tgz ../\ncd ..\nrm -r temptemp"
-
-processFiles :: [FilePath] -> IO ()
-processFiles outputs = do
-       pids <- mapM (\x -> async $ genInfoFile x) outputs
-       mapM_ wait pids
+-- Creates info files from molcas output
+createInfo = do
+       outs <- readShell $ "ls " ++ folder ++ "/*.out"
+       let outputs = lines outs
+       mapM_ genInfoFile outputs
 
 rdInfoFile  :: FilePath -> IO(Dinamica)
 rdInfoFile fn = do
     cont <- readFile fn
     let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
-        atomN  = read (head aN) :: Int
-        rN     = read (head rNS) :: Int
+        atomN  = read (head aN)   :: Int
+        rN     = read (head rNS)  :: Int
         rlx    = read (head rlxS) :: Int
         dT     = read (head dTS)  :: Double
         enepop = splitWhen (== "SUBDIVISION") ene 
@@ -60,20 +45,37 @@ rdInfoFile fn = do
         charT  = map (\x-> read x :: Double) h
     return $ Dinamica fn atomN rN rlx dT aT eneflo coord1 oscStr charT
 
+-- to cut an infofile at "step" step, and make it smaller
+cutInfoFile :: FilePath -> Int -> IO ()
+cutInfoFile fn steps = do
+  cont <- readFile fn
+  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+      atomN        = read (head aN)   :: Int
+      enepop       = splitWhen (== "SUBDIVISION") ene
+      newEnepop    = map (take steps) enepop
+      newCoord     = concat $ take steps $ chunksOf atomN f
+      newOscStr    = concat $ take steps $ chunksOf atomN g
+      newMullChar  = concat $ take steps $ chunksOf atomN h
+      div          = "DIVISION"
+      subDiv       = "SUBDIVISION"
+      energiesPop' = intercalate [subDiv] newEnepop
+      wholefile    = unlines $ intercalate [div] [aN,rNS,rlxS,dTS,aT,energiesPop',newCoord,newOscStr,newMullChar]
+  writeFile (fn ++ "CUT") wholefile 
+
 genInfoFile :: String -> IO ()
 genInfoFile fn = do
     atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
     rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
     rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
-    dTS                     <- readShell $ "head -200 " ++ fn ++ " | grep -i -A1 dt | tail -1 | awk '{print $1}'"
+    dTS                     <- readShell $ "head -200 " ++ fn ++ " | grep -i -A1 dt | tail -1 | awk '{print $1}'" 
     let atomNumber          = read atomNS :: Int
         rootN               = read rootNS :: Int
         rlxRtN              = read rlxRtS :: Int
         dT                  = read dTS    :: Double
         grepLength          = show $ atomNumber + 3
         numberFields        = (rootN * 2) + 1
-    atomTS                  <- readShell $ "head -500 " ++ fn ++ " | grep -A" ++ grepLength ++ " ' Cartesian Coordinates' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}'"
-    energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the sring gnuplot
+    atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " ' Cartesian Coordinates' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}'"
+    energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the string gnuplot
     coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
     chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: 1/ {flag=1;next} /Expectation values of various properties for root number:  1/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
@@ -82,12 +84,11 @@ genInfoFile fn = do
         subDiv              = "SUBDIVISION\n"
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
-        chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr        
+        chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
         wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
 
 parseTriplet :: String -> [Vec Double]
 parseTriplet = fmap (Vec .fmap (readDouble) . words) . lines
      where readDouble = \x -> 0.529177249 * (read x :: Double)
-
 
