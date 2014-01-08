@@ -78,7 +78,7 @@ graphicLifeTime root = do
     writeFile (fnLabe ++ "gnuplotScript") header
     writeFile (fnLabe ++ "GnupValues") $ unlines $ map transf tupla
     system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
-    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
+--    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
     putStrLn $ "done"
 
 
