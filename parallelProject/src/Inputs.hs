@@ -1,0 +1,3 @@
+module Inputs where
+
+folder = "*"
