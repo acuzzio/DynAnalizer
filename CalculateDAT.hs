@@ -88,8 +88,8 @@ rotationDirections  = do
     let outputs = lines outs
     mapM_ rotationDirection outputs
 
-safeLast [] = (9999.9,"toRemove") -- 4000 is just a Double flag... obviously a dihedral cannot be 9999.9, so I use it as a filter
-safeLast x  = last x
+safeLast [] = (9999.9,"toRemove") -- 4000 is just a Double flag... 
+safeLast x  = last x -- obviously a dihedral cannot be 9999.9, so I use it as a filter
 
 rotationDirection fn = do
     a             <- rdInfoFile fn

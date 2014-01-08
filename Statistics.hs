@@ -70,6 +70,7 @@ calculateLifeTime root limitFrom limitTo = do
         result   = barbattiFitting adjTupla
     print result
 
+graphicLifeTime :: Int -> IO ()
 graphicLifeTime root = do
     tupla            <- averageLifetime root
     let transf (x,y) = show x ++ " " ++ show y
