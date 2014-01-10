@@ -8,7 +8,7 @@ set terminal pngcairo size 2048,1060 enhanced font ", 25"
 set pm3d interpolate 8,8
 set palette defined (0 '#005824',  1 '#238B45',  2 '#41AE76',  3 '#66C2A4',  4 '#99D8C9',  5 '#CCECE6',  6 '#E5F5F9',  12 '#F7FCFD')
 set nokey
-set xrange [0:200]
+set xrange [0:600]
 set yrange [-270:90]
 set zrange [0:800]
 set view map

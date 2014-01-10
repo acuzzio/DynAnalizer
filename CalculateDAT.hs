@@ -27,7 +27,44 @@ data DinamicV = DinamicV {
     ,getBlaV        :: [String]
      } deriving Show
 
-createDATAs = do 
+
+tryCorrections = do
+    outs <- readShell $ "ls " ++ folder ++ "/*.info"
+    let outputs = lines outs
+    a <- mapM (tryCorrection ccccList) outputs
+--    print $ a
+    writeFile "prova" $ unlines a
+
+tryCorrection ccccList fn = do
+    a             <- rdInfoFile fn
+    let rlxR      = getStartRlxRt a
+        dynNum    = reverse $ takeWhile (isDigit) $ reverse $ takeWhile (/= '.') fn
+        isS1      = rootDiscov a rlxR
+        dynN      = take (length isS1) $ repeat dynNum
+        stepN     = take (length isS1) $ map show [1..]
+        atomN     = getAtomN a 
+        justHop   = justHopd a rlxR
+        ccccV     = corrDihedro3 $ diHedro ccccList atomN a
+--        cT        = calculateCT atomN $ getCharTran a
+        betaV     = corrDihedro3 $ diHedro betaList atomN a 
+--        tauV      = zipWith (\x y -> (x+y)*0.5) betaV ccccV
+--        deltaV    = zipWith (-) ccccV betaV
+--        blaV      = blaD atomN a
+--        st        = map show
+        prt       = map (\x -> printf "%.3f" x :: String)
+        pr        = printWellSpacedColumn . prt
+        pw        = printWellSpacedColumn
+        dynV      = [(pw dynN), (pw stepN), (pr ccccV), (pr betaV), isS1, justHop]
+    return $ unlines $ map unwords $ transpose dynV
+
+corrDihedro3 dihedList = let
+   firstDih = head dihedList
+   corr  x  = corrDihedro $ corrDihedro x
+   in case isDihCloser firstDih 0 180 of
+           0   -> corr dihedList
+           180 -> if firstDih < 0 then corr dihedList else corr $ map (\x -> x-360.0) dihedList
+
+createDATAs = do -- {{{
    outs <- readShell $ "ls " ++ folder ++ "/*.info"
    let outputs = lines outs
    mapM_ (createDATA betaList ccccList) outputs
@@ -109,7 +146,7 @@ wiseOrNot x fn = if x == 9999.9
                  else let 
                       y = isDihCloser x (-90) 90
                       z = if y == 90 then "        GIU" else "SU"
-                      in fn ++ " -> " ++ z
+                      in fn ++ " -> " ++ z-- }}}
 
 -- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 
 isDihCloser :: Double -> Int -> Int -> Int
