@@ -270,6 +270,7 @@ genTrajectories = do
    let outputs = lines outs
    mapM_ genTrajectory outputs
 
+-- those corrections are to make smooth gnuplot lines
 chargeTsingle :: [[[String]]] -> String -> Double -> IO()
 chargeTsingle stringZ filtername thresh = do
     let upper       = map (filter (\x -> read2 (x!!7) > thresh)) stringZ
@@ -279,6 +280,20 @@ chargeTsingle stringZ filtername thresh = do
 
 chargeTmap :: [[[String]]] -> String -> [Double] -> IO()
 chargeTmap stringZ filtername list = mapM_ (chargeTsingle stringZ filtername) list
+
+-- I wanna make a space for each nonconsecutive point in the splot (!!1 is the STEP)
+correctLines :: [[String]] -> [[String]]
+correctLines  (x:[]) = x:[]  
+correctLines  (x:xs) = let
+    readI y = read (y!!1) :: Int
+    a       = readI x
+    b       = readI $ head xs
+    in if (a+1) == b then x : correctLines xs else x : [" "] : correctLines xs 
+
+-- I wanna fill the space between two different set in gnuplot splot lines
+correctGaps :: [[String]] -> [[String]] -> [[String]]
+correctGaps a b = undefined
+
 
 readerData :: IO [[[String]]]
 readerData = do
