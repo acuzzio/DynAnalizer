@@ -291,9 +291,12 @@ correctLines  (x:xs) = let
     in if (a+1) == b then x : correctLines xs else x : [" "] : correctLines xs 
 
 -- I wanna fill the space between two different set in gnuplot splot lines
-correctGaps :: [[String]] -> [[String]] -> [[String]]
-correctGaps a b = undefined
+correctGaps :: [[String]] -> [[String]] -> [[String]] -> [[String]]
+correctGaps a b c = undefined
 
+a=[1,2,3,4,5,6,7,8,9]
+b=[1,2,3,7,8]
+c=[4,5,6,9]
 
 readerData :: IO [[[String]]]
 readerData = do
