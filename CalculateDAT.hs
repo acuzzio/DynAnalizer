@@ -275,8 +275,8 @@ chargeTsingle :: [[[String]]] -> String -> Double -> IO()
 chargeTsingle stringZ filtername thresh = do
     let upper       = map (filter (\x -> read2 (x!!7) > thresh)) stringZ
         lower       = map (filter (\x -> read2 (x!!7) < thresh)) stringZ
-        upperCorr   = zipWith correctGaps upper stringZ
-        lowerCorr   = zipWith correctGaps lower stringZ
+        upperCorr   = map compress $ zipWith correctGaps upper stringZ
+        lowerCorr   = map compress $ zipWith correctGaps lower stringZ
     writeFile ("CCCCcT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upperCorr
     writeFile ("CCCCcT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lowerCorr
 

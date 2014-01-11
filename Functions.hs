@@ -18,3 +18,6 @@ avgListaListe xss = let avg xs = (sum xs)/(fromIntegral $ length xs)
                     in map avg $ transpose xss
 
 printZ x    = (printf "%.2f" x) :: String
+
+compress :: Eq a => [a] -> [a] 
+compress = map head . group
