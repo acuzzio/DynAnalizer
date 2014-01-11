@@ -275,14 +275,17 @@ chargeTsingle :: [[[String]]] -> String -> Double -> IO()
 chargeTsingle stringZ filtername thresh = do
     let upper       = map (filter (\x -> read2 (x!!7) > thresh)) stringZ
         lower       = map (filter (\x -> read2 (x!!7) < thresh)) stringZ
-    writeFile ("CCCCcT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upper
-    writeFile ("CCCCcT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lower
+        upperCorr   = zipWith correctGaps upper stringZ
+        lowerCorr   = zipWith correctGaps lower stringZ
+    writeFile ("CCCCcT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upperCorr
+    writeFile ("CCCCcT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lowerCorr
 
 chargeTmap :: [[[String]]] -> String -> [Double] -> IO()
 chargeTmap stringZ filtername list = mapM_ (chargeTsingle stringZ filtername) list
 
 -- I wanna make a space for each nonconsecutive point in the splot (!!1 is the STEP)
 correctLines :: [[String]] -> [[String]]
+correctLines  []     = []
 correctLines  (x:[]) = x:[]  
 correctLines  (x:xs) = let
     readI y = read (y!!1) :: Int
@@ -291,12 +294,10 @@ correctLines  (x:xs) = let
     in if (a+1) == b then x : correctLines xs else x : [" "] : correctLines xs 
 
 -- I wanna fill the space between two different set in gnuplot splot lines
-correctGaps :: [[String]] -> [[String]] -> [[String]] -> [[String]]
-correctGaps a b c = undefined
-
-a=[1,2,3,4,5,6,7,8,9]
-b=[1,2,3,7,8]
-c=[4,5,6,9]
+correctGaps :: [[String]] -> [[String]] -> [[String]]
+correctGaps []    a      = []
+correctGaps small (x:[]) = x : []
+correctGaps small (x:xs) = if elem (head xs) small then x : correctGaps small xs else if elem x small then x : correctGaps small xs else [" "] : correctGaps small xs
 
 readerData :: IO [[[String]]]
 readerData = do

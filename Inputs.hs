@@ -36,14 +36,14 @@ module Inputs where
 --isomCond x = x < -90.0
 --nRoot      = 2 :: Int
 
---folder   = "e-Samer"
---chargeTrFragment = [1, 2, 3, 8, 10, 13, 14] ::[Int]
---ccccList = [2,3,4,5] :: [Int]
---betaList = [8,3,4,9] :: [Int]
---blaList  = [[(1,2),(3,4),(5,7)],[(2,3),(4,5)]] :: [[(Int,Int)]]
---upperLimit = 90.0
---isomCond x = x > -90.0
---nRoot    = 3 :: Int
+folder   = "e-Samer"
+chargeTrFragment = [1, 2, 3, 8, 10, 13, 14] ::[Int]
+ccccList = [2,3,4,5] :: [Int]
+betaList = [8,3,4,9] :: [Int]
+blaList  = [[(1,2),(3,4),(5,7)],[(2,3),(4,5)]] :: [[(Int,Int)]]
+upperLimit = 90.0
+isomCond x = x > -90.0
+nRoot    = 3 :: Int
 
 --folder     = "h-Gabriel-planar"
 --chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] ::[Int]
@@ -63,12 +63,12 @@ module Inputs where
 --isomCond x = x > -90.0
 --nRoot      = 3 :: Int
 
-folder     = "tempElisa"
-chargeTrFragment = [6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 21, 26, 27, 28] ::[Int]
-ccccList   = [5,4,6,7] :: [Int]
-betaList   = [3,4,6,10] :: [Int]
-blaList    = [[(1,5),(4,6),(7,8)],[(5,4),(6,7)]] :: [[(Int,Int)]]
-upperLimit = 90.0
-isomCond x = x > -90.0
-nRoot      = 2 :: Int
+--folder     = "tempElisa"
+--chargeTrFragment = [6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 21, 26, 27, 28] ::[Int]
+--ccccList   = [5,4,6,7] :: [Int]
+--betaList   = [3,4,6,10] :: [Int]
+--blaList    = [[(1,5),(4,6),(7,8)],[(5,4),(6,7)]] :: [[(Int,Int)]]
+--upperLimit = 90.0
+--isomCond x = x > -90.0
+--nRoot      = 2 :: Int
 
