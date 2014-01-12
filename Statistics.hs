@@ -29,8 +29,8 @@ reportMassimo = do
         avgZip   = zip [1..] $ map avg avgDihedral -- steps starts from 1
         form (a,b) = [show a,show b]
         ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip
-    writeFile "CCCC" $ writeF stringZ
-    writeFile "CCCCS1AVG" ccccAVG
+    writeFile (folder ++ "CCCC") $ writeF stringZ
+    writeFile (folder ++ "S1AVG") ccccAVG
     let hopOrNot    = map (all (\x -> x /= "10")) $ map (map (\x-> x!!9)) stringZ 
         isomYorN xs = map (map (\a -> read (a!!3) :: Double)) $ map (stringZ !!) xs
         counter x   = if isomCond x then 1 else 0
@@ -43,7 +43,7 @@ reportMassimo = do
         hopIsoC     = sum $ map counter $ map last $ isomYorN whoHop     
         hopNIsoC    = (length whoHop) - hopIsoC
         aveRAGES    = map (\x -> averageSublist stringZ x 3 200) [whoNotHop,whoHopAndIs,whoHopAndNo] -- 3 is cccc, 200 is first 200 substeps
-    writeFile "CCCCAVERAGES" $ unlines $ map unwords $ map (map printZ) $ transpose aveRAGES
+    writeFile (folder ++ "AVERAGES") $ unlines $ map unwords $ map (map printZ) $ transpose aveRAGES
     putStrLn $ "Hop and Iso -> " ++ (show hopIsoC)
     putStrLn $ "Hop not Iso -> " ++ (show hopNIsoC)
     putStrLn $ "NoHop and Iso -> " ++ (show notHopIsoC)
@@ -57,7 +57,7 @@ reportMassimo = do
     let rateTOT = (fromIntegral (hopIsoC * 100) / fromIntegral (total)) :: Double
     putStrLn $ "Total Iso/notIso -> " ++ (printZ rateTOT) ++ "%"
     hopS
-    mapped stringZ 3 "CCCCDensity"
+    mapped stringZ 3 (folder ++ "Density")
     chargeTmap stringZ "TOT" [0.4,0.5,0.6]
     let sZeroOnly = map (filter (\x -> x!!8 == "S0")) stringZ
     chargeTmap sZeroOnly "S0" [0.4,0.5,0.6]

@@ -32,7 +32,8 @@ tryCorrections = do
     outs <- readShell $ "ls " ++ folder ++ "/*.info"
     let outputs = lines outs
     a <- mapM (tryCorrection ccccList) outputs
---    print $ a
+    let stringZ = map (map words) $ map lines a
+    chargeTmap stringZ "TOT" [0.4,0.5,0.6]
     writeFile (folder ++ "Corrected") $ unlines a
 
 tryCorrection ccccList fn = do
@@ -64,7 +65,7 @@ corrDihedro3 dihedList = let
            0   -> corr dihedList
            180 -> if firstDih < 0 then corr dihedList else corr $ map (\x -> x-360.0) dihedList
 
-createDATAs = do -- {{{
+createDATAs = do 
    outs <- readShell $ "ls " ++ folder ++ "/*.info"
    let outputs = lines outs
    mapM_ (createDATA betaList ccccList) outputs
@@ -146,7 +147,7 @@ wiseOrNot x fn = if x == 9999.9
                  else let 
                       y = isDihCloser x (-90) 90
                       z = if y == 90 then "        GIU" else "SU"
-                      in fn ++ " -> " ++ z-- }}}
+                      in fn ++ " -> " ++ z
 
 -- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 
 isDihCloser :: Double -> Int -> Int -> Int
@@ -277,8 +278,8 @@ chargeTsingle stringZ filtername thresh = do
         lower       = map (filter (\x -> read2 (x!!7) < thresh)) stringZ
         upperCorr   = map compress $ zipWith correctGaps upper stringZ
         lowerCorr   = map compress $ zipWith correctGaps lower stringZ
-    writeFile ("CCCCcT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upperCorr
-    writeFile ("CCCCcT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lowerCorr
+    writeFile (folder ++ "cT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upperCorr
+    writeFile (folder ++ "cT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lowerCorr
 
 chargeTmap :: [[[String]]] -> String -> [Double] -> IO()
 chargeTmap stringZ filtername list = mapM_ (chargeTsingle stringZ filtername) list
@@ -313,7 +314,7 @@ hopS = do
       allJumps    = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y]
       getHOP root = filter (\x -> x /= []) $ map (filter (\x-> x!!9 == root)) stringZ
       getHOPs     = map getHOP $ allJumps
-  mapM_ (\x -> writeFile ("CCCCHOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+  mapM_ (\x -> writeFile (folder ++ "HOP" ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
 
 whoIsomerize :: IO()
 whoIsomerize = do
