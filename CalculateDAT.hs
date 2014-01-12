@@ -33,7 +33,7 @@ tryCorrections = do
     let outputs = lines outs
     a <- mapM (tryCorrection ccccList) outputs
 --    print $ a
-    writeFile "prova" $ unlines a
+    writeFile (folder ++ "Corrected") $ unlines a
 
 tryCorrection ccccList fn = do
     a             <- rdInfoFile fn
@@ -45,16 +45,16 @@ tryCorrection ccccList fn = do
         atomN     = getAtomN a 
         justHop   = justHopd a rlxR
         ccccV     = corrDihedro3 $ diHedro ccccList atomN a
---        cT        = calculateCT atomN $ getCharTran a
+        cT        = calculateCT atomN $ getCharTran a
         betaV     = corrDihedro3 $ diHedro betaList atomN a 
---        tauV      = zipWith (\x y -> (x+y)*0.5) betaV ccccV
---        deltaV    = zipWith (-) ccccV betaV
---        blaV      = blaD atomN a
+        tauV      = zipWith (\x y -> (x+y)*0.5) betaV ccccV
+        deltaV    = zipWith (-) ccccV betaV
+        blaV      = blaD atomN a
 --        st        = map show
         prt       = map (\x -> printf "%.3f" x :: String)
         pr        = printWellSpacedColumn . prt
         pw        = printWellSpacedColumn
-        dynV      = [(pw dynN), (pw stepN), (pr ccccV), (pr betaV), isS1, justHop]
+        dynV      = [(pw dynN), (pw stepN), (pr ccccV), (pr betaV), (pr tauV), (pr deltaV), (pr blaV), (pr cT), isS1, justHop]
     return $ unlines $ map unwords $ transpose dynV
 
 corrDihedro3 dihedList = let

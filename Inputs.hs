@@ -1,13 +1,13 @@
 module Inputs where
 
-folder     = "a-CASPT2-Trans"
-chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] :: [Int]
-ccccList   = [2,3,4,5] :: [Int]
-betaList   = [8,3,4,7] :: [Int]
-blaList    = [[(1,2),(3,4),(5,6)],[(2,3),(4,5)]] :: [[(Int,Int)]]
-upperLimit = 90.0
-isomCond x = x > -90.0
-nRoot      = 2 :: Int
+--folder     = "a-CASPT2-Trans"
+--chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] :: [Int]
+--ccccList   = [2,3,4,5] :: [Int]
+--betaList   = [8,3,4,7] :: [Int]
+--blaList    = [[(1,2),(3,4),(5,6)],[(2,3),(4,5)]] :: [[(Int,Int)]]
+--upperLimit = 90.0
+--isomCond x = x > -90.0
+--nRoot      = 2 :: Int
 
 --folder     = "b-casscf-Trans"
 --chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] ::[Int]
@@ -53,22 +53,26 @@ nRoot      = 2 :: Int
 --upperLimit = 90.0
 --isomCond x = x > -90.0
 --nRoot      = 2 :: Int
+--stepCheck  = 400 :: Int
 
---folder     = "h-Samer3RootNew"
+--folder     = "i-Gabriel-168"
 --chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] ::[Int]
 --ccccList   = [2,3,4,5] :: [Int]
 --betaList   = [8,3,4,7] :: [Int]
 --blaList    = [[(1,2),(3,4),(5,6)],[(2,3),(4,5)]] :: [[(Int,Int)]]
 --upperLimit = 90.0
 --isomCond x = x > -90.0
---nRoot      = 3 :: Int
-
---folder     = "tempElisa"
---chargeTrFragment = [6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 21, 26, 27, 28] ::[Int]
---ccccList   = [5,4,6,7] :: [Int]
---betaList   = [3,4,6,10] :: [Int]
---blaList    = [[(1,5),(4,6),(7,8)],[(5,4),(6,7)]] :: [[(Int,Int)]]
---upperLimit = 90.0
---isomCond x = x > -90.0
 --nRoot      = 2 :: Int
+--stepCheck  = 300 :: Int
+
+folder     = "l-Gabriel-155"
+chargeTrFragment = [1, 2, 3, 8, 10, 13, 14, 15, 16, 17] ::[Int]
+ccccList   = [2,3,4,5] :: [Int]
+betaList   = [8,3,4,7] :: [Int]
+blaList    = [[(1,2),(3,4),(5,6)],[(2,3),(4,5)]] :: [[(Int,Int)]]
+upperLimit = 90.0
+isomCond x = x > -90.0
+nRoot      = 2 :: Int
+stepCheck  = 300 :: Int
+
 

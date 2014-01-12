@@ -21,7 +21,7 @@ reportMassimo :: IO()
 reportMassimo = do
     stringZ <- readerData 
     let checkLN     = zip [0..] $ map length stringZ
-        filtered    = unwords $ map (show . fst) $ filter (\x -> snd x < 500) checkLN
+        filtered    = unwords $ map (show . fst) $ filter (\x -> snd x < stepCheck) checkLN
         messaGe     = if filtered == "" then "Everything OK" else "Check out short trajectories: " ++ filtered
     putStrLn messaGe
     let avgDihedral = map (map (\a -> read (a!!3) :: Double)) $ map (filter (\x -> x!!8=="S1")) $ transpose stringZ
