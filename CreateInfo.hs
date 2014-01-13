@@ -62,6 +62,24 @@ cutInfoFile fn steps = do
       wholefile    = unlines $ intercalate [div] [aN,rNS,rlxS,dTS,aT,energiesPop',newCoord,newOscStr,newMullChar]
   writeFile (fn ++ "CUT") wholefile 
 
+checkInfoFiles :: IO()
+checkInfoFiles = do
+  outs <- readShell $ "ls " ++ folder ++ "/*.info"
+  let outputs = lines outs
+  mapM_ checkInfoFile outputs
+
+checkInfoFile :: FilePath -> IO()
+checkInfoFile fn = do
+  cont <- readFile fn
+  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+      atomN        = read (head aN)   :: Int
+      enepop       = splitWhen (== "SUBDIVISION") ene
+      leng1        = map length enepop
+      leng2        = length $ chunksOf atomN f
+      leng3        = length g
+      leng4        = length $ chunksOf atomN h
+  print $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4]))
+
 genInfoFile :: String -> IO ()
 genInfoFile fn = do
     atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
