@@ -126,7 +126,7 @@ rotationDirections  = do
     let outputs = lines outs
     mapM_ rotationDirection outputs
 
-safeLast [] = (9999.9,"toRemove") -- 4000 is just a Double flag... 
+safeLast [] = (9999.9,"toRemove") -- 9999.9 is just a Double flag... 
 safeLast x  = last x -- obviously a dihedral cannot be 9999.9, so I use it as a filter
 
 rotationDirection fn = do
@@ -320,7 +320,7 @@ whoIsomerize :: IO()
 whoIsomerize = do
     stringZ <- readerData 
     let checkLN     = zip [0..] $ map length stringZ
-        filtered    = unwords $ map (show . fst) $ filter (\x -> snd x < 200) checkLN
+        filtered    = unwords $ map (show . fst) $ filter (\x -> snd x < stepCheck) checkLN
         messaGe     = if filtered == "" then "Everything OK" else "Check out short trajectories: " ++ filtered
     putStrLn messaGe
     let hopOrNot    = map (all (\x -> x /= "10")) $ map (map (\x-> x!!9)) stringZ 
