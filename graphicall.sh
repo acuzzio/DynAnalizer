@@ -1,4 +1,5 @@
-fn=CCCC
+echo "Wich file?"
+read fn
 
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
@@ -12,7 +13,7 @@ set xrange [0:600]
 set yrange [-270:90]
 set zrange [0:800]
 set view map
-splot "${fn}Density" u 1:2:3 w pm3d, "CCCCHOP10" u 2:3:(0) w p pt 7 ps 2 t "Hop to S0", "CCCCHOP01" u 2:3:(0) w p pt 7 ps 2 t "Hop to S1", "CCCCS1AVG" u 1:2:(0) w points
+splot "${fn}Density" u 1:2:3 w pm3d, "${fn}HOP10" u 2:3:(0) w p pt 7 ps 2 t "Hop to S0", "${fn}HOP01" u 2:3:(0) w p pt 7 ps 2 t "Hop to S1", "${fn}S1AVG" u 1:2:(0) w points
 MOROKUMA
 ###############################################
 gnuplot < gnuplot.script
@@ -26,7 +27,7 @@ set output 'averages.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 25"
 set yrange [-270:90]
 set view map
-plot "CCCCAVERAGES" u 1 t "no Isom", "" u 2 t "Isom", "" u 3 t "no Hop"
+plot "${fn}AVERAGES" u 1 t "no Isom", "" u 2 t "Isom", "" u 3 t "no Hop"
 MOROKUMA
 ###############################################
 gnuplot < gnuplot.script
