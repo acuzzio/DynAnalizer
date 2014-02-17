@@ -2,6 +2,7 @@ module GnuplotZ where
 
 import System.ShQQ
 import System.Process
+import System.Directory
 import Data.List
 import Data.List.Split
 import Control.Monad
@@ -28,9 +29,12 @@ plotEnergiesPopulation file = do
    let popEne = getEnergies dina
        dt     = getDT dina 
        rlxRoot= getStartRlxRt dina
+       eneFol = folder ++ "/EnePop"
    writeGnuplots dt rlxRoot file popEne 
+   createDirectoryIfMissing True eneFol
    system "gnuplot < gnuplotScript"
    system "rm sdafrffile* gnuplotScript"
+   system $ "mv " ++ folder ++ "/*EnergiesPopulation.png " ++ eneFol
    putStrLn $ file ++ ": done"
 
 writeGnuplots :: Double -> Int -> FilePath -> [[Double]] -> IO()
@@ -110,15 +114,18 @@ extractBAD fn atomL fun label = do
       coordS = chunksOf atomN coord
       fileN  = takeWhile (/= '.') fn
       values = map fun $ map (\x -> map ( x !!) atomLI) coordS
-      smLab  = zipWith (++) (getAtomT dina) (map show [1..])
-      rightL = label ++ " " ++ (unwords $ map (smLab!!) atomLI)
-      fnLabe = fileN ++ (filter (/= ' ') rightL) 
+      smLab  = zipWith (++) (getAtomT dina) (map show [1..])     -- [C1, C2, C3, N4, H5, C6]
+      rightL = label ++ " " ++ (unwords $ map (smLab!!) atomLI)  -- "Dihedral C1 C2 C3 N4"
+      fnLabe = fileN ++ (filter (/= ' ') rightL)                 -- "folder/traj054DihedralC1C2C3N4"
       limRan = if label == "Dihedral" then "set yrange [-180:180]\n" else ""
-      header = "set title \"" ++ rightL ++ "\"\nset xlabel \"fs\"\nset key off\nset format y \"%6.2f\"\nset output '" ++ fileN ++ (filter (/= ' ') rightL) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ limRan ++ "plot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u ($0*" ++ (fromAUtoFemtoDT (show dt)) ++ "):1 w lines"
+      pngFol = folder ++ "/" ++ (filter (/= ' ') rightL)         -- "folder/DihedralC1C2C3N4"
+      header = "set title \"" ++ rightL ++ "\"\nset xlabel \"fs\"\nset key off\nset format y \"%6.2f\"\nset output '" ++ fnLabe ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ limRan ++ "plot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u ($0*" ++ (fromAUtoFemtoDT (show dt)) ++ "):1 w lines"
   writeFile (fnLabe ++ "gnuplotScript") header
   writeFile (fnLabe ++ "GnupValues") $ unlines $ map show values
+  createDirectoryIfMissing True pngFol
   system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
   system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
+  system $ "mv " ++ fnLabe ++ ".png " ++ pngFol
   putStrLn $ fileN ++ ": done"
 
 
