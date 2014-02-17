@@ -66,6 +66,7 @@ checkInfoFiles :: IO()
 checkInfoFiles = do
   outs <- readShell $ "ls " ++ folder ++ "/*.info"
   let outputs = lines outs
+  putStrLn "A Good one of 100 step should be like [98,98,98,98,98,100,99,100]
   mapM_ checkInfoFile outputs
 
 checkInfoFile :: FilePath -> IO()
@@ -78,7 +79,7 @@ checkInfoFile fn = do
       leng2        = length $ chunksOf atomN f
       leng3        = length g
       leng4        = length $ chunksOf atomN h
-  print $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4]))
+  putStrLn $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4]))
 
 genInfoFile :: String -> IO ()
 genInfoFile fn = do
