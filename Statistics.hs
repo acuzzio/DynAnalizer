@@ -76,39 +76,45 @@ reportMassimo = do
     let sZeroOnly = map (filter (\x -> x!!8 == "S0")) stringZ
     chargeTmap sZeroOnly "S0" [0.4,0.5,0.6]
 
+-- to be used    calculateLifeTime 2  30 120            with 1 = "S0" and 2 = "S1"
 calculateLifeTime :: Int -> Int -> Int -> IO ()
 calculateLifeTime root limitFrom limitTo = do
-    tupla        <- averageLifetime root
-    let diff     = limitTo - limitFrom
-        adjTupla = take diff $ drop limitFrom tupla 
-        result   = barbattiFitting adjTupla
-    print result
+    (tupla,deltaTfs)  <- averageLifetime root
+    let diff          = limitTo - limitFrom
+        adjTupla      = take diff $ drop limitFrom tupla 
+        result        = barbattiFitting adjTupla
+--    putStrLn "\nWatch out this function calculates between STEP a and b, unless you have 1 fs = 1 step, do not use the graphic label to calculate this A.L.T.\n\n"
+    putStrLn $ "The average lifetime in state " ++ (show root) ++" according to STEP interval [" ++ (show limitFrom) ++ "-" ++ (show limitTo) ++ "] is: " ++ printZ (result * deltaTfs) ++ " fs"
 
+-- to be used with 1 = "S0" and 2 = "S1"
 graphicLifeTime :: Int -> IO ()
 graphicLifeTime root = do
-    tupla            <- averageLifetime root
+    (tupla,deltaTfs) <- averageLifetime root
     let transf (x,y) = show x ++ " " ++ show y
         fnLabe = "AverageOnState" ++ (show root)
-        header       = "set title \"" ++ folder ++ "\"\nset xlabel \"steps\"\nset key off\nset output '" ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\nplot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u 1:2 w lines"
+        header       = "set title \"" ++ folder ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output '" ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\nplot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") header
     writeFile (fnLabe ++ "GnupValues") $ unlines $ map transf tupla
     system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
 --    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
-    putStrLn $ "done"
+    putStrLn $ "file " ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png written !!"
 
 
--- this is the most accurate one, that calculates the medium popoulation to be used with root INDEX, 1 or 2
-averageLifetime :: Int -> IO [(Double, Double)]
+-- this is the most accurate one, that calculates the medium population to be used with root INDEX, 1 or 2
+--averageLifetime :: Int -> IO [(Double, Double)]
 averageLifetime state = do
     outs            <- readShell $ "ls " ++ folder ++ "/*.info"
     let outputs     = lines outs
     stinGZ          <- mapM rdInfoFile outputs
-    let energies    = map getEnergies stinGZ
+    let deltaTfs    = (getDT $ head stinGZ) * convAUtoFS  -- it is not always 1 step = 1 fs. I need to convert.
+        energies    = map getEnergies stinGZ
         rightstate  = state -1
         rightArray  = map (\x -> x!!rightstate) energies
         rightAverag = avgListaListe rightArray
-        tupla       = zip (map fromIntegral2 [1..]) rightAverag
-    return tupla
+        tupla       = zip (map fromIntegral2 [0..]) rightAverag
+--        tupla       = zip (iterate (+deltaTfs) 0) rightAverag
+    return (tupla,deltaTfs)
+
 
 -- to be used with "S1" or "S2"
 averageDynIntoState :: String -> IO [(Double, Double)]

@@ -78,8 +78,11 @@ createPlotLine (Pop,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemto
 createPlotLine (Ene,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w lines lw 4 linecolor rgb " ++ "\"" ++ c ++ "\"" ++ " t " ++ "\"" ++ d ++ "\","
 createPlotLine (Dyn,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w lp ps 1 linecolor rgb \"black\" t \"RlxRoot\""
 
+convFStoAU = 41.3414472
+convAUtoFS =  0.0241888
+
 fromAUtoFemtoDT :: String -> String
-fromAUtoFemtoDT dt = show ((read2 dt) / 41.34144728138643)
+fromAUtoFemtoDT dt = show ((read2 dt) / convFStoAU)
 
 findRlxRT a = let len           = length a
                   states        = div (len-1) 2
