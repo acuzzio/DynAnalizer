@@ -62,6 +62,34 @@ cutInfoFile fn steps = do
       wholefile    = unlines $ intercalate [div] [aN,rNS,rlxS,dTS,aT,energiesPop',newCoord,newOscStr,newMullChar]
   writeFile (fn ++ "CUT") wholefile 
 
+checkInfoFiles :: IO()
+checkInfoFiles = do
+  outs <- readShell $ "ls " ++ folder ++ "/*.info"
+  let outputs = lines outs
+  putStrLn "A Good one of 100 step should be like [98,98,98,98,98,100,99,100]"
+  putStrLn "Tully's energies/populations are STEP-2, then we have STEP geometries, STEP-1 Oscillator strength and STEP charge transfers (one for each geometry)"
+  mapM_ checkInfoFile outputs
+
+checkInfoFile :: FilePath -> IO()
+checkInfoFile fn = do
+  cont <- readFile fn
+  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+      atomN        = read (head aN)   :: Int
+      enepop       = splitWhen (== "SUBDIVISION") ene
+      leng1        = map length enepop
+      leng2        = length $ chunksOf atomN f
+      leng3        = length g
+      leng4        = length $ chunksOf atomN h
+      fstCheck     = map (\x-> head leng1 == x) leng1 -- all energies population equal?
+      sndCheck     = (head leng1) + 2 == leng2 -- STEP geometries
+      trdCheck     = (head leng1) + 1 == leng3 -- STEP-1 Oscillator strength
+      fthCheck     = (head leng1) + 2 == leng4 -- STEP charge transfers
+      allChecks    = and $ fstCheck ++ [sndCheck,trdCheck,fthCheck]
+      resultMsg    = case allChecks of
+                       True  -> " ->  That's OK !"
+                       False -> " ->  This one has problems !"
+  putStrLn $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4])) ++ " " ++ resultMsg
+
 genInfoFile :: String -> IO ()
 genInfoFile fn = do
     atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
@@ -87,6 +115,7 @@ genInfoFile fn = do
         chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
         wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
+    putStrLn $ fn ++ " done"
 
 parseTriplet :: String -> [Vec Double]
 parseTriplet = fmap (Vec .fmap (readDouble) . words) . lines

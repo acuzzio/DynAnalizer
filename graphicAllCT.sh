@@ -29,7 +29,7 @@ fi
 
 fn=$(basename $RE CCCC)
 
-
+# THIS IS THE GREEN DENSITY MAP
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
 set title "Density Map"
@@ -38,7 +38,7 @@ set terminal pngcairo size 2048,1060 enhanced font ", 25"
 set pm3d interpolate 8,8
 set palette defined (0 '#005824',  1 '#238B45',  2 '#41AE76',  3 '#66C2A4',  4 '#99D8C9',  5 '#CCECE6',  6 '#E5F5F9',  12 '#F7FCFD')
 set nokey
-set xrange [0:600]
+set xrange [0:200]
 set yrange [-270:90]
 set zrange [0:800]
 set view map
@@ -65,10 +65,13 @@ for i in TOT S0
 do
 for thr in 0.4 0.5 0.6 
 do
+
+# these are the pointed red black graphics
+
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
 set title "${thr}$i"
-set output '${i}${thr}Ct.png'
+set output '${fn}${i}${thr}Ct.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 12"
 plot "${fn}cT${thr}LO$i" u 2:4 w p pt 7 ps 1.5 linecolor rgb "black" t "CT lower than ${thr}", "${fn}cT${thr}HI$i" u 2:4 w p pt 7 ps 1.5 linecolor rgb "red" t "CT bigger than ${thr}"
 MOROKUMA
@@ -78,9 +81,8 @@ rm gnuplot.script
 ################# Figure 2 ####################
 cat > gnuplot.script << MOROKUMA
 set title "${thr}${i}Tra"
-set output 'Tra${i}${thr}Ct.png'
+set output '${fn}${i}${thr}TraCt.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 12"
-set yrange [0:200]
 plot "${fn}cT${thr}LO$i" u 1:2 w p pt 7 ps 1.5 linecolor rgb "black" t "CT lower than ${thr}", "${fn}cT${thr}HI$i" u 1:2 w p pt 7 ps 1.5 linecolor rgb "red" t "CT bigger than ${thr}"
 MOROKUMA
 ###############################################

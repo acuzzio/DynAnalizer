@@ -1,7 +1,8 @@
 #!/bin/bash
 ps=1.1
-lw=2
-range=[-360:360]
+lw=1
+range=[-540:180] # TRANS
+#range=[-360:360] # CIS
 
 if [ -z $1 ]; then
 echo ""

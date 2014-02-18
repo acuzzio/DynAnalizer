@@ -1,6 +1,8 @@
 module CalculateDAT where
 
 import System.ShQQ
+import System.Directory
+import System.Process
 import Text.Printf
 import Data.List.Split
 import Data.List
@@ -27,12 +29,14 @@ data DinamicV = DinamicV {
     ,getBlaV        :: [String]
      } deriving Show
 
+reminder="\nRemember do not put POINTs in the whole filePAth, nor NUMBERS after the LABEL number\n folder/geom001.info    -> This is right!!! \n fol.der/ge.om001.info  -> those points will mess up everything !!\n folder/geom002PT2.info -> that 2 in the namefile after the right traj label (023) will mess up everything \n Alessio, just make some CHECKS !!! come on !!!\n\n"
 
 tryCorrections = do
     outs <- readShell $ "ls " ++ folder ++ "/*.info"
     let outputs = lines outs
     a <- mapM (tryCorrection ccccList) outputs
     let stringZ = map (map words) $ map lines a
+    putStrLn reminder 
     chargeTmap stringZ "TOT" [0.4,0.5,0.6]
     writeFile (folder ++ "Corrected") $ unlines a
 
@@ -263,7 +267,11 @@ genTrajectory fn = do
       header x  = (show atomN) ++ "\n \n" ++ x
       coordsAndType = zipWith (zipWith (\x y -> x ++ " " ++ y)) (repeat atomT) coords
       divided   = concat $ map (header . unlines) coordsAndType
+      foldTraj  = folder ++ "/Trajectories"
+  createDirectoryIfMissing True foldTraj
   writeFile dynname divided
+  system $ "mv " ++ dynname ++ " " ++ foldTraj
+  putStrLn $ dynname ++ ": Done"
 
 genTrajectories :: IO()
 genTrajectories = do

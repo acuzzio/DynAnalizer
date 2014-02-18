@@ -19,6 +19,7 @@ import GnuplotZ
 
 reportMassimo :: IO()
 reportMassimo = do
+    putStrLn reminder -- reminder is a warning in file CalculateDAT.hs
     stringZ <- readerData 
     let checkLN     = zip [0..] $ map length stringZ
         filtered    = unwords $ map (show . fst) $ filter (\x -> snd x < stepCheck) checkLN
