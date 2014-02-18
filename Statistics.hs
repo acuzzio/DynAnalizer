@@ -1,6 +1,7 @@
 --import Text.Printf
 import System.ShQQ
 import System.Process
+import System.Directory
 --import Text.Printf
 --import Data.List.Split
 import Data.List
@@ -16,6 +17,18 @@ import Mapped
 import Functions
 import GnuplotZ
 
+main = do
+ let cCCCname = folder ++ "CCCC"
+ plotEnergiesPopulations
+ plotBondAngleDihedrals ccccList 
+ createDATAs
+ genTrajectories
+ reportMassimo
+ system $ "./graphicAllCT.sh " ++ cCCCname
+ tryCorrections
+ system $ "./graphicCorrectCT.sh " ++ cCCCname
+ createDirectoryIfMissing True $ folder ++ "/graphics"
+ system $ "mv " ++ folder ++ "* " ++ folder ++ "/graphics"
 
 reportMassimo :: IO()
 reportMassimo = do

@@ -71,7 +71,7 @@ do
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
 set title "${thr}$i"
-set output '${fn}${i}${thr}Ct.png'
+set output '${fn}DOTTED${i}${thr}Ct.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 12"
 plot "${fn}cT${thr}LO$i" u 2:4 w p pt 7 ps 1.5 linecolor rgb "black" t "CT lower than ${thr}", "${fn}cT${thr}HI$i" u 2:4 w p pt 7 ps 1.5 linecolor rgb "red" t "CT bigger than ${thr}"
 MOROKUMA
@@ -81,7 +81,7 @@ rm gnuplot.script
 ################# Figure 2 ####################
 cat > gnuplot.script << MOROKUMA
 set title "${thr}${i}Tra"
-set output '${fn}${i}${thr}TraCt.png'
+set output '${fn}DOTTED${i}${thr}TraCt.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 12"
 plot "${fn}cT${thr}LO$i" u 1:2 w p pt 7 ps 1.5 linecolor rgb "black" t "CT lower than ${thr}", "${fn}cT${thr}HI$i" u 1:2 w p pt 7 ps 1.5 linecolor rgb "red" t "CT bigger than ${thr}"
 MOROKUMA

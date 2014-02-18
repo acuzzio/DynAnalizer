@@ -1,8 +1,8 @@
 #!/bin/bash
 ps=1.1
 lw=1
-range=[-540:180] # TRANS
-#range=[-360:360] # CIS
+#range=[-540:180] # TRANS
+range=[-360:360] # CIS
 
 if [ -z $1 ]; then
 echo ""
@@ -45,7 +45,7 @@ value=${labels[$i]}
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
 set title "${fn} : $value"
-set output '${fn}${value}.png'
+set output '${fn}Corr${value}.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 25"
 set yrange $range
 set key off
@@ -57,11 +57,10 @@ rm gnuplot.script
 
 for thr in 0.4 0.5 0.6
 do
-value=${labels[$i]}
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
 set title "${fn} CT $thr : $value"
-set output '${fn}${value}${thr}.png'
+set output '${fn}Corr${value}${thr}.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 25"
 set yrange $range
 set key off
