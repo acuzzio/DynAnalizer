@@ -91,8 +91,9 @@ graphicLifeTime :: Int -> IO ()
 graphicLifeTime root = do
     (tupla,deltaTfs) <- averageLifetime root
     let transf (x,y) = show x ++ " " ++ show y
+        xrange = "set xrange [0:200]\nset xtics 10\nset yrange [0:1]"
         fnLabe = "AverageOnState" ++ (show root)
-        header       = "set title \"" ++ folder ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output '" ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\nplot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u 1:2 w lines"
+        header       = "set title \"" ++ folder ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output '" ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") header
     writeFile (fnLabe ++ "GnupValues") $ unlines $ map transf tupla
     system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
