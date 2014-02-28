@@ -38,6 +38,8 @@ tryCorrections = do
     let stringZ = map (map words) $ map lines a
     putStrLn reminder 
     chargeTmap stringZ "TOT" [0.4,0.5,0.6]
+    let sZeroOnly = map (filter (\x -> x!!8 == "S0")) stringZ
+    chargeTmap sZeroOnly "S0" [0.4,0.5,0.6]
     writeFile (folder ++ "Corrected") $ unlines a
 
 tryCorrection ccccList fn = do
@@ -144,13 +146,13 @@ rotationDirection fn = do
         hopOnly   = safeLast $ filter (\x -> snd x == "10") zipList
         lastEl    = last zipList
 --    print $ map fst [firstEl, hopOnly, lastEl] 
-    print $ wiseOrNot (fst hopOnly) fn
+    putStrLn $ wiseOrNot (fst hopOnly) fn
 
 wiseOrNot x fn = if x == 9999.9 
                  then fn ++ " -> " ++ "This traj did non HOP" 
                  else let 
                       y = isDihCloser x (-90) 90
-                      z = if y == 90 then "        GIU" else "SU"
+                      z = if y == 90 then "        Dx" else "Sx"
                       in fn ++ " -> " ++ z
 
 -- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 

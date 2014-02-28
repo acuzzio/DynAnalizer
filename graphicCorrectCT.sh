@@ -2,7 +2,9 @@
 ps=1.1
 lw=1
 #range=[-540:180] # TRANS
-range=[-360:360] # CIS
+yrange=[-360:360] # CIS
+
+xrange=[0:210]
 
 if [ -z $1 ]; then
 echo ""
@@ -47,7 +49,8 @@ cat > gnuplot.script << MOROKUMA
 set title "${fn} : $value"
 set output '${fn}Corr${value}.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 25"
-set yrange $range
+set yrange $yrange
+set xrange $xrange
 set key off
 plot "${fn}Corrected" u 2:$i lw $lw linecolor rgb "black" w lines, "${fn}01" u 2:$i pt 7 ps $ps w p, "${fn}10" u 2:$i pt 7 ps $ps w p
 MOROKUMA
@@ -55,6 +58,8 @@ MOROKUMA
 gnuplot < gnuplot.script
 rm gnuplot.script
 
+for typ in "TOT" "S0"
+do
 for thr in 0.4 0.5 0.6
 do
 ################# Figure 1 ####################
@@ -62,12 +67,14 @@ cat > gnuplot.script << MOROKUMA
 set title "${fn} CT $thr : $value"
 set output '${fn}Corr${value}${thr}.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 25"
-set yrange $range
+set yrange $yrange
+set xrange $xtange
 set key off
-plot "${fn}cT${thr}LOTOT" u 2:$i lw $lw linecolor rgb "black" w lines, "${fn}cT${thr}HITOT" u 2:$i lw $lw linecolor rgb "red" w lines, "${fn}10" u 2:$i pt 7 ps $ps w p , "${fn}01" u 2:$i linecolor rgb "green" pt 7 ps $ps w p
+plot "${fn}cT${thr}LO${typ}" u 2:$i lw $lw linecolor rgb "black" w lines, "${fn}cT${thr}HI${typ}" u 2:$i lw $lw linecolor rgb "red" w lines, "${fn}10" u 2:$i pt 7 ps $ps w p , "${fn}01" u 2:$i linecolor rgb "green" pt 7 ps $ps w p
 MOROKUMA
 ###############################################
 gnuplot < gnuplot.script
 rm gnuplot.script
+done
 done
 done
