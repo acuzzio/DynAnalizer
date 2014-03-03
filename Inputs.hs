@@ -21,15 +21,15 @@ module Inputs where
 --stepCheck  = 200 :: Int
 
 
-folder     = "c-CASPT2-Cis"
-chargeTrFragment = [1, 2, 3, 8, 10, 13, 14] ::[Int]
-ccccList   = [2,3,4,5] :: [Int]
-betaList   = [8,3,4,9] :: [Int]
-blaList    = [[(1,2),(3,4),(5,7)],[(2,3),(4,5)]] :: [[(Int,Int)]]
-upperLimit = 90.0 
-isomCond x = x < -90.0
-nRoot      = 2 :: Int
-stepCheck  = 198 :: Int
+--folder     = "c-CASPT2-Cis"
+--chargeTrFragment = [1, 2, 3, 8, 10, 13, 14] ::[Int]
+--ccccList   = [2,3,4,5] :: [Int]
+--betaList   = [8,3,4,9] :: [Int]
+--blaList    = [[(1,2),(3,4),(5,7)],[(2,3),(4,5)]] :: [[(Int,Int)]]
+--upperLimit = 90.0 
+--isomCond x = x < -90.0
+--nRoot      = 2 :: Int
+--stepCheck  = 198 :: Int
 
 --folder     = "d-casscf-Cis"
 --chargeTrFragment = [1, 2, 3, 8, 10, 13, 14] ::[Int]
@@ -81,4 +81,12 @@ stepCheck  = 198 :: Int
 --nRoot      = 2 :: Int
 --stepCheck  = 200 :: Int
 
-
+folder     = "f-FedeBolero"
+chargeTrFragment = [4,5,6,9,10,11,13,14,15,16] ::[Int]
+ccccList   = [2,3,4,5] :: [Int]
+betaList   = [8,3,4,9] :: [Int]
+blaList    = [[(1,2),(3,4),(5,6)],[(2,3),(4,5)]] :: [[(Int,Int)]]
+upperLimit = 90.0 
+isomCond x = x < -90.0
+nRoot      = 2 :: Int
+stepCheck  = 198 :: Int
