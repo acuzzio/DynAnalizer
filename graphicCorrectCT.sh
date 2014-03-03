@@ -65,7 +65,7 @@ do
 ################# Figure 1 ####################
 cat > gnuplot.script << MOROKUMA
 set title "${fn} CT $thr : $value"
-set output '${fn}Corr${value}${thr}${typ}.png'
+set output '${fn}Corr${value}${typ}${thr}.png'
 set terminal pngcairo size 2048,1060 enhanced font ", 25"
 set yrange $yrange
 set xrange $xrange
