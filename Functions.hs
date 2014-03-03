@@ -18,6 +18,13 @@ avgListaListe xss = map avg $ transpose xss
 
 avg xs   = (sum xs)/(fromIntegral $ length xs)
 
+devSt :: [Double] -> Double
+devSt xs = let
+  average = avg xs
+  differences = map (\x -> x - average) xs
+  l       = fromIntegral (length xs )
+  in sqrt $ (sum(map (\x-> x**2) (differences)))/l
+
 printZ x    = (printf "%.2f" x) :: String
 
 compress :: Eq a => [a] -> [a] 

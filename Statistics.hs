@@ -47,9 +47,11 @@ askFede thresh rangeL = do
        upper         = map (filter (\x -> read2 (x!!7) > thresh)) thoseThatHops
        upperLengths  = map length upper
        upperLengthsAroundHop = map length $ map (\x -> secondQuestion x rangeL thresh) thoseThatHops
+       average x     = show $ avg $ map (\y -> fromIntegral y :: Double) x
+       deviation x   = show $ devSt $ map (\y -> fromIntegral y :: Double) x
    writeFile (folder ++ "CCCC") $ writeF thoseThatHops
    chargeTmap thoseThatHops "TOT" [thresh]
-   putStrLn $ "with " ++ (show thresh) ++ " threshold\n" ++ show upperLengths ++ " " ++ "avg = " ++ show (avg $ map fromIntegral upperLengths) ++ "\n" ++ show upperLengthsAroundHop ++ " " ++ "avg = " ++ show (avg $ map fromIntegral upperLengthsAroundHop)
+   putStrLn $ "with " ++ (show thresh) ++ " threshold\n" ++ show upperLengths ++ " " ++ "avg = " ++ average upperLengths  ++ " devSt = " ++ deviation upperLengths ++ "\n" ++ show upperLengthsAroundHop ++ " " ++ "avg = " ++ average upperLengthsAroundHop ++ " devSt = " ++ deviation upperLengthsAroundHop
 
 secondQuestion onedyn rangeL thresh = let 
    indexLastHop = snd $ last $ filter (\x -> (fst x)!!9 == "10") $ zip onedyn [0..]
