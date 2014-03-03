@@ -29,6 +29,9 @@ main = do
 -- system $ "./graphicCorrectCT.sh " ++ cCCCname
 -- createDirectoryIfMissing True $ folder ++ "/graphics"
 -- system $ "mv " ++ folder ++ "* " ++ folder ++ "/graphics"
+ askFede 0.6 15
+ askFede 0.5 15
+ askFede 0.4 15
 
 readerDATA2Corr = do
    putStrLn "This funcion is why you are a sucker"
@@ -38,13 +41,23 @@ readerDATA2Corr = do
    let stringZ = map (map words) $ map lines a
    return stringZ
 
-askFede thresh = do
+askFede thresh rangeL = do
    stringZ <- readerDATA2Corr
    let thoseThatHops = filter (\x -> elem "10" $ map (\x-> x!!9) x ) stringZ
-       upper       = map (filter (\x -> read2 (x!!7) > thresh)) thoseThatHops
+       upper         = map (filter (\x -> read2 (x!!7) > thresh)) thoseThatHops
+       upperLengths  = map length upper
+       upperLengthsAroundHop = map length $ map (\x -> secondQuestion x rangeL thresh) thoseThatHops
    writeFile (folder ++ "CCCC") $ writeF thoseThatHops
    chargeTmap thoseThatHops "TOT" [thresh]
-   return $ map length upper   
+   putStrLn $ "with " ++ (show thresh) ++ " threshold\n" ++ show upperLengths ++ " " ++ "avg = " ++ show (avg $ map fromIntegral upperLengths) ++ "\n" ++ show upperLengthsAroundHop ++ " " ++ "avg = " ++ show (avg $ map fromIntegral upperLengthsAroundHop)
+
+secondQuestion onedyn rangeL thresh = let 
+   indexLastHop = snd $ last $ filter (\x -> (fst x)!!9 == "10") $ zip onedyn [0..]
+   range         = filter (\x -> x > 0 && x < stepCheck) $ [ (indexLastHop - rangeL) .. (indexLastHop + rangeL) ]
+   pointsInRange = map (\x -> onedyn !! x ) range -- do not want negative index or bigger than 200
+   upper       = filter (\x -> read2 (x!!7) > thresh) pointsInRange
+   in upper
+
 
 reportMassimo :: IO()
 reportMassimo = do
