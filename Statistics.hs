@@ -18,17 +18,33 @@ import Functions
 import GnuplotZ
 
 main = do
- let cCCCname = folder ++ "CCCC"
- plotEnergiesPopulations
- plotBondAngleDihedrals ccccList 
- createDATAs
- genTrajectories
+-- let cCCCname = folder ++ "CCCC"
+-- plotEnergiesPopulations
+-- plotBondAngleDihedrals ccccList 
+-- createDATAs
+-- genTrajectories
  reportMassimo
- system $ "./graphicAllCT.sh " ++ cCCCname
+-- system $ "./graphicAllCT.sh " ++ cCCCname
  tryCorrections
- system $ "./graphicCorrectCT.sh " ++ cCCCname
- createDirectoryIfMissing True $ folder ++ "/graphics"
- system $ "mv " ++ folder ++ "* " ++ folder ++ "/graphics"
+-- system $ "./graphicCorrectCT.sh " ++ cCCCname
+-- createDirectoryIfMissing True $ folder ++ "/graphics"
+-- system $ "mv " ++ folder ++ "* " ++ folder ++ "/graphics"
+
+readerDATA2Corr = do
+   putStrLn "This funcion is why you are a sucker"
+   outs <- readShell $ "ls " ++ folder ++ "/*.info"
+   let outputs = lines outs
+   a <- mapM (tryCorrection ccccList) outputs
+   let stringZ = map (map words) $ map lines a
+   return stringZ
+
+askFede thresh = do
+   stringZ <- readerDATA2Corr
+   let thoseThatHops = filter (\x -> elem "10" $ map (\x-> x!!9) x ) stringZ
+       upper       = map (filter (\x -> read2 (x!!7) > thresh)) thoseThatHops
+   writeFile (folder ++ "CCCC") $ writeF thoseThatHops
+   chargeTmap thoseThatHops "TOT" [thresh]
+   return $ map length upper   
 
 reportMassimo :: IO()
 reportMassimo = do
@@ -39,7 +55,6 @@ reportMassimo = do
         messaGe     = if filtered == "" then "Everything OK" else "Check out short trajectories: " ++ filtered
     putStrLn messaGe
     let avgDihedral = map (map (\a -> read (a!!3) :: Double)) $ map (filter (\x -> x!!8=="S1")) $ transpose stringZ
-        avg xs   = (sum xs)/(fromIntegral $ length xs)
         avgZip   = zip [1..] $ map avg avgDihedral -- steps starts from 1
         form (a,b) = [show a,show b]
         ccccAVG  = unlines $ take 100 $ map unwords $ map form avgZip

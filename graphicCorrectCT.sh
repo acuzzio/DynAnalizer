@@ -1,6 +1,6 @@
 #!/bin/bash
 ps=1.1
-lw=1
+lw=2
 #range=[-540:180] # TRANS
 yrange=[-360:360] # CIS
 

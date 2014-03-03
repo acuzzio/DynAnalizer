@@ -124,8 +124,6 @@ readData fn = do
     dataContent  <- readFile fn
     return $ map words $ lines dataContent
 
-fn = "h-Gabriel-planar/geom000.info"
-
 --rotationDirections :: IO()
 rotationDirections  = do
     outs <- readShell $ "ls " ++ folder ++ "/*.info"
@@ -256,7 +254,6 @@ averageSublist stringOne trajxs index thres = let
     rightTrajectories = map (stringOne !!) trajxs
     rightValue        = map (map (\x -> x!!index)) rightTrajectories
     rightFloat        = map (map (\x -> read x :: Double)) rightValue
-    avg xs   = (sum xs)/(fromIntegral $ length xs)
     in map avg $ take thres $ transpose rightFloat
 
 genTrajectory :: FilePath -> IO()
