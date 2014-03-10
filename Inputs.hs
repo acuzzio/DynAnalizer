@@ -81,7 +81,17 @@ module Inputs where
 --nRoot      = 2 :: Int
 --stepCheck  = 200 :: Int
 
-folder     = "f-FedeBolero"
+--folder     = "f-FedeBolero"
+--chargeTrFragment = [4,5,6,9,10,11,13,14,15,16] ::[Int]
+--ccccList   = [2,3,4,5] :: [Int]
+--betaList   = [8,3,4,9] :: [Int]
+--blaList    = [[(1,2),(3,4),(5,6)],[(2,3),(4,5)]] :: [[(Int,Int)]]
+--upperLimit = 90.0 
+--isomCond x = x < -90.0
+--nRoot      = 2 :: Int
+--stepCheck  = 198 :: Int
+
+folder     = "g-FedeBolero"
 chargeTrFragment = [4,5,6,9,10,11,13,14,15,16] ::[Int]
 ccccList   = [2,3,4,5] :: [Int]
 betaList   = [8,3,4,9] :: [Int]
