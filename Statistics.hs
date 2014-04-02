@@ -1,6 +1,7 @@
 --import Text.Printf
 import System.ShQQ
 import System.Process
+import System.Posix.Process (forkProcess)
 import System.Directory
 --import Text.Printf
 --import Data.List.Split
@@ -18,20 +19,20 @@ import Functions
 import GnuplotZ
 
 main = do
--- let cCCCname = folder ++ "CCCC"
--- plotEnergiesPopulations
--- plotBondAngleDihedrals ccccList 
--- createDATAs
--- genTrajectories
- reportMassimo
--- system $ "./graphicAllCT.sh " ++ cCCCname
+ let cCCCname = folder ++ "CCCC"
+ plotEnergiesPopulations
+ plotBondAngleDihedrals ccccList 
+ createDATAs
+ genTrajectories
+ reportMassimo --perFede
+ system $ "./graphicAllCT.sh " ++ cCCCname
  tryCorrections
--- system $ "./graphicCorrectCT.sh " ++ cCCCname
--- createDirectoryIfMissing True $ folder ++ "/graphics"
--- system $ "mv " ++ folder ++ "* " ++ folder ++ "/graphics"
- askFede 0.6 15
- askFede 0.5 15
- askFede 0.4 15
+ system $ "./graphicCorrectCT.sh " ++ cCCCname
+ createDirectoryIfMissing True $ folder ++ "/graphics"
+ system $ "mv " ++ folder ++ "* " ++ folder ++ "/graphics"
+ askFede 0.6 15 --perFede
+ askFede 0.5 15 --perFede
+ askFede 0.4 15 --perFede
 
 readerDATA2Corr = do
    putStrLn "This funcion is why you are a sucker"
