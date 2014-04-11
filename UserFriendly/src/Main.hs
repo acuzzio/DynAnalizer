@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Monad
+import Control.Exception
 import Data.List
 import System.Console.GetOpt
 import System.Console.ANSI
@@ -60,7 +61,8 @@ getExpression flag =
           False -> do
             a <- doesFileExist fn
             case a of
-              True     -> goIntoMenu fn
+            --  True     -> goIntoMenu fn
+              True     -> handle ((\_ -> quitNoStyle) :: SomeException -> IO ()) $ goIntoMenu fn -- if file already exists, it enters the menu
               False    -> writeInputTemplate fn
     CheckInfo folder   -> checkInfoFiles folder
 
@@ -179,6 +181,11 @@ menuLifeTimes fn = do
 
 quitWithStyle fn = do
   putStrLn "\nExiting from here...\n"
+  setSGR [Reset]
+  clearScreen
+  exitSuccess
+
+quitNoStyle = do
   setSGR [Reset]
   clearScreen
   exitSuccess
