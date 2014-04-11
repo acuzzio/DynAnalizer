@@ -1,4 +1,4 @@
-module GnuplotZ2 where
+module GnuplotZ where
 
 import System.ShQQ
 import System.Process

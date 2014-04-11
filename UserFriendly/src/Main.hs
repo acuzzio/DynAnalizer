@@ -7,10 +7,10 @@ import System.Environment (getArgs)
 import System.Exit
 import System.IO
 
-import CreateInfo2
+import CreateInfo
 import ParseInput
-import GnuplotZ2
-import CalculateDAT2
+import GnuplotZ
+--import CalculateDAT2
 
 data Flag = Help
             | CreateInfo String
@@ -63,7 +63,7 @@ getExpression flag =
 
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
-  let content = "folder     = example_info_folder                 -- Here Info foldername\nchargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\n\n"
+  let content = "folder     = o-traj1trans              -- Here Info foldername\nchargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\n\n"
   putStrLn $ "\nTemplate input file: " ++ fn ++ " written.\n"
   putStrLn "Change it as you wish, then re-run this command !! \n"
   writeFile fn content
@@ -91,6 +91,7 @@ validate s = isValid (reads s)
 choices :: [(Int, (String, (FilePath -> IO ())))]
 choices = zip [1.. ] [
    ("Create graphics of Energies and Population", createGraphsEnePop),
+   ("Create graphics of Bond, Angle or Dihedral", createGraphsBAD),
    ("Quit", quitWithStyle)
     ]
 
@@ -102,6 +103,13 @@ execute (n, fn) = let
 createGraphsEnePop fn = do
   input <- getInputInfos fn
   plotEnergiesPopulations input
+
+createGraphsBAD fn = do
+  input <- getInputInfos fn
+  putStrLn "\nPlease give me a list with atom numbers, like [1,2,3]:\n"
+  choice <- getLine
+  let a = read choice :: [Int]
+  plotBondAngleDihedrals input a
 
 quitWithStyle fn = do
   putStrLn "\nSee ya, mate !!\n"

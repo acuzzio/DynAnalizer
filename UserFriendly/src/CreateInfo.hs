@@ -1,4 +1,4 @@
-module CreateInfo2 where
+module CreateInfo where
 
 import System.ShQQ
 import Text.Printf
