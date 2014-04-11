@@ -6,17 +6,7 @@ import Text.Parsec.Combinator
 import Text.Parsec.String
 import Data.Functor.Identity
 
-data IsomType = Cis | Trans deriving (Show, Read)
-
-data Inputs = Inputs {
-     getfolder           :: String         -- Here Info foldername
-    ,getchargeTrFragment :: [Int]          -- Here list of Atom in charge transfer fraction
-    ,getccccList         :: [Int]          -- Here the central dihedral
-    ,getbetaList         :: [Int]          -- Here beta angle
-    ,getblaList          :: [[(Int,Int)]]  -- BLA list of single bonds, list of double bonds
-    ,getisomType         :: IsomType       -- This is your cutting line if you wanna shift down graphics
-    ,getnRoot            :: Int            -- This is the root number
-     } deriving Show
+import DataTypes
 
 defaul = Inputs "lol" [1] [1] [1] [[(1,1)]] Cis 3
 

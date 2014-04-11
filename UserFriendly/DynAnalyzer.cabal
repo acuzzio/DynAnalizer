@@ -51,6 +51,7 @@ executable DynAnalyzer
     , split
     , shqq
     , async
+    , ansi-terminal
 
   hs-source-dirs:      src 
   main-is: Main.hs

@@ -9,19 +9,7 @@ import Control.Monad
 import Control.Concurrent.Async
 
 import IntCoor
-
-data Dinamica = Dinamica {
-          getOutputNam   :: String,
-          getAtomN       :: Int,
-          getRootN       :: Int,
-          getStartRlxRt  :: Int,
-          getDT          :: Double,
-          getAtomT       :: [String],
-          getEnergies    :: [[Double]],
-          getCoordinates :: [Vec Double],
-          getOscStr      :: [Double],
-          getCharTran    :: [Double]
-          } deriving Show
+import DataTypes
 
 -- Creates info files from molcas output
 createInfo folder = do

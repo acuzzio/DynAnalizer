@@ -1,22 +1,21 @@
 module Main where
 
 import Control.Monad
+import Data.List
 import System.Console.GetOpt
+import System.Console.ANSI
 import System.Directory
 import System.Environment (getArgs)
 import System.Exit
 import System.IO
 
 import CreateInfo
-import ParseInput
+import DataTypes
 import GnuplotZ
---import CalculateDAT2
+import ParseInput
+import Statistics
+import Trajectories
 
-data Flag = Help
-            | CreateInfo String
-            | CheckInfo String
-            | InputFile String
-            deriving (Show, Eq)
 
 startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\nThose are the options avaiable:"
 
@@ -71,7 +70,10 @@ writeInputTemplate fn = do
 --MENUUUU
 
 goIntoMenu fn = do
-  let concatNums (i, (s, _)) = show i ++ " ) " ++ s
+  let concatNums (i, (s, _)) = " " ++ show i ++ " ) " ++ s
+  setTitle "DynAnalyzer by Alessio Valentini"
+  setSGR [SetColor Background Dull Cyan, SetConsoleIntensity BoldIntensity]
+  clearScreen
   putStrLn "\nSo here we are again. What do you want to do now ?\n"
   putStrLn . unlines $ map concatNums choices
   choice <- getLine
@@ -90,8 +92,10 @@ validate s = isValid (reads s)
 
 choices :: [(Int, (String, (FilePath -> IO ())))]
 choices = zip [1.. ] [
-   ("Create graphics of Energies and Population", createGraphsEnePop),
-   ("Create graphics of Bond, Angle or Dihedral", createGraphsBAD),
+   ("Create graphics of Energies and Population", menuGraphsEnePop),
+   ("Create graphics of Bond, Angle or Dihedral", menuGraphsBAD),
+   ("Create Trajectories folder", menuTrajectories),
+   ("I want to know lifetimes !!", menuLifeTimes),
    ("Quit", quitWithStyle)
     ]
 
@@ -100,17 +104,82 @@ execute (n, fn) = let
      doExec ((_, (_,f)):_) = f fn
      in doExec $ filter (\(i, _) -> i == n) choices
 
-createGraphsEnePop fn = do
+menuGraphsEnePop fn = do
   input <- getInputInfos fn
   plotEnergiesPopulations input
+  blockScreenTillPress
 
-createGraphsBAD fn = do
+menuGraphsBAD fn = do
   input <- getInputInfos fn
-  putStrLn "\nPlease give me a list with atom numbers, like [1,2,3]:\n"
-  choice <- getLine
-  let a = read choice :: [Int]
-  plotBondAngleDihedrals input a
+  putStrLn "\nWhich graphs do you want?\n 1 ) Central Dihedral\n 2 ) Beta\n 3 ) Other\n"
+  choice1 <- getLine
+  let a = read choice1
+  case a of
+    1 -> plotBondAngleDihedrals input $ getccccList input
+    2 -> plotBondAngleDihedrals input $ getbetaList input
+    3 -> do 
+         putStrLn "\nPlease give me a list with atom numbers, like [1,2,3]:\n"
+         choice2 <- getLine
+         let a = read choice2 :: [Int]
+         plotBondAngleDihedrals input a
+    otherwise -> do 
+                 putStrLn "\nI do not like you.\n"
+                 menuGraphsBAD fn
+  blockScreenTillPress
+
+menuTrajectories fn = do
+  input <- getInputInfos fn
+  genTrajectories input
+  blockScreenTillPress
+
+menuLifeTimes fn = do
+  input <- getInputInfos fn
+  let nRoot = getnRoot input
+  putStrLn "\nDo you know the range already or you want to print the graphic?\n\n 1 ) Graphic, please\n 2 ) Yes, I know the range\n"
+  choice1 <- getLine
+  let a = read choice1
+  case a of
+    1 -> do
+         let menu = intercalate "\n" $ map (\x -> " " ++ (show x) ++ " ) Graphic of lifetime in S" ++ (show $ pred x)) [1..nRoot]
+         putStrLn $ "\nWhich Root?\n\n" ++ menu ++ "\n"
+         choice2 <- getLine
+         let b = read choice2 :: Int
+         if b `elem` [1..nRoot] 
+            then do
+              graphicLifeTime input b
+              blockScreenTillPress
+            else do
+              putStrLn "\nI do not like you.\n"
+              menuLifeTimes fn
+    2 -> do
+         let menu = intercalate "\n" $ map (\x -> " " ++ (show x) ++ " ) S" ++ (show $ pred x)) [1..nRoot]
+         putStrLn $ "\nWhich Root?\n\n" ++ menu ++ "\n"
+         choice3 <- getLine
+         let c = read choice3 :: Int
+         if c `elem` [1..nRoot]
+            then do
+              putStrLn $ "\nAt which step does that exponential curve start?\n"
+              choice4 <- getLine
+              let d = read choice4 :: Int
+              putStrLn $ "\nAt which step does it finish?\n"
+              choice5 <- getLine
+              let e = read choice5 :: Int
+              calculateLifeTime input c d e
+              blockScreenTillPress
+            else do
+              putStrLn "\nI do not like you.\n"
+              menuLifeTimes fn
+    otherwise -> do
+                 putStrLn "\nI do not like you.\n"
+                 menuLifeTimes fn
 
 quitWithStyle fn = do
-  putStrLn "\nSee ya, mate !!\n"
+  putStrLn "\nExiting from here...\n"
+  setSGR [Reset]
+  clearScreen
   exitSuccess
+
+blockScreenTillPress = do
+  putStrLn "\nPress ENTER to go back to main menu..."
+  choice2 <- getLine
+  return ()

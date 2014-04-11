@@ -14,8 +14,7 @@ import CreateInfo
 import IntCoor
 import Functions
 import ParseInput
-
-data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
+import DataTypes
 
 plotEnergiesPopulations :: Inputs -> IO ()
 plotEnergiesPopulations inputs = do
@@ -80,9 +79,6 @@ createPlotLine :: (PlotType, String, String) -> FilePath -> String -> String
 createPlotLine (Pop,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 axes x1y2 w filledcurves x1 lt 1 lc rgb " ++ "\"" ++ c ++ "\"" ++ " t '" ++ d ++ " Population',"
 createPlotLine (Ene,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w lines lw 4 linecolor rgb " ++ "\"" ++ c ++ "\"" ++ " t " ++ "\"" ++ d ++ "\","
 createPlotLine (Dyn,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w lp ps 1 linecolor rgb \"black\" t \"RlxRoot\""
-
-convFStoAU = 41.3414472
-convAUtoFS =  0.0241888
 
 fromAUtoFemtoDT :: String -> String
 fromAUtoFemtoDT dt = show ((read2 dt) / convFStoAU)
