@@ -54,6 +54,10 @@ getExpression flag =
   case flag of
     CreateInfo folder -> createInfo folder
     InputFile fn      -> do
+       aa <- doesDirectoryExist fn
+       case aa of
+          True -> do putStrLn "\nDo not use the same name as an existing folder!! \n" >> exitSuccess
+          False -> do
             a <- doesFileExist fn
             case a of
               True     -> goIntoMenu fn
@@ -92,9 +96,9 @@ validate s = isValid (reads s)
 
 choices :: [(Int, (String, (FilePath -> IO ())))]
 choices = zip [1.. ] [
-   ("Create graphics of Energies and Population", menuGraphsEnePop),
-   ("Create graphics of Bond, Angle or Dihedral", menuGraphsBAD),
-   ("Create Trajectories folder", menuTrajectories),
+   ("I want to see the graphics of Energies and Population", menuGraphsEnePop),
+   ("I want a graphic of a Bond, an Angle or a Dihedral", menuGraphsBAD),
+   ("I want to see Trajectories !", menuTrajectories),
    ("I want to know lifetimes !!", menuLifeTimes),
    ("Quit", quitWithStyle)
     ]

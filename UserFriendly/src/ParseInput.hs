@@ -3,7 +3,8 @@ module ParseInput where
 import Data.Char
 import Text.Parsec
 import Text.Parsec.Combinator
-import Text.Parsec.String
+--import Text.Parsec.String
+import Text.Parsec.ByteString -- Felipe suggested
 import Data.Functor.Identity
 
 import DataTypes
