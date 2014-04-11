@@ -9,14 +9,16 @@ import Data.Functor.Identity
 data IsomType = Cis | Trans deriving (Show, Read)
 
 data Inputs = Inputs {
-     folder           :: String         -- Here Info foldername
-    ,chargeTrFragment :: [Int]          -- Here list of Atom in charge transfer fraction
-    ,ccccList         :: [Int]          -- Here the central dihedral
-    ,betaList         :: [Int]          -- Here beta angle
-    ,blaList          :: [[(Int,Int)]]  -- BLA list of single bonds, list of double bonds
-    ,isomType         :: IsomType       -- This is your cutting line if you wanna shift down graphics
-    ,nRoot            :: Int            -- This is the root number
+     getfolder           :: String         -- Here Info foldername
+    ,getchargeTrFragment :: [Int]          -- Here list of Atom in charge transfer fraction
+    ,getccccList         :: [Int]          -- Here the central dihedral
+    ,getbetaList         :: [Int]          -- Here beta angle
+    ,getblaList          :: [[(Int,Int)]]  -- BLA list of single bonds, list of double bonds
+    ,getisomType         :: IsomType       -- This is your cutting line if you wanna shift down graphics
+    ,getnRoot            :: Int            -- This is the root number
      } deriving Show
+
+defaul = Inputs "lol" [1] [1] [1] [[(1,1)]] Cis 3
 
 getUpperAndIsomCond :: IsomType -> (Double, (Double -> Bool))
 getUpperAndIsomCond a = case a of
@@ -26,8 +28,8 @@ getUpperAndIsomCond a = case a of
 getInputInfos file = do
    r <- parseFromFile parseInput file
    case r of  
-     Left msg -> print msg 
-     Right x  -> print x
+     Left msg -> return defaul 
+     Right x  -> return x
 
 parseInput = do
  a <- parseLine "folder"
