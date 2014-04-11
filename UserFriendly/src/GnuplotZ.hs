@@ -10,7 +10,7 @@ import Text.Parsec
 import Text.ParserCombinators.Parsec (parseFromFile)
 import Data.Functor.Identity
 
-import CreateInfo2
+import CreateInfo
 import IntCoor
 import Functions
 import ParseInput
@@ -100,6 +100,7 @@ plotBondAngleDihedrals inputs xs = do
    a <- readShell $ "ls " ++ folder ++ "/*.info"
    let files = lines a        
    mapM_ (\x -> plotBondAngleDihedral inputs x xs) files
+   putStrLn $ "\nYu can find those graphs into folder: " ++ folder ++ "\n"
 
 plotBondAngleDihedral :: Inputs -> FilePath -> [Int] -> IO()
 plotBondAngleDihedral inputs fn xs = do
