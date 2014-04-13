@@ -99,7 +99,7 @@ validate s = isValid (reads s)
 choices :: [(Int, (String, (FilePath -> IO ())))]
 choices = zip [1.. ] [
    ("I want to see the graphics of Energies and Population", menuGraphsEnePop),
-   ("I want a graphic of a Bond, an Angle or a Dihedral", menuGraphsBAD),
+   ("I want a graphic of a Bond, an Angle or a Dihedral angle", menuGraphsBAD),
    ("I want to see Trajectories !", menuTrajectories),
    ("I want to know lifetimes !!", menuLifeTimes),
    ("Quit", quitWithStyle)
@@ -179,15 +179,18 @@ menuLifeTimes fn = do
                  putStrLn "\nI do not like you.\n"
                  menuLifeTimes fn
 
+byeString="\nDynAnalyzer - by AcuZZio\n"
+
 quitWithStyle fn = do
-  putStrLn "\nExiting from here...\n"
   setSGR [Reset]
   clearScreen
+  putStrLn $ byeString ++ "\nThanks !!\n"
   exitSuccess
 
 quitNoStyle = do
   setSGR [Reset]
   clearScreen
+  putStrLn $ byeString ++ "\nRemember, it was your fault, not mine.\n"
   exitSuccess
 
 blockScreenTillPress = do
