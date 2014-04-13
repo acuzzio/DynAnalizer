@@ -62,17 +62,9 @@ getExpression flag =
           False -> do
             a <- doesFileExist fn
             case a of
-            --  True     -> goIntoMenu fn --`catch` handler
-            --  True     -> goIntoMenu --fn `catch` handler
-            --  True     -> handle ((\_ -> quitNoStyle) :: SomeException -> IO ()) $ goIntoMenu fn -- if file already exists, it enters the menu
               True     -> handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fn -- if file already exists, it enters the menu
               False    -> writeInputTemplate fn
     CheckInfo folder   -> checkInfoFiles folder
-
---handler :: IOError -> IO ()  
---handler e 
---     | 
---     | otherwise = ioError e 
 
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
@@ -113,7 +105,6 @@ choices = zip [1.. ] [
    ("Quit", quitWithStyle)
     ]
 
---execute :: (Int,FilePath) -> IO ()
 execute (n, fn) = let     
      doExec ((_, (_,f)):_) = f fn
      in doExec $ filter (\(i, _) -> i == n) choices
@@ -192,7 +183,7 @@ byeString="\nDynAnalyzer - by AcuZZio\n"
 quitWithStyle fn = do
   setSGR [Reset]
   clearScreen
-  putStrLn $ byeString ++ "\nThanks !!\n"
+  putStrLn $ byeString ++ "\nBye Bye !!\n"
   exitSuccess
 
 quitNoStyle = do
