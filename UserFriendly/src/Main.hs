@@ -9,6 +9,7 @@ import System.Directory
 import System.Environment (getArgs)
 import System.Exit
 import System.IO
+import System.IO.Error
 
 import CreateInfo
 import DataTypes
@@ -61,10 +62,17 @@ getExpression flag =
           False -> do
             a <- doesFileExist fn
             case a of
-            --  True     -> goIntoMenu fn
-              True     -> handle ((\_ -> quitNoStyle) :: SomeException -> IO ()) $ goIntoMenu fn -- if file already exists, it enters the menu
+            --  True     -> goIntoMenu fn --`catch` handler
+            --  True     -> goIntoMenu --fn `catch` handler
+            --  True     -> handle ((\_ -> quitNoStyle) :: SomeException -> IO ()) $ goIntoMenu fn -- if file already exists, it enters the menu
+              True     -> handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fn -- if file already exists, it enters the menu
               False    -> writeInputTemplate fn
     CheckInfo folder   -> checkInfoFiles folder
+
+--handler :: IOError -> IO ()  
+--handler e 
+--     | 
+--     | otherwise = ioError e 
 
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
