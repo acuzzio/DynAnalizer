@@ -33,13 +33,14 @@ graphicLifeTime input root = do
         transf (x,y) = show x ++ " " ++ show y
 --        xrange = "set xrange [0:200]\nset xtics 10\nset yrange [0:1]"
         xrange = "set xtics 10\nset yrange [0:1]"
-        fnLabe = folder ++ "/AverageOnState" ++ (show root)
-        header       = "set title \"" ++ folder ++ " Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output '" ++ folder ++ "/AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
+       -- fnLabe = folder ++ "/AverageOnState" ++ (show root)
+        fnLabe = "AverageOnState" ++ (show root)
+        header       = "set title \"Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output 'AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") header
     writeFile (fnLabe ++ "gnuplotValues") $ unlines $ map transf tupla
     system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
 --    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
-    putStrLn $ "\nFile " ++ folder ++ "/AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"
+    putStrLn $ "\nFile AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"
 
 
 -- this is the most accurate one, that calculates the average population to be used with root INDEX, 1 or 2

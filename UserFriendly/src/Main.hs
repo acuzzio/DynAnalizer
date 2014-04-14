@@ -63,7 +63,7 @@ getExpression flag =
         --  True -> do goIntoMenu fn
           False -> do
               createDirectory fn
-              putStrLn $ "Folder " ++ fn ++ " does not exist. So I created it.\n"
+              putStrLn $ "\nFolder " ++ fn ++ " does not exist. So I created it.\n"
               createDirectory $ fn ++ "/INFO"
               writeInputTemplate $ fn ++ "/input"
               putStrLn $ "\nNow you should copy your info files into folder " ++ fn ++ "/INFO/ and modify " ++ fn ++ "/input according to your system\n"
@@ -72,7 +72,7 @@ getExpression flag =
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
   let content = "chargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\n\n"
-  putStrLn $ "\nTemplate input file: " ++ fn ++ " written.\n"
+  putStrLn $ "Template input file: " ++ fn ++ " written."
   writeFile fn content
 
 --MENUUUU
