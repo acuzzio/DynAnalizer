@@ -81,6 +81,7 @@ goIntoMenu fn = do
   setTitle "DynAnalyzer by AcuZZio"
   setSGR [SetColor Background Dull Cyan, SetConsoleIntensity BoldIntensity]
   clearScreen
+  curDir <- getCurrentDirectory
   setCurrentDirectory fn
   inputFile <- getInputInfos "input"
   let input = inputFile { getfolder = fn }
@@ -91,6 +92,7 @@ goIntoMenu fn = do
   case validate choice of
        Just n  -> execute (read $ choice, input)
        Nothing -> putStrLn "This option does not exist !!\n"
+  setCurrentDirectory curDir
   goIntoMenu fn
 
 validate :: String -> Maybe Int
