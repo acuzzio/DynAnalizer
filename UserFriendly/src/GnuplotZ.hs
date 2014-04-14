@@ -95,7 +95,7 @@ plotBondAngleDihedrals inputs xs = do
    a <- readShell $ "ls INFO/*.info"
    let files = lines a        
    mapM_ (\x -> plotBondAngleDihedral inputs x xs) files
-   putStrLn $ "\nYu can find those graphs into folder: " ++ folder ++ "\n"
+   putStrLn $ "\nYou can find those graphs into folder: " ++ folder ++ "/\n"
 
 plotBondAngleDihedral :: Inputs -> FilePath -> [Int] -> IO()
 plotBondAngleDihedral inputs fn xs = do
