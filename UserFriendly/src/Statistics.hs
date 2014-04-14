@@ -19,8 +19,8 @@ calculateLifeTime input root limitFrom limitTo = do
         adjTupla      = take diff $ drop limitFrom tupla
         result        = barbattiFitting adjTupla
 --    putStrLn "\nWatch out this function calculates between STEP a and b, unless you have 1 fs = 1 step, do not use the graphic label to calculate this A.L.T.\n\n"
-        stringToWrite = "\n\nThe average lifetime in state " ++ (show root) ++" according to STEP interval [" ++ (show limitFrom) ++ "-" ++ (show limitTo) ++ "] is: " ++ printZ (result * deltaTfs) ++ " fs"
-        fileToWriteN  = folder ++ "LifeTimeIn" ++ (show root)  
+        stringToWrite = "\n\nThe average lifetime in state " ++ (show root) ++" according to STEP interval [" ++ (show limitFrom) ++ "-" ++ (show limitTo) ++ "] is: " ++ printZ (result * deltaTfs) ++ " fs\n"
+        fileToWriteN  = folder ++ "/LifeTimeIn" ++ (show root)  
     putStrLn stringToWrite
     writeFile fileToWriteN stringToWrite
     putStrLn $ "\nThis information has been written into file: " ++ fileToWriteN ++ "\n"
@@ -31,21 +31,22 @@ graphicLifeTime input root = do
     (tupla,deltaTfs) <- averageLifetime input root
     let folder = getfolder input
         transf (x,y) = show x ++ " " ++ show y
-        xrange = "set xrange [0:200]\nset xtics 10\nset yrange [0:1]"
-        fnLabe = folder ++ "AverageOnState" ++ (show root)
-        header       = "set title \"" ++ folder ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output '" ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
+--        xrange = "set xrange [0:200]\nset xtics 10\nset yrange [0:1]"
+        xrange = "set xtics 10\nset yrange [0:1]"
+        fnLabe = folder ++ "/AverageOnState" ++ (show root)
+        header       = "set title \"" ++ folder ++ " Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output '" ++ folder ++ "/AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") header
     writeFile (fnLabe ++ "gnuplotValues") $ unlines $ map transf tupla
     system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
 --    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
-    putStrLn $ "\nFile " ++ folder ++ "AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"
+    putStrLn $ "\nFile " ++ folder ++ "/AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"
 
 
--- this is the most accurate one, that calculates the medium population to be used with root INDEX, 1 or 2
+-- this is the most accurate one, that calculates the average population to be used with root INDEX, 1 or 2
 --averageLifetime :: Int -> IO [(Double, Double)]
 averageLifetime input state = do
     let folder = getfolder input
-    outs            <- readShell $ "ls " ++ folder ++ "/*.info"
+    outs            <- readShell $ "ls INFO/*.info"
     let outputs     = lines outs
     stinGZ          <- mapM rdInfoFile outputs
     let deltaTfs    = (getDT $ head stinGZ) * convAUtoFS  -- it is not always 1 step = 1 fs. I need to convert.

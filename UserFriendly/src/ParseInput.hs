@@ -23,8 +23,6 @@ getInputInfos file = do
      Right x  -> return x
 
 parseInput = do
- a <- parseLine "folder"
- manyTill anyChar eoL 
  b <- parseLine "chargeTrFragment"
  manyTill anyChar eoL 
  let b1 = read b :: [Int]
@@ -43,7 +41,7 @@ parseInput = do
  g <- parseLine "nRoot"            
  manyTill anyChar eoL 
  let g1 = read g :: Int
- return $ Inputs a b1 c1 d1 e1 f1 g1
+ return $ Inputs "itWillBeReplacedByfn" b1 c1 d1 e1 f1 g1
 
 parseLine label = do
    many spaces2

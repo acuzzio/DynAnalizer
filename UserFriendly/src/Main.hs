@@ -10,6 +10,7 @@ import System.Environment (getArgs)
 import System.Exit
 import System.IO
 import System.IO.Error
+import System.ShQQ
 
 import CreateInfo
 import DataTypes
@@ -18,6 +19,19 @@ import ParseInput
 import Statistics
 import Trajectories
 
+
+main :: IO()
+main = do
+  gotArgs <- getArgs
+  if gotArgs == [] 
+     then do
+       useMessage
+     else do
+       (flags,args,_) <- return $ getOpt RequireOrder options gotArgs
+       when (Help `elem` flags) $ useMessage >> exitSuccess
+       mapM_ getExpression flags
+  
+useMessage = putStrLn $ usageInfo startMessage options
 
 startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\nThose are the options avaiable:"
 
@@ -32,59 +46,50 @@ options = [
    Option "C" ["CheckInfo"]
      (ReqArg CheckInfo "FOLDERNAME")
      "it checks for consistency in info files inside specified folder",
-   Option "i" ["input"]
-     (ReqArg InputFile "INPUTFILE")
-     "It will run the program using this input file. In case it does not exist, a template file will be created"
+   Option "f" ["folder"]
+     (ReqArg InputFile "ProjectFolder")
+     "It will run the program using the information into FOLDER. In case it does not exist, a template one will be created"
    ]
-
-useMessage = putStrLn $ usageInfo startMessage options
-
-main :: IO()
-main = do
-  gotArgs <- getArgs
-  if gotArgs == [] 
-     then do
-       useMessage
-     else do
-       (flags,args,_) <- return $ getOpt RequireOrder options gotArgs
-       when (Help `elem` flags) $ useMessage >> exitSuccess
-       mapM_ getExpression flags
-  
 
 getExpression :: Flag -> IO ()
 getExpression flag = 
   case flag of
     CreateInfo folder -> createInfo folder
-    InputFile fn      -> do
+    InputFile fnn     -> do
+       let fn = if (last fnn == '/') then init fnn else fnn
        aa <- doesDirectoryExist fn
        case aa of
-          True -> do putStrLn "\nDo not use the same name as an existing folder!! \n" >> exitSuccess
+          True -> do handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fn
+        --  True -> do goIntoMenu fn
           False -> do
-            a <- doesFileExist fn
-            case a of
-              True     -> handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fn -- if file already exists, it enters the menu
-              False    -> writeInputTemplate fn
+              createDirectory fn
+              putStrLn $ "Folder " ++ fn ++ " does not exist. So I created it.\n"
+              createDirectory $ fn ++ "/INFO"
+              writeInputTemplate $ fn ++ "/input"
+              putStrLn $ "\nNow you should copy your info files into folder " ++ fn ++ "/INFO/ and modify " ++ fn ++ "/input according to your system\n"
     CheckInfo folder   -> checkInfoFiles folder
 
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
-  let content = "folder     = o-traj1trans              -- Here Info foldername\nchargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\n\n"
+  let content = "chargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\n\n"
   putStrLn $ "\nTemplate input file: " ++ fn ++ " written.\n"
-  putStrLn "Change it as you wish, then re-run this command !! \n"
   writeFile fn content
 
 --MENUUUU
-
 goIntoMenu fn = do
   let concatNums (i, (s, _)) = " " ++ show i ++ " ) " ++ s
-  setTitle "DynAnalyzer by Alessio Valentini"
+  setTitle "DynAnalyzer by AcuZZio"
   setSGR [SetColor Background Dull Cyan, SetConsoleIntensity BoldIntensity]
   clearScreen
+  setCurrentDirectory fn
+  inputFile <- getInputInfos "input"
+  let input = inputFile { getfolder = fn }
+--  checkFolder fn
   putStrLn "\nSo here we are again. What do you want to do now ?\n"
   putStrLn . unlines $ map concatNums choices
   choice <- getLine
   case validate choice of
-       Just n  -> execute (read $ choice, fn)
+       Just n  -> execute (read $ choice, input)
        Nothing -> putStrLn "This option does not exist !!\n"
   goIntoMenu fn
 
@@ -96,7 +101,7 @@ validate s = isValid (reads s)
                | otherwise     = Just n
          outOfBounds n = (n < 1) || (n > length choices)
 
-choices :: [(Int, (String, (FilePath -> IO ())))]
+choices :: [(Int, (String, (Inputs -> IO ())))]
 choices = zip [1.. ] [
    ("I want to see the graphics of Energies and Population", menuGraphsEnePop),
    ("I want a graphic of a Bond, an Angle or a Dihedral angle", menuGraphsBAD),
@@ -105,17 +110,23 @@ choices = zip [1.. ] [
    ("Quit", quitWithStyle)
     ]
 
-execute (n, fn) = let     
-     doExec ((_, (_,f)):_) = f fn
+execute (n, input) = let     
+     doExec ((_, (_,f)):_) = f input
      in doExec $ filter (\(i, _) -> i == n) choices
 
-menuGraphsEnePop fn = do
-  input <- getInputInfos fn
+checkFolder folder = do
+  infos <- readShell $ "ls " ++ folder ++ "INFO/*.info"
+  let infosNames = lines infos
+      infosNum   = length infosNames
+  case infosNum of
+    0 -> putStrLn $ "I did not find any Info files into " ++ folder ++ " folder !"
+    otherwise -> putStrLn $ "I found " ++ show infosNum ++ " info files into " ++ folder ++ " folder."
+
+menuGraphsEnePop input = do
   plotEnergiesPopulations input
   blockScreenTillPress
 
-menuGraphsBAD fn = do
-  input <- getInputInfos fn
+menuGraphsBAD input = do
   putStrLn "\nWhich graphs do you want?\n 1 ) Central Dihedral\n 2 ) Beta\n 3 ) Other\n"
   choice1 <- getLine
   let a = read choice1
@@ -129,16 +140,14 @@ menuGraphsBAD fn = do
          plotBondAngleDihedrals input a
     otherwise -> do 
                  putStrLn "\nI do not like you.\n"
-                 menuGraphsBAD fn
+                 menuGraphsBAD input
   blockScreenTillPress
 
-menuTrajectories fn = do
-  input <- getInputInfos fn
+menuTrajectories input = do
   genTrajectories input
   blockScreenTillPress
 
-menuLifeTimes fn = do
-  input <- getInputInfos fn
+menuLifeTimes input = do
   let nRoot = getnRoot input
   putStrLn "\nDo you know the range already or you want to print the graphic?\n\n 1 ) Graphic, please\n 2 ) Yes, I know the range\n"
   choice1 <- getLine
@@ -155,7 +164,7 @@ menuLifeTimes fn = do
               blockScreenTillPress
             else do
               putStrLn "\nI do not like you.\n"
-              menuLifeTimes fn
+              menuLifeTimes input
     2 -> do
          let menu = intercalate "\n" $ map (\x -> " " ++ (show x) ++ " ) S" ++ (show $ pred x)) [1..nRoot]
          putStrLn $ "\nWhich Root?\n\n" ++ menu ++ "\n"
@@ -173,14 +182,14 @@ menuLifeTimes fn = do
               blockScreenTillPress
             else do
               putStrLn "\nI do not like you.\n"
-              menuLifeTimes fn
+              menuLifeTimes input
     otherwise -> do
                  putStrLn "\nI do not like you.\n"
-                 menuLifeTimes fn
+                 menuLifeTimes input
 
 byeString="\nDynAnalyzer - by AcuZZio\n"
 
-quitWithStyle fn = do
+quitWithStyle input = do
   setSGR [Reset]
   clearScreen
   putStrLn $ byeString ++ "\nBye Bye !!\n"

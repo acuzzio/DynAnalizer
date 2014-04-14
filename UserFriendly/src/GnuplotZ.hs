@@ -18,25 +18,24 @@ import DataTypes
 
 plotEnergiesPopulations :: Inputs -> IO ()
 plotEnergiesPopulations inputs = do
-       let folder = getfolder inputs 
-       a <- readShell $ "ls " ++ folder ++ "/*.info"
+       let folder = getfolder inputs
+       a <- readShell $ "ls INFO/*.info"
        let files = lines a
        mapM_ (plotEnergiesPopulation inputs) files
-       putStrLn $ "\nYou can find those graphics into folder: " ++ folder ++ "/EnePop\n"
+       putStrLn $ "\nYou can find those graphics into: " ++ folder ++ "/EnePop\n"
 
 plotEnergiesPopulation :: Inputs -> FilePath -> IO ()
 plotEnergiesPopulation inputs file = do
-   let folder = getfolder inputs
    dina <- rdInfoFile file
    let popEne = getEnergies dina
        dt     = getDT dina 
        rlxRoot= getStartRlxRt dina
-       eneFol = folder ++ "/EnePop"
+       eneFol = "EnePop"
    writeGnuplots dt rlxRoot file popEne 
    createDirectoryIfMissing True eneFol
    system "gnuplot < gnuplotScript"
    system "rm sdafrffile* gnuplotScript"
-   system $ "mv " ++ folder ++ "/*EnergiesPopulation.png " ++ eneFol
+   system $ "mv INFO/*EnergiesPopulation.png " ++ eneFol
    putStrLn $ file ++ ": done"
 
 writeGnuplots :: Double -> Int -> FilePath -> [[Double]] -> IO()
@@ -93,7 +92,7 @@ findRlxRT a = let len           = length a
 plotBondAngleDihedrals :: Inputs -> [Int] -> IO()
 plotBondAngleDihedrals inputs xs = do
    let folder = getfolder inputs
-   a <- readShell $ "ls " ++ folder ++ "/*.info"
+   a <- readShell $ "ls INFO/*.info"
    let files = lines a        
    mapM_ (\x -> plotBondAngleDihedral inputs x xs) files
    putStrLn $ "\nYu can find those graphs into folder: " ++ folder ++ "\n"
@@ -123,7 +122,7 @@ extractBAD inputs fn atomL fun label = do
       rightL = label ++ " " ++ (unwords $ map (smLab!!) atomLI)  -- "Dihedral C1 C2 C3 N4"
       fnLabe = fileN ++ (filter (/= ' ') rightL)                 -- "folder/traj054DihedralC1C2C3N4"
       limRan = if label == "Dihedral" then "set yrange [-180:180]\n" else ""
-      pngFol = folder ++ "/" ++ (filter (/= ' ') rightL)         -- "folder/DihedralC1C2C3N4"
+      pngFol = filter (/= ' ') rightL         -- "DihedralC1C2C3N4"
       header = "set title \"" ++ rightL ++ "\"\nset xlabel \"fs\"\nset key off\nset format y \"%6.2f\"\nset output '" ++ fnLabe ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ limRan ++ "plot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u ($0*" ++ (fromAUtoFemtoDT (show dt)) ++ "):1 w lines"
   writeFile (fnLabe ++ "gnuplotScript") header
   writeFile (fnLabe ++ "GnupValues") $ unlines $ map show values

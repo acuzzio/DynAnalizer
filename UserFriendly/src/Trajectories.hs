@@ -21,7 +21,7 @@ genTrajectory input fn = do
       header x  = (show atomN) ++ "\n \n" ++ x
       coordsAndType = zipWith (zipWith (\x y -> x ++ " " ++ y)) (repeat atomT) coords
       divided   = concat $ map (header . unlines) coordsAndType
-      foldTraj  = folder ++ "/Trajectories"
+      foldTraj  = "Trajectories"
   createDirectoryIfMissing True foldTraj
   writeFile dynname divided
   system $ "mv " ++ dynname ++ " " ++ foldTraj
@@ -30,7 +30,7 @@ genTrajectory input fn = do
 genTrajectories :: Inputs -> IO()
 genTrajectories input = do
    let folder = getfolder input
-   outs <- readShell $ "ls " ++ folder ++ "/*.info"
+   outs <- readShell $ "ls INFO/*.info"
    let outputs = lines outs
    mapM_ (genTrajectory input) outputs
    putStrLn $ "\nTrajectories extracted into folder: " ++ folder ++ "/Trajectories\n"
