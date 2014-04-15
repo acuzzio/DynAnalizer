@@ -12,6 +12,7 @@ import System.IO
 import System.IO.Error
 import System.ShQQ
 
+import CalculateData
 import CreateInfo
 import DataTypes
 import GnuplotZ
@@ -71,7 +72,7 @@ getExpression flag =
 
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
-  let content = "chargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\n\n"
+  let content = "chargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\ndataPlot   = [Cccc, CcccCorrected, Beta, BetaCorrected, Tau, Delta, Bla, Ct, Root, Jump]\n\n"
   putStrLn $ "Template input file: " ++ fn ++ " written."
   writeFile fn content
 
@@ -109,6 +110,7 @@ choices = zip [1.. ] [
    ("I want a graphic of a Bond, an Angle or a Dihedral angle", menuGraphsBAD),
    ("I want to see Trajectories !", menuTrajectories),
    ("I want to know lifetimes !!", menuLifeTimes),
+   ("I want to create DATA files !!", menuData),
    ("Quit", quitWithStyle)
     ]
 
@@ -188,6 +190,10 @@ menuLifeTimes input = do
     otherwise -> do
                  putStrLn "\nI do not like you.\n"
                  menuLifeTimes input
+
+menuData input = do
+  createDATAs input  
+  blockScreenTillPress
 
 byeString="\nDynAnalyzer - by AcuZZio\n"
 

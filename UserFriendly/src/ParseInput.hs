@@ -9,7 +9,8 @@ import Data.Functor.Identity
 
 import DataTypes
 
-defaul = Inputs "lol" [1] [1] [1] [[(1,1)]] Cis 3
+dataplot = [Cccc, CcccCorrected, Beta, BetaCorrected, Tau, Delta, Bla, Ct, Root, Jump]
+defaul = Inputs "lol" [1] [1] [1] [[(1,1)]] Cis 3 dataplot
 
 getUpperAndIsomCond :: IsomType -> (Double, (Double -> Bool))
 getUpperAndIsomCond a = case a of
@@ -41,7 +42,10 @@ parseInput = do
  g <- parseLine "nRoot"            
  manyTill anyChar eoL 
  let g1 = read g :: Int
- return $ Inputs "itWillBeReplacedByfn" b1 c1 d1 e1 f1 g1
+ h <- parseLine "dataPlot"    
+ manyTill anyChar eoL 
+ let h1 = read h :: [Plottable]
+ return $ Inputs "itWillBeReplacedByfn" b1 c1 d1 e1 f1 g1 h1
 
 parseLine label = do
    many spaces2

@@ -1,0 +1,5 @@
+check points in filepath, or numbers after the traj number.
+check if info files EXISTS into folder
+check for dyns smaller than averages
+yo, guarda che hai il NUMERO DI ROOT sia da mettere come input che parseato negli input, dagli una guardata
+nel parser non sono ammessi SPAZI nelle liste, okkio... [3,4,5,6] va bene [3 , 4 , 5] NO

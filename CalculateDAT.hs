@@ -64,6 +64,7 @@ tryCorrection ccccList fn = do
         dynV      = [(pw dynN), (pw stepN), (pr ccccV), (pr betaV), (pr tauV), (pr deltaV), (pr blaV), (pr cT), isS1, justHop]
     return $ unlines $ map unwords $ transpose dynV
 
+corrDihedro3 :: [Double] -> [Double]
 corrDihedro3 dihedList = let
    firstDih = head dihedList
    corr  x  = corrDihedro $ corrDihedro x
