@@ -20,7 +20,7 @@ calculateLifeTime input root limitFrom limitTo = do
         result        = barbattiFitting adjTupla
 --    putStrLn "\nWatch out this function calculates between STEP a and b, unless you have 1 fs = 1 step, do not use the graphic label to calculate this A.L.T.\n\n"
         stringToWrite = "\n\nThe average lifetime in state " ++ (show root) ++" according to STEP interval [" ++ (show limitFrom) ++ "-" ++ (show limitTo) ++ "] is: " ++ printZ (result * deltaTfs) ++ " fs\n"
-        fileToWriteN  = folder ++ "/LifeTimeIn" ++ (show root)  
+        fileToWriteN  = "LifeTimeInRootS" ++ (show $ pred root)  
     putStrLn stringToWrite
     writeFile fileToWriteN stringToWrite
     putStrLn $ "\nThis information has been written into file: " ++ fileToWriteN ++ "\n"

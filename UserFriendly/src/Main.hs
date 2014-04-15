@@ -79,7 +79,7 @@ writeInputTemplate fn = do
 goIntoMenu fn = do
   let concatNums (i, (s, _)) = " " ++ show i ++ " ) " ++ s
   setTitle "DynAnalyzer by AcuZZio"
-  setSGR [SetColor Background Dull Cyan, SetConsoleIntensity BoldIntensity]
+  setSGR [SetColor Background Dull White, SetColor Foreground Dull Black, SetConsoleIntensity BoldIntensity]
   clearScreen
   curDir <- getCurrentDirectory
   setCurrentDirectory fn
