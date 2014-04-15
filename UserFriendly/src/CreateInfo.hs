@@ -17,6 +17,10 @@ createInfo folder = do
        let outputs = lines outs
        mapM_ genInfoFile outputs
 
+rdInfoFiles :: [FilePath] -> IO([Dinamica])
+rdInfoFiles fns = do
+    mapM rdInfoFile fns
+
 rdInfoFile  :: FilePath -> IO(Dinamica)
 rdInfoFile fn = do
     cont <- readFile fn

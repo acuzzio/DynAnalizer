@@ -17,7 +17,7 @@ data Dinamica = Dinamica {
 
 data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
 
-data Plottable = Cccc | CcccCorrected | Beta | BetaCorrected | Tau | Delta | Bla | Ct | Root | Jump deriving (Show, Read)
+data Plottable = Cccc | CcccCorrected | Beta | BetaCorrected | Tau | Delta | Bla | Ct | Root | Jump deriving (Eq, Show, Read)
 
 data Flag = Help
             | CreateInfo String
@@ -37,6 +37,10 @@ data Inputs = Inputs {
      getnRoot             :: Int,           -- This is the root number
      getListToPlot        :: [Plottable]    -- These are the DATA file column
      } deriving Show
+
+type AllTrajData = [SingleTrajData]
+type SingleTrajData = [PlottableData]
+type PlottableData = [String]
 
 convFStoAU = 41.3414472
 convAUtoFS =  0.0241888

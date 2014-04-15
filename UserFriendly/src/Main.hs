@@ -55,7 +55,9 @@ options = [
 getExpression :: Flag -> IO ()
 getExpression flag = 
   case flag of
-    CreateInfo folder -> createInfo folder
+    CreateInfo folder -> do
+       let folderWithoutSlash = if (last folder == '/') then init folder else folder
+       createInfo folderWithoutSlash
     InputFile fnn     -> do
        let fn = if (last fnn == '/') then init fnn else fnn
        aa <- doesDirectoryExist fn
@@ -68,11 +70,13 @@ getExpression flag =
               createDirectory $ fn ++ "/INFO"
               writeInputTemplate $ fn ++ "/input"
               putStrLn $ "\nNow you should copy your info files into folder " ++ fn ++ "/INFO/ and modify " ++ fn ++ "/input according to your system\n"
-    CheckInfo folder   -> checkInfoFiles folder
+    CheckInfo folder   -> do
+       let folderWithoutSlash = if (last folder == '/') then init folder else folder
+       checkInfoFiles folderWithoutSlash
 
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
-  let content = "chargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\ndataPlot   = [Cccc, CcccCorrected, Beta, BetaCorrected, Tau, Delta, Bla, Ct, Root, Jump]\n\n"
+  let content = "chargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\ndataPlot   = [Cccc,CcccCorrected,Beta,BetaCorrected,Tau,Delta,Bla,Ct,Root,Jump]\n\n"
   putStrLn $ "Template input file: " ++ fn ++ " written."
   writeFile fn content
 
@@ -80,7 +84,7 @@ writeInputTemplate fn = do
 goIntoMenu fn = do
   let concatNums (i, (s, _)) = " " ++ show i ++ " ) " ++ s
   setTitle "DynAnalyzer by AcuZZio"
-  setSGR [SetColor Background Dull White, SetColor Foreground Dull Black, SetConsoleIntensity BoldIntensity]
+  setSGR [SetColor Background Vivid Black, SetColor Foreground Vivid White, SetConsoleIntensity BoldIntensity]
   clearScreen
   curDir <- getCurrentDirectory
   setCurrentDirectory fn
@@ -106,11 +110,13 @@ validate s = isValid (reads s)
 
 choices :: [(Int, (String, (Inputs -> IO ())))]
 choices = zip [1.. ] [
-   ("I want to see the graphics of Energies and Population", menuGraphsEnePop),
-   ("I want a graphic of a Bond, an Angle or a Dihedral angle", menuGraphsBAD),
-   ("I want to see Trajectories !", menuTrajectories),
-   ("I want to know lifetimes !!", menuLifeTimes),
+   ("I want to see Energies and Populations graphics", menuGraphsEnePop),
+   ("I want to plot a Bond, an Angle or a Dihedral angle", menuGraphsBAD),
+   ("I want to see MD Trajectories !", menuTrajectories),
+   ("I want to know average lifetimes !!", menuLifeTimes),
    ("I want to create DATA files !!", menuData),
+   ("I have DATA files, wanna do some Analysis !!", menuAnalysis),
+   ("Wanna Do Them All !!", menuAll),
    ("Quit", quitWithStyle)
     ]
 
@@ -119,7 +125,7 @@ execute (n, input) = let
      in doExec $ filter (\(i, _) -> i == n) choices
 
 checkFolder folder = do
-  infos <- readShell $ "ls " ++ folder ++ "INFO/*.info"
+  infos <- readShell $ "ls " ++ folder ++ "/INFO/*.info"
   let infosNames = lines infos
       infosNum   = length infosNames
   case infosNum of
@@ -193,6 +199,18 @@ menuLifeTimes input = do
 
 menuData input = do
   createDATAs input  
+  blockScreenTillPress
+
+menuAnalysis input = do
+  putStrLn "\nThis is a new feature that I will implement soon"
+  blockScreenTillPress
+
+menuAll input = do 
+  plotEnergiesPopulations input 
+  plotBondAngleDihedrals input $ getccccList input 
+  genTrajectories input 
+  graphicLifeTime input 2 
+  createDATAs input
   blockScreenTillPress
 
 byeString="\nDynAnalyzer - by AcuZZio\n"

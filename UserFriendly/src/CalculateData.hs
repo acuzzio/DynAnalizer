@@ -22,7 +22,8 @@ createDATAs input = do
    createDirectoryIfMissing True dataFold
    mapM_ (createDATA input listToPlot) outputs
    system $ "mv INFO/*.data " ++ dataFold
-   putStrLn $ "\nYou can find data files into: " ++ folder ++ "/" ++ dataFold ++ "\n"
+   joinAllDATA folder
+   putStrLn $ "\nYou can find data files into: " ++ folder ++ "/" ++ dataFold ++ " .\nI also wrote an all data file, have fun with Gnuplot !!\n"
 
 createDATA input listToPlot fileInfo = do
    a             <- rdInfoFile fileInfo
@@ -164,3 +165,41 @@ printWellSpacedColumn xs = let
 
 prt :: [Double] -> [String]
 prt doubles = map (\x -> printf "%.3f" x :: String) doubles
+
+joinAllDATA :: FilePath -> IO ()
+joinAllDATA folder = do  
+    outs <- readShell $ "ls DATA/*.data"
+    let outputs = lines outs
+    dataContent  <- mapM readFile outputs
+    writeFile (folder ++ "-all.data") $ intercalate "  \n" dataContent
+
+readerData :: IO AllTrajData
+readerData = do
+    outs            <- readShell $ "ls DATA/*.data"
+    let outputs     = lines outs
+    dataContent     <- mapM readFile outputs
+    return $ map (map words) $ map lines dataContent
+
+whoIsomWhoDoesNot :: AllTrajData -> (AllTrajData,AllTrajData)
+whoIsomWhoDoesNot atd = undefined
+
+whoHopWhoDoesNot :: AllTrajData -> (AllTrajData,AllTrajData)
+whoHopWhoDoesNot atd = undefined
+
+clockWiseCounterClockWise :: AllTrajData -> (AllTrajData,AllTrajData)
+clockWiseCounterClockWise atd = undefined
+
+filterHoppingPointsAll :: AllTrajData -> AllTrajData
+filterHoppingPointsAll atd = map filterHoppingPoints atd
+
+filterHoppingPoints :: SingleTrajData -> SingleTrajData
+filterHoppingPoints std = undefined
+
+filterCTHigherOrLowerAll :: Double -> AllTrajData -> (AllTrajData,AllTrajData)
+filterCTHigherOrLowerAll thresh atd = let 
+    a = map (filterCTHigherOrLower thresh) atd
+    in (map fst a, map snd a)
+
+filterCTHigherOrLower :: Double -> SingleTrajData -> (SingleTrajData,SingleTrajData)
+filterCTHigherOrLower thresh std = undefined -- look at PARTITION function
+
