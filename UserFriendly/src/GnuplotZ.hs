@@ -12,9 +12,11 @@ import Data.Functor.Identity
 
 import CreateInfo
 import IntCoor
+import Filters
 import Functions
 import ParseInput
 import DataTypes
+
 
 plotEnergiesPopulations :: Inputs -> IO ()
 plotEnergiesPopulations inputs = do
@@ -132,5 +134,20 @@ extractBAD inputs fn atomL fun label = do
   system $ "mv " ++ fnLabe ++ ".png " ++ pngFol
   putStrLn $ fileN ++ ": done"
 
-
+-- THIS WORKS WITH JUST 2 ROOTS, ARREGLALOOO
+gnuplotG input label plotThis atd = do
+  let folder    = getfolder input
+      fileN     = folder ++ label 
+      title     = folder ++ " " ++ label
+      pngName   = folder ++ label ++ ".png"
+      lw        = "2"
+      ps        = "3"
+      plottable = getListToPlot input
+      rightInd  = show $ findInd plotThis plottable  
+      header    = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\nset terminal pngcairo size 2048,1060 enhanced font \", 25\"\nset key off\n"
+      plotLine  = "plot \"" ++ label ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ label ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ label ++ "\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
+      wholeScript = header ++ plotLine
+  writeFile (fileN ++ "gnuplotScript") wholeScript
+  system $ "gnuplot < " ++ (fileN ++ "gnuplotScript")
+  
 

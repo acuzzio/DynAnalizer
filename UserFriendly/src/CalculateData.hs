@@ -12,6 +12,7 @@ import Data.Char (isDigit)
 import DataTypes
 import Functions
 import IntCoor
+import ParseInput
 
 createDATAs input = do
    let listToPlot = getListToPlot input 
@@ -50,9 +51,9 @@ createPLOTDATA a input listToPlot = do
       blaList    = getblaList input
       cTFragment = getchargeTrFragment input
   case listToPlot of
-    Cccc          -> dihedro ccccList geometries 
+    Cccc          -> corrDihedro2 input $ dihedro ccccList geometries 
     CcccCorrected -> corrDihedro3 $ dihedro ccccList geometries 
-    Beta          -> dihedro betaList geometries
+    Beta          -> corrDihedro2 input $ dihedro betaList geometries
     BetaCorrected -> corrDihedro3 $ dihedro betaList geometries
     Tau           -> let
                      cccc = map read2 $ corrDihedro3 $ dihedro ccccList geometries
@@ -107,6 +108,13 @@ corrDihedro3 dihedListS = let
                   in prt result
            180 -> let result = if firstDih < 0 then corr dihedList else corr $ map (\x -> x-360.0) dihedList
                   in prt result
+
+corrDihedro2 :: Inputs -> [String] -> [String] 
+corrDihedro2 input xl = let 
+   doubles     = map read2 xl
+   upperShift  = fst $ getUpperAndIsomCond $ getisomType input
+   shiftDown x = if x > upperShift then x-360.0 else x
+   in prt $ map shiftDown doubles
 
 -- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 
 isDihCloser :: Double -> Int -> Int -> Int
