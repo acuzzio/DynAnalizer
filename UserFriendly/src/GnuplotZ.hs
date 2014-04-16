@@ -12,7 +12,7 @@ import Data.Functor.Identity
 
 import CreateInfo
 import IntCoor
-import Filters
+--import Filters
 import Functions
 import ParseInput
 import DataTypes
@@ -138,14 +138,14 @@ extractBAD inputs fn atomL fun label = do
 gnuplotG input label plotThis atd = do
   let folder    = getfolder input
       fileN     = folder ++ label 
-      title     = folder ++ " " ++ label
-      pngName   = folder ++ label ++ ".png"
+      title     = folder ++ " " ++ label ++ " " ++ (show plotThis)
+      pngName   = folder ++ label ++ (show plotThis) ++ ".png"
       lw        = "2"
       ps        = "3"
       plottable = getListToPlot input
-      rightInd  = show $ findInd plotThis plottable  
+      rightInd  = show $ (findInd plotThis plottable) + 1 -- in GNUPLOT you cannot use index starting from 0...
       header    = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\nset terminal pngcairo size 2048,1060 enhanced font \", 25\"\nset key off\n"
-      plotLine  = "plot \"" ++ label ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ label ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ label ++ "\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
+      plotLine  = "plot \"" ++ fileN ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ fileN ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ fileN ++ "10\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
       wholeScript = header ++ plotLine
   writeFile (fileN ++ "gnuplotScript") wholeScript
   system $ "gnuplot < " ++ (fileN ++ "gnuplotScript")

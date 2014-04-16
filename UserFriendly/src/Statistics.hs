@@ -35,10 +35,14 @@ graphicLifeTime input root = do
         xrange = "set xtics 10\nset yrange [0:1]"
        -- fnLabe = folder ++ "/AverageOnState" ++ (show root)
         fnLabe = "AverageOnState" ++ (show root)
-        header       = "set title \"Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output 'AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
-    writeFile (fnLabe ++ "gnuplotScript") header
+        graphicpng       = "set title \"Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output 'AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
+        graphicDumb       = "set title \"Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset terminal dumb\nset yrange [0:1]\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
+    writeFile (fnLabe ++ "gnuplotScript") graphicpng
+    writeFile (fnLabe ++ "gnuplotScriptD") graphicDumb
     writeFile (fnLabe ++ "gnuplotValues") $ unlines $ map transf tupla
     system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
+    system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScriptD")
+    system $ "rm " ++ (fnLabe ++ "gnuplotScriptD")
 --    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
     putStrLn $ "\nFile AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"
 

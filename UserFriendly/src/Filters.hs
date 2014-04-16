@@ -1,11 +1,14 @@
 module Filters where
 
 import Data.List
+import System.Directory
+import System.Process
 import System.ShQQ
 
 import CalculateData
 import DataTypes
 import Functions
+import GnuplotZ
 import ParseInput
 
 readerData :: IO AllTrajData
@@ -43,20 +46,22 @@ buaaaah input lab atd = do
         rightIndex  = findInd Jump plottable
         getHOP root = filter (\x -> x /= []) $ map (filter (\x-> x!!rightIndex == root)) atd
         getHOPs     = map getHOP allJumps
-    mapM_ (\x -> writeFile (label ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
-    print label
-    print $ trajNum atd
-    print $ length $ trajNum atd
-    writeFile label $ unlines $ map unlines $ map (map unwords) atd
+    case length atd of
+       0 -> do putStrLn $ "No trajectories are " ++ lab
+       otherwise -> do
+          writeFile label $ unlines $ map unlines $ map (map unwords) atd
+          mapM_ (\x -> writeFile (label ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+          mapM (\x -> gnuplotG input lab x atd) [CcccCorrected,BetaCorrected,Tau]
+          createDirectoryIfMissing True "Graphics"
+          system $ "mv " ++ label ++ "* Graphics"
+          print label
+          print $ trajNum atd
+          print $ length $ trajNum atd
                
 extractJust :: Maybe Int -> Int
 extractJust a = case a of
    Just x  -> x
    Nothing -> 0
-
-findInd :: Plottable -> [Plottable] -> Int
-findInd plo plos = let Just x = elemIndex plo plos
-                     in x + 2
 
 whoIsom :: Inputs -> AllTrajData -> (AllTrajData,AllTrajData)
 whoIsom input atd = partition ( isoOrNot input ) atd

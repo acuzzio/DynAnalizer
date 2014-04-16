@@ -4,6 +4,8 @@ import Data.List.Split
 import Data.List
 import Text.Printf
 
+import DataTypes
+
 read2 :: String -> Double
 read2 x = read x :: Double
 
@@ -29,3 +31,8 @@ printZ x    = (printf "%.2f" x) :: String
 
 compress :: Eq a => [a] -> [a] 
 compress = map head . group
+
+findInd :: Plottable -> [Plottable] -> Int
+findInd plo plos = let Just x = elemIndex plo plos
+                     in x + 2
+
