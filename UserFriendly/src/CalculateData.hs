@@ -173,33 +173,3 @@ joinAllDATA folder = do
     dataContent  <- mapM readFile outputs
     writeFile (folder ++ "-all.data") $ intercalate "  \n" dataContent
 
-readerData :: IO AllTrajData
-readerData = do
-    outs            <- readShell $ "ls DATA/*.data"
-    let outputs     = lines outs
-    dataContent     <- mapM readFile outputs
-    return $ map (map words) $ map lines dataContent
-
-whoIsomWhoDoesNot :: AllTrajData -> (AllTrajData,AllTrajData)
-whoIsomWhoDoesNot atd = undefined
-
-whoHopWhoDoesNot :: AllTrajData -> (AllTrajData,AllTrajData)
-whoHopWhoDoesNot atd = undefined
-
-clockWiseCounterClockWise :: AllTrajData -> (AllTrajData,AllTrajData)
-clockWiseCounterClockWise atd = undefined
-
-filterHoppingPointsAll :: AllTrajData -> AllTrajData
-filterHoppingPointsAll atd = map filterHoppingPoints atd
-
-filterHoppingPoints :: SingleTrajData -> SingleTrajData
-filterHoppingPoints std = undefined
-
-filterCTHigherOrLowerAll :: Double -> AllTrajData -> (AllTrajData,AllTrajData)
-filterCTHigherOrLowerAll thresh atd = let 
-    a = map (filterCTHigherOrLower thresh) atd
-    in (map fst a, map snd a)
-
-filterCTHigherOrLower :: Double -> SingleTrajData -> (SingleTrajData,SingleTrajData)
-filterCTHigherOrLower thresh std = undefined -- look at PARTITION function
-

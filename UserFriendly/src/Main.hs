@@ -15,6 +15,7 @@ import System.ShQQ
 import CalculateData
 import CreateInfo
 import DataTypes
+import Filters
 import GnuplotZ
 import ParseInput
 import Statistics
@@ -203,6 +204,7 @@ menuData input = do
 
 menuAnalysis input = do
   putStrLn "\nThis is a new feature that I will implement soon"
+  mainfilter input
   blockScreenTillPress
 
 menuAll input = do 
