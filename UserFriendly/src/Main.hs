@@ -213,6 +213,7 @@ menuAll input = do
   genTrajectories input 
   graphicLifeTime input 2 
   createDATAs input
+  mainfilter input
   blockScreenTillPress
 
 byeString="\nDynAnalyzer - by AcuZZio\n"
