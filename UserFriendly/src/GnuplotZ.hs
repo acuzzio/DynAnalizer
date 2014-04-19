@@ -136,16 +136,20 @@ extractBAD inputs fn atomL fun label = do
 
 -- THIS WORKS WITH JUST 2 ROOTS, ARREGLALOOO
 gnuplotG input label plotThis atd = do
-  let folder    = getfolder input
-      fileN     = folder ++ label 
-      title     = folder ++ " " ++ label ++ " " ++ (show plotThis)
-      pngName   = folder ++ label ++ (show plotThis) ++ ".png"
-      lw        = "2"
-      ps        = "3"
-      plottable = getListToPlot input
-      rightInd  = show $ (findInd plotThis plottable) + 1 -- in GNUPLOT you cannot use index starting from 0...
-      header    = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\nset terminal pngcairo size 2048,1060 enhanced font \", 25\"\nset key off\n"
-      plotLine  = "plot \"" ++ fileN ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ fileN ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ fileN ++ "10\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
+  let folder      = getfolder input
+      fileN       = folder ++ label 
+      title       = folder ++ " " ++ label ++ " " ++ (show plotThis)
+      pngName     = folder ++ label ++ (show plotThis) ++ ".png"
+      lw          = "2"
+      ps          = "3"
+      isomK       = getisomType input
+      rangeOption = case isomK of
+                        Cis   -> "set yrange [-300:300]"  
+                        Trans -> "set yrange [-540:180]"
+      plottable   = getListToPlot input
+      rightInd    = show $ (findInd plotThis plottable) + 1 -- in GNUPLOT you cannot use index starting from 0...
+      header      = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\nset terminal pngcairo size 2048,1060 enhanced font \", 25\"\nset key off\n" ++ rangeOption ++ "\n"
+      plotLine    = "plot \"" ++ fileN ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ fileN ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ fileN ++ "10\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
       wholeScript = header ++ plotLine
   writeFile (fileN ++ "gnuplotScript") wholeScript
   system $ "gnuplot < " ++ (fileN ++ "gnuplotScript")
