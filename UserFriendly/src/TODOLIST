@@ -6,3 +6,4 @@ nel parser non sono ammessi SPAZI nelle liste, okkio... [3,4,5,6] va bene [3 , 4
 mettere le opzioni gnuplot nell'input user OPZIONALE
 shifta i data cccc in caso di CIS
 se una molecola fa un giro completo, la segna come NON isomerizza
+METTI CREATEINFO PARALLELO COME opzione -c
