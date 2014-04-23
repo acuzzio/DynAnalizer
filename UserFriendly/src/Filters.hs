@@ -21,10 +21,10 @@ readerData = do
 mainfilter input = do
     atd   <- readerData
     let plottable  = getListToPlot input
-        checkPlots = map (\x -> x `elemIndex` plottable) [Cccc, Ct, Jump]
+        checkPlots = map (\x -> x `elemIndex` plottable) [CcccCorrected, Ct, Jump]
         thereSNoth = Nothing `elem` checkPlots
     case thereSNoth of 
-      True  -> do putStrLn $ "You cannot use filters without Cccc, Ct and Jump constructors in dataPlot variable"
+      True  -> do putStrLn $ "You cannot use filters without Cccccorrected, Ct and Jump constructors in dataPlot variable"
       False -> do 
           let (doHop,doesNotHop)   = whoHop input atd
               (doIsom,doesNotIsom) = whoIsom input atd
@@ -68,8 +68,8 @@ whoIsom input atd = partition ( isoOrNot input ) atd
 
 isoOrNot :: Inputs -> SingleTrajData -> Bool
 isoOrNot input std = let
-   listPlot  = getListToPlot input
-   index     = findInd Cccc listPlot
+   listPlot  = getListToPlot input 
+   index     = findInd CcccCorrected listPlot
    lastPoint = last std
    lastValue = read2 $ lastPoint !! index
    isomCond  = snd $ getUpperAndIsomCond $ getisomType input 

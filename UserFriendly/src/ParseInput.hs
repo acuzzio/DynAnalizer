@@ -14,8 +14,8 @@ defaul = Inputs "lol" [1] [1] [1] [[(1,1)]] Cis 3 dataplot
 
 getUpperAndIsomCond :: IsomType -> (Double, (Double -> Bool))
 getUpperAndIsomCond a = case a of
-     Cis    -> (90.0, (\x -> x < -90.0))
-     Trans  -> (90.0, (\x -> x < -90.0))
+     Cis    -> (90.0, (\x -> x > 90.0 || x < -90.0 ))
+     Trans  -> (90.0, (\x -> x > -90.0 || x < -270.00))
 
 getInputInfos file = do
    r <- parseFromFile parseInput file
