@@ -4,6 +4,10 @@ check for dyns smaller than averages
 check for Dyns with Energies WAY bigger than the initial one.
 yo, guarda che hai il NUMERO DI ROOT sia da mettere come input che parseato negli input, dagli una guardata
 nel parser non sono ammessi SPAZI nelle liste, okkio... [3,4,5,6] va bene [3 , 4 , 5] NO
-mettere le opzioni gnuplot nell'input user OPZIONALE
+mettere le opzioni gnuplot nell'input user OPZIONALE  ....     metti tutti gli X a 200  !!!! IMPORTANT 
 METTI CREATEINFO PARALLELO COME opzione -c
 metti nel primo menu il TAGLIATORE
+
+
+crea il file con la tabella "quante hoppano quante no" ecc.. ecc..   !!! IMPORTANT
+
