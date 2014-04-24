@@ -203,7 +203,6 @@ menuData input = do
   blockScreenTillPress
 
 menuAnalysis input = do
-  putStrLn "\nThis is a new feature that I will implement soon"
   mainfilter input
   blockScreenTillPress
 

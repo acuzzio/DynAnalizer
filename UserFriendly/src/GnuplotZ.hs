@@ -152,6 +152,6 @@ gnuplotG input label plotThis atd = do
       plotLine    = "plot \"" ++ fileN ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ fileN ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ fileN ++ "10\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
       wholeScript = header ++ plotLine
   writeFile (fileN ++ "gnuplotScript") wholeScript
-  system $ "gnuplot < " ++ (fileN ++ "gnuplotScript")
+  system $ "gnuplot < " ++ (fileN ++ "gnuplotScript 2> /dev/null")
   
 

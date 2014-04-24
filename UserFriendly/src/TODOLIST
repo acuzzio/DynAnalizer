@@ -2,12 +2,20 @@ check points in filepath, or numbers after the traj number.
 check if info files EXISTS into folder
 check for dyns shorter than averages
 check for Dyns with Energies WAY bigger than the initial one. (quelle che esplodono)
+
+
 yo, guarda che hai il NUMERO DI ROOT sia da mettere come input che parseato negli input, dagli una guardata
 nel parser non sono ammessi SPAZI nelle liste, okkio... [3,4,5,6] va bene [3 , 4 , 5] NO
+
+
 mettere le opzioni gnuplot nell'input user OPZIONALE  ....     metti tutti gli X a 200  !!!! IMPORTANT 
-METTI CREATEINFO PARALLELO COME opzione -c
+
+
+METTI CREATEINFO PARALLELO COME opzione -c <- you must specify the infopath (not just the subfolder)
 metti nel primo menu il TAGLIATORE
 
 
-crea il file con la tabella "quante hoppano quante no" ecc.. ecc..   !!! IMPORTANT
+function gnuplotG works just with 2 roots
+
+i grafici ROSSI <- IMPORTANTE
 

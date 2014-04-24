@@ -21,6 +21,7 @@ readerData = do
 mainfilter input = do
     atd   <- readerData
     let plottable  = getListToPlot input
+        folder     = getfolder input
         checkPlots = map (\x -> x `elemIndex` plottable) [CcccCorrected, Ct, Jump]
         thereSNoth = Nothing `elem` checkPlots
     case thereSNoth of 
@@ -33,11 +34,41 @@ mainfilter input = do
               doHopNoIsom   = (intersect doHop doesNotIsom, "HopAndNoIsom")
               noHopIsom     = (intersect doesNotHop doIsom, "NoHopAndIsom")
               noHopNoIsom   = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
-          mapM_ (\x -> buaaaah input (snd x) (fst x)) [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom]
+              listOfThem    = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom]
+              fileN         = folder ++ "-Stats"
+          system $ "rm " ++ fileN ++ " 2> /dev/null"
+          mapM_ (\x -> buaaaah input (snd x) (fst x)) listOfThem
+          mapM_ (\x -> atdLogger fileN (snd x) (fst x)) listOfThem
+          let lf = length . fst
+              [all,yhyi,yhni,nhyi,nhni] = map lf listOfThem
+              z         = "TOTAL         -> " ++ (show all)
+              a         = "Hop and Iso   -> " ++ (show yhyi)
+              b         = "Hop not Iso   -> " ++ (show yhni)
+              c         = "NoHop and Iso -> " ++ (show nhyi)
+              d         = "NoHop not Iso -> " ++ (show nhni)
+              e         = "\nonly Hopped Iso/notIso -> " ++ (rateH yhyi yhni) ++ "%"
+              f         = "only NON Hopped Iso/notIso -> " ++ (rateH nhyi nhni) ++ "%"
+              g         = "Total Iso/notIso -> " ++ (rateH (yhyi+nhyi) (yhni+nhni)) ++ "%"
+              stringToW = intercalate "\n" [z,a,b,c,d,e,f,g] 
+          putStrLn stringToW
+          appendFile fileN stringToW 
+          putStrLn $ "\nEverything written down into file: " ++ fileN ++ " !!\n\n"
+
+rateH :: Int -> Int -> String
+rateH a b = printZ ((fromIntegral (a * 100) / (fromIntegral (a+b))) :: Double) 
+
+
+atdLogger filN lab atd = do
+          let trajNum x   = map (\x -> x!!0!!0) x
+          appendFile filN $ "\n" ++ lab ++ " " 
+          appendFile filN $ show $ length $ trajNum atd
+          appendFile filN $ ":\n" ++ (unwords $ trajNum atd)
+          appendFile filN "\n"
+
+
 
 buaaaah input lab atd = do
-    let trajNum x   = map (\x -> x!!0!!0) x
-        folder      = getfolder input
+    let folder      = getfolder input
         label       = folder ++ lab 
         nRoot       = getnRoot input
         nRootI      = pred nRoot
@@ -54,9 +85,7 @@ buaaaah input lab atd = do
           mapM (\x -> gnuplotG input lab x atd) [CcccCorrected,BetaCorrected,Tau]
           createDirectoryIfMissing True "Graphics"
           system $ "mv " ++ label ++ "* Graphics"
-          print label
-          print $ trajNum atd
-          print $ length $ trajNum atd
+          return ()
                
 extractJust :: Maybe Int -> Int
 extractJust a = case a of
