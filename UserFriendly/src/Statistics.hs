@@ -14,12 +14,12 @@ import DataTypes
 calculateLifeTime :: Inputs -> Int -> Int -> Int -> IO ()
 calculateLifeTime input root limitFrom limitTo = do
     (tupla,deltaTfs)  <- averageLifetime input root
-    let folder        = getfolder input
-        diff          = limitTo - limitFrom
-        adjTupla      = take diff $ drop limitFrom tupla
-        result        = barbattiFitting adjTupla
+    let folder                  = getfolder input
+        diff                    = limitTo - limitFrom
+        adjTupla                = take diff $ drop limitFrom tupla
+        (result, (delay,decay)) = barbattiFitting adjTupla
 --    putStrLn "\nWatch out this function calculates between STEP a and b, unless you have 1 fs = 1 step, do not use the graphic label to calculate this A.L.T.\n\n"
-        stringToWrite = "\n\nThe average lifetime in state " ++ (show root) ++" according to STEP interval [" ++ (show limitFrom) ++ "-" ++ (show limitTo) ++ "] is: " ++ printZ (result * deltaTfs) ++ " fs\n"
+        stringToWrite = "\n\nThe average lifetime in state " ++ (show root) ++" according to STEP interval [" ++ (show limitFrom) ++ "-" ++ (show limitTo) ++ "] is: " ++ printZ (result * deltaTfs) ++ " fs\nDecay constant: " ++ (show decay) ++ "\nDelay constant: " ++ (show delay) ++ "\n"
         fileToWriteN  = "LifeTimeInRootS" ++ (show $ pred root)  
     putStrLn stringToWrite
     writeFile fileToWriteN stringToWrite
@@ -78,11 +78,11 @@ exponentialFitting tuplas = let
     in [exp (fitA),fitB]
 
 -- solve normal exponents regression first, then t1 and t2 from this paper (page 2794 - Nonadiabatic Photodynamics of a retinal model in polar and nonpolar environment, Ruckenbauer) are as in the code, where a and b are the same as this general formula - > y = A exp (Bx) :
-barbattiFitting :: [(Double, Double)] -> Double
+barbattiFitting :: [(Double, Double)] -> (Double, (Double, Double))
 barbattiFitting tuplas = let
     [a,b] = exponentialFitting tuplas
     t1    = -(( log a ) / b )
     t2    = (-1)/b
     tau   = t1 + t2
-    in tau
+    in (tau,(t1,t2))
 

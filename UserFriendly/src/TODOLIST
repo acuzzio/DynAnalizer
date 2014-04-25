@@ -3,6 +3,7 @@ METTI CREATEINFO PARALLELO COME opzione -c <- you must specify the infopath (not
 mettere le opzioni gnuplot nell'input user OPZIONALE  ....     metti tutti gli X a 200  !!!! IMP 
 metti nel primo menu il TAGLIATORE
 i grafici ROSSI <- IMPORTANTE
+usa la FRAZIONE invece dei pesi
 
 
 II  BUGS
