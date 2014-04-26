@@ -1,14 +1,14 @@
 I   FEATURES
-METTI CREATEINFO PARALLELO COME opzione -c <- you must specify the infopath (not just the subfolder)
-mettere le opzioni gnuplot nell'input user OPZIONALE  ....     metti tutti gli X a 200  !!!! IMP 
+
+METTI CREATEINFO PARALLELO COME opzione -c <- you must specify the infopath (not just the subfolder */*.info )
 metti nel primo menu il TAGLIATORE
 i grafici ROSSI <- IMPORTANTE
 usa la FRAZIONE invece dei pesi
 
 
 II  BUGS
+
 yo, guarda che hai il NUMERO DI ROOT sia da mettere come input che parseato negli input, dagli una guardata
-nel parser non sono ammessi SPAZI nelle liste, okkio... [3,4,5,6] va bene [3 , 4 , 5] NO
 function gnuplotG works just with 2 roots
 
 

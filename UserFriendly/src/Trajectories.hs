@@ -8,6 +8,7 @@ import Data.List.Split
 import CreateInfo
 import IntCoor
 import DataTypes
+import ParseInput
 
 
 genTrajectory :: Inputs -> FilePath -> IO()

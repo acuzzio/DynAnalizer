@@ -11,13 +11,6 @@ import Functions
 import GnuplotZ
 import ParseInput
 
-readerData :: IO AllTrajData
-readerData = do
-    outs            <- readShell $ "ls DATA/*.data"
-    let outputs     = lines outs
-    dataContent     <- mapM readFile outputs
-    return $ map (map words) $ map lines dataContent
-
 mainfilter input = do
     atd   <- readerData
     let plottable  = getListToPlot input
@@ -64,8 +57,6 @@ atdLogger filN lab atd = do
           appendFile filN $ show $ length $ trajNum atd
           appendFile filN $ ":\n" ++ (unwords $ trajNum atd)
           appendFile filN "\n"
-
-
 
 buaaaah input lab atd = do
     let folder      = getfolder input
@@ -129,4 +120,50 @@ filterCTHigherOrLowerAll thresh atd = map (filterCTHigherOrLower thresh) atd
 
 filterCTHigherOrLower :: Double -> SingleTrajData -> SingleTrajData
 filterCTHigherOrLower thresh std = undefined 
+
+-- Charge Transfer part
+
+chargeTmap :: Inputs -> IO()
+chargeTmap input = do
+  atd   <- readerData
+  let plottable  = getListToPlot input
+      folder     = getfolder input
+      checkPlots = map (\x -> x `elemIndex` plottable) [CcccCorrected, Ct, Jump]
+      thereSNoth = Nothing `elem` checkPlots
+  case thereSNoth of
+    True  -> do putStrLn $ "You cannot use filters without Cccccorrected, Ct and Jump constructors in dataPlot variable"
+    False -> do
+      let (doHop,doesNotHop)   = whoHop input atd 
+          (doIsom,doesNotIsom) = whoIsom input atd 
+          allOfThem     = (atd, "all")
+          doHopIsom     = (intersect doHop doIsom, "HopAndIsom")
+          doHopNoIsom   = (intersect doHop doesNotIsom, "HopAndNoIsom")
+          noHopIsom     = (intersect doesNotHop doIsom, "NoHopAndIsom")
+          noHopNoIsom   = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
+          listOfThem    = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom]
+          thresh = getchargeTrThresh input
+      mapM_ (\x -> chargeTMultiple input (fst x) (snd x) thresh) listOfThem
+
+chargeTMultiple :: Inputs -> AllTrajData -> String -> [Double] -> IO()
+chargeTMultiple input atd filtername thresh = mapM_ (\x -> chargeTsingle input atd filtername x ) thresh
+
+chargeTsingle :: Inputs -> AllTrajData -> String -> Double -> IO()
+chargeTsingle input atd filtername thresh = do
+    let folder      = getfolder input
+        plottable   = getListToPlot input
+        rightIndex  = findInd Ct plottable
+        upper       = map (filter (\x -> read2 (x!!rightIndex) > thresh)) atd
+        lower       = map (filter (\x -> read2 (x!!rightIndex) < thresh)) atd
+        upperCorr   = map compress $ zipWith correctGaps upper atd
+        lowerCorr   = map compress $ zipWith correctGaps lower atd
+    writeFile (folder ++ "cT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upperCorr
+    writeFile (folder ++ "cT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lowerCorr
+
+-- I wanna fill the space between two different set in gnuplot splot lines
+correctGaps :: [[String]] -> [[String]] -> [[String]]
+correctGaps []    a      = []
+correctGaps small (x:[]) = x : []
+correctGaps small (x:xs) = if elem (head xs) small then x : correctGaps small xs else if elem x small then x : correctGaps small xs else [" "] : correctGaps small xs
+
+
 

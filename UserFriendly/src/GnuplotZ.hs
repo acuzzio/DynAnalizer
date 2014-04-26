@@ -27,37 +27,38 @@ plotEnergiesPopulations inputs = do
        putStrLn $ "\nYou can find those graphics into: " ++ folder ++ "/EnePop\n"
 
 plotEnergiesPopulation :: Inputs -> FilePath -> IO ()
-plotEnergiesPopulation inputs file = do
+plotEnergiesPopulation input file = do
    dina <- rdInfoFile file
    let popEne = getEnergies dina
        dt     = getDT dina 
        rlxRoot= getStartRlxRt dina
        eneFol = "EnePop"
-   writeGnuplots dt rlxRoot file popEne 
+   writeGnuplots input dt rlxRoot file popEne 
    createDirectoryIfMissing True eneFol
    system "gnuplot < gnuplotScript"
    system "rm sdafrffile* gnuplotScript"
    system $ "mv INFO/*EnergiesPopulation.png " ++ eneFol
    putStrLn $ file ++ ": done"
 
-writeGnuplots :: Double -> Int -> FilePath -> [[Double]] -> IO()
-writeGnuplots dt rlxRoot file xss = do
+writeGnuplots :: Inputs -> Double -> Int -> FilePath -> [[Double]] -> IO()
+writeGnuplots input dt rlxRoot file xss = do
       let valuesS   = map (unlines . (map show)) xss
           filenames = map (\x -> "sdafrffile" ++ (show x)) [1..]
           lengthV   = length valuesS
 --      print values
       zipWithM writeFile filenames valuesS
-      createGnuplotFile file dt lengthV rlxRoot
+      createGnuplotFile input file dt lengthV rlxRoot
 
-createGnuplotFile :: FilePath -> Double -> Int -> Int -> IO()
-createGnuplotFile file dt' n rlxRt = do
-      let fileZ  = takeWhile (/='.') file
+createGnuplotFile :: Inputs -> FilePath -> Double -> Int -> Int -> IO()
+createGnuplotFile input file dt' n rlxRt = do
+      let gplOpt = getgnuplotOptions input
+          fileZ  = takeWhile (/='.') file
           dt     = show dt'
 -- wanna new colors? http://hexcolorgenerator.com/          
           hexColo= ["#FFF7F7","#F7FFF7","#E5FFFF","#FFF7F7","#FFFFF7","#F9F7FF","#FFF7FF"]
           colors = ["#FF0600","#06FF00","#00FFFF","#FFB400","#FFF600","#4E00FF","#FF00FC"]
           tag    = map (\x -> "S" ++ (show x)) [0..]
-          header = "set title \"" ++ fileZ ++ " Population and Energies\"\nset xlabel \"fs\"\nset key outside\nset format y \"%6.3f\"\nset y2range[0:1.001]\nset output '" ++ fileZ ++ "EnergiesPopulation.png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\nplot "
+          header = "set title \"" ++ fileZ ++ " Population and Energies\"\nset xlabel \"fs\"\nset key outside\nset format y \"%6.3f\"\nset y2range[0:1.001]\nset output '" ++ fileZ ++ "EnergiesPopulation.png'\n" ++ gplOpt ++ "\nplot "
           states = div (n-1) 2
           filenames = map (\x -> "sdafrffile" ++ (show x)) [1..]
           list   = (take states $ repeat Pop) ++ (take states $ repeat Ene) ++ [Dyn]
@@ -110,8 +111,8 @@ plotBondAngleDihedral inputs fn xs = do
 errorMsg = "a list of 2 -> bond\na list of 3 -> angle\na list of 4 -> dihedral"
 
 extractBAD :: Inputs -> FilePath -> [Int] -> ([Vec Double] -> Double) -> String -> IO () 
-extractBAD inputs fn atomL fun label = do
-  let folder = getfolder inputs
+extractBAD input fn atomL fun label = do
+  let folder = getfolder input
   dina <- rdInfoFile fn
   let coord  = getCoordinates dina
       dt     = getDT dina
@@ -125,7 +126,8 @@ extractBAD inputs fn atomL fun label = do
       fnLabe = fileN ++ (filter (/= ' ') rightL)                 -- "folder/traj054DihedralC1C2C3N4"
       limRan = if label == "Dihedral" then "set yrange [-180:180]\n" else ""
       pngFol = filter (/= ' ') rightL         -- "DihedralC1C2C3N4"
-      header = "set title \"" ++ rightL ++ "\"\nset xlabel \"fs\"\nset key off\nset format y \"%6.2f\"\nset output '" ++ fnLabe ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ limRan ++ "plot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u ($0*" ++ (fromAUtoFemtoDT (show dt)) ++ "):1 w lines"
+      gplOpt = getgnuplotOptions input
+      header = "set title \"" ++ rightL ++ "\"\nset xlabel \"fs\"\nset key off\nset format y \"%6.2f\"\nset output '" ++ fnLabe ++ ".png'\n" ++ gplOpt ++ "\n" ++ limRan ++ "plot \"" ++ (fnLabe ++ "GnupValues") ++ "\" u ($0*" ++ (fromAUtoFemtoDT (show dt)) ++ "):1 w lines"
   writeFile (fnLabe ++ "gnuplotScript") header
   writeFile (fnLabe ++ "GnupValues") $ unlines $ map show values
   createDirectoryIfMissing True pngFol
@@ -148,7 +150,8 @@ gnuplotG input label plotThis atd = do
                         Trans -> "set yrange [-540:180]"
       plottable   = getListToPlot input
       rightInd    = show $ (findInd plotThis plottable) + 1 -- in GNUPLOT you cannot use index starting from 0...
-      header      = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\nset terminal pngcairo size 2048,1060 enhanced font \", 25\"\nset key off\n" ++ rangeOption ++ "\n"
+      gplOpt = getgnuplotOptions input
+      header      = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\n" ++ gplOpt ++ "\nset key off\n" ++ rangeOption ++ "\n"
       plotLine    = "plot \"" ++ fileN ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ fileN ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ fileN ++ "10\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
       wholeScript = header ++ plotLine
   writeFile (fileN ++ "gnuplotScript") wholeScript

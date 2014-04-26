@@ -8,6 +8,7 @@ import System.ShQQ
 import CreateInfo
 import Functions
 import DataTypes
+import ParseInput
 
 
 -- to be used    calculateLifeTime 2  30 120            with 1 = "S0" and 2 = "S1"

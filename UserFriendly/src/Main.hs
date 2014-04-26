@@ -75,12 +75,6 @@ getExpression flag =
        let folderWithoutSlash = if (last folder == '/') then init folder else folder
        checkInfoFiles folderWithoutSlash
 
-writeInputTemplate :: FilePath -> IO()
-writeInputTemplate fn = do
-  let content = "chargeTrFragment = [1,2,3]                       -- Here list of Atom in charge transfer fraction\nccccList   = [5,4,6,7]                           -- Here the central dihedral\nbetaList   = [3,4,6,10]                          -- Here beta angle\nblaList    = [[(1,5),(4,6),(7,8)],[(4,5),(6,7)]] -- BLA list of single bonds, list of double bonds\nisomType   = Cis                                 -- Here Cis or Trans\nnRoot      = 2                                   -- This is the number of root in the system\ndataPlot   = [Cccc,CcccCorrected,Beta,BetaCorrected,Tau,Delta,Bla,Ct,Root,Jump]\n\n"
-  putStrLn $ "Template input file: " ++ fn ++ " written."
-  writeFile fn content
-
 --MENUUUU
 goIntoMenu fn = do
   let concatNums (i, (s, _)) = " " ++ show i ++ " ) " ++ s
@@ -117,6 +111,7 @@ choices = zip [1.. ] [
    ("I want to know average lifetimes !!", menuLifeTimes),
    ("I want to create DATA files !!", menuData),
    ("I have DATA files, wanna do some Analysis !!", menuAnalysis),
+   ("I have DATA files, wanna do some Charge Transfer Graph !!", menuCT),
    ("Wanna Do Them All !!", menuAll),
    ("Quit", quitWithStyle)
     ]
@@ -204,6 +199,10 @@ menuData input = do
 
 menuAnalysis input = do
   mainfilter input
+  blockScreenTillPress
+
+menuCT input = do
+  chargeTmap input 
   blockScreenTillPress
 
 menuAll input = do 
