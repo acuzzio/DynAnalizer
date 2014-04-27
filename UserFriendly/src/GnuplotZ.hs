@@ -160,4 +160,29 @@ gnuplotG input label plotThis atd = do
   writeFile (fileN ++ "gnuplotScript") wholeScript
   system $ "gnuplot < " ++ (fileN ++ "gnuplotScript 2> /dev/null")
   
+--gnuplotCT :: Inputs -> String -> Plottable -> AllTrajData -> Double -> IO()
+gnuplotCT input label plotThis atd thresh = do
+  let folder        = getfolder input
+      fileN         = "chargeTr" ++ folder ++ (show thresh) ++ label
+      title         = folder ++ " " ++ label ++ " " ++ (show thresh) ++ " " ++ (show plotThis)
+      pngName       = folder ++ label ++ (show thresh) ++ (show plotThis) ++ ".png"
+      lw            = "2"
+      ps            = "3"
+      isomK         = getisomType input
+      rangeOption   = case isomK of
+                        Cis   -> "set yrange [-300:300]"
+                        Trans -> "set yrange [-540:180]"
+      plottable     = getListToPlot input
+      rightInd      = show $ (findInd plotThis plottable) + 1 
+      gplOpt        = getgnuplotOptions input
+      nRootI        = pred $ getnRoot input
+      allJumps      = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y]
+      header        = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\n" ++ gplOpt ++ "\nset key off\n" ++ rangeOption ++ "\n"
+      hopPlotLine l = ", \"" ++ fileN ++ l ++ "\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
+      allHopsPlotL  = concat $ map hopPlotLine allJumps
+      wholePlotLine = "plot \"" ++ fileN ++ "HI\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ fileN ++ "LO\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"red\" w lines" ++ allHopsPlotL
+      wholeScript   = header ++ wholePlotLine 
+  writeFile (fileN ++ "gnuplotScript") wholeScript
+  system $ "gnuplot < " ++ (fileN ++ "gnuplotScript 2> /dev/null")
+  --system $ "gnuplot < " ++ (fileN ++ "gnuplotScript")
 

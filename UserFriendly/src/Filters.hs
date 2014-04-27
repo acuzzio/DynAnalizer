@@ -141,8 +141,9 @@ chargeTmap input = do
           noHopIsom     = (intersect doesNotHop doIsom, "NoHopAndIsom")
           noHopNoIsom   = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
           listOfThem    = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom]
+          listOfNonEmpt = filter (\x -> (length $ fst x) > 0 ) listOfThem
           thresh = getchargeTrThresh input
-      mapM_ (\x -> chargeTMultiple input (fst x) (snd x) thresh) listOfThem
+      mapM_ (\x -> chargeTMultiple input (fst x) (snd x) thresh) listOfNonEmpt 
 
 chargeTMultiple :: Inputs -> AllTrajData -> String -> [Double] -> IO()
 chargeTMultiple input atd filtername thresh = mapM_ (\x -> chargeTsingle input atd filtername x ) thresh
@@ -152,12 +153,24 @@ chargeTsingle input atd filtername thresh = do
     let folder      = getfolder input
         plottable   = getListToPlot input
         rightIndex  = findInd Ct plottable
+        nRootI      = pred $ getnRoot input
+        allJumps    = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y]
+        rightIndHop = findInd Jump plottable
+        getHOP root = filter (\x -> x /= []) $ map (filter (\x-> x!!rightIndHop == root)) atd
+        getHOPs     = map getHOP allJumps
         upper       = map (filter (\x -> read2 (x!!rightIndex) > thresh)) atd
         lower       = map (filter (\x -> read2 (x!!rightIndex) < thresh)) atd
         upperCorr   = map compress $ zipWith correctGaps upper atd
         lowerCorr   = map compress $ zipWith correctGaps lower atd
-    writeFile (folder ++ "cT" ++ (show thresh) ++ "HI" ++ filtername) $ writeF upperCorr
-    writeFile (folder ++ "cT" ++ (show thresh) ++ "LO" ++ filtername) $ writeF lowerCorr
+        fileName    = "chargeTr" ++ folder ++ (show thresh) ++ filtername 
+    mapM_ (\x -> writeFile (fileName ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
+    writeFile (fileName ++ "HI") $ writeF upperCorr
+    writeFile (fileName ++ "LO") $ writeF lowerCorr
+    mapM (\x -> gnuplotCT input filtername x atd thresh) [CcccCorrected,BetaCorrected,Tau]
+    createDirectoryIfMissing True "GraphicsCT"
+    system $ "mv " ++ fileName ++ "* GraphicsCT"
+    return ()
+
 
 -- I wanna fill the space between two different set in gnuplot splot lines
 correctGaps :: [[String]] -> [[String]] -> [[String]]
