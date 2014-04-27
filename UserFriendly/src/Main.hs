@@ -212,6 +212,7 @@ menuAll input = do
   graphicLifeTime input 2 
   createDATAs input
   mainfilter input
+  chargeTmap input
   blockScreenTillPress
 
 byeString="\nDynAnalyzer - by AcuZZio\n"
