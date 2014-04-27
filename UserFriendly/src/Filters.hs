@@ -167,8 +167,8 @@ chargeTsingle input atd filtername thresh = do
     writeFile (fileName ++ "HI") $ writeF upperCorr
     writeFile (fileName ++ "LO") $ writeF lowerCorr
     mapM (\x -> gnuplotCT input filtername x atd thresh) [CcccCorrected,BetaCorrected,Tau]
-    createDirectoryIfMissing True "GraphicsCT"
-    system $ "mv " ++ fileName ++ "* GraphicsCT"
+    createDirectoryIfMissing True "ChargeTranfData"
+    system $ "mv " ++ fileName ++ "* ChargeTranfData"
     return ()
 
 
