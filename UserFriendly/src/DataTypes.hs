@@ -17,6 +17,8 @@ data Dinamica = Dinamica {
 
 data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
 
+--data PlotType2 = Red | Black | Hop deriving (Eq,Show)
+
 data Plottable = Cccc | CcccCorrected | Beta | BetaCorrected | Tau | Delta | Bla | Ct | Root | Jump deriving (Eq, Show, Read)
 
 data Flag = Help

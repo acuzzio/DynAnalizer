@@ -136,24 +136,27 @@ extractBAD input fn atomL fun label = do
   system $ "mv " ++ fnLabe ++ ".png " ++ pngFol
   putStrLn $ fileN ++ ": done"
 
--- THIS WORKS WITH JUST 2 ROOTS, ARREGLALOOO
 gnuplotG input label plotThis atd = do
-  let folder      = getfolder input
-      fileN       = folder ++ label 
-      title       = folder ++ " " ++ label ++ " " ++ (show plotThis)
-      pngName     = folder ++ label ++ (show plotThis) ++ ".png"
-      lw          = "2"
-      ps          = "3"
-      isomK       = getisomType input
-      rangeOption = case isomK of
+  let folder        = getfolder input
+      fileN         = folder ++ label 
+      title         = folder ++ " " ++ label ++ " " ++ (show plotThis)
+      pngName       = folder ++ label ++ (show plotThis) ++ ".png"
+      lw            = "2"
+      ps            = "3"
+      isomK         = getisomType input
+      rangeOption   = case isomK of
                         Cis   -> "set yrange [-300:300]"  
                         Trans -> "set yrange [-540:180]"
-      plottable   = getListToPlot input
-      rightInd    = show $ (findInd plotThis plottable) + 1 -- in GNUPLOT you cannot use index starting from 0...
-      gplOpt = getgnuplotOptions input
-      header      = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\n" ++ gplOpt ++ "\nset key off\n" ++ rangeOption ++ "\n"
-      plotLine    = "plot \"" ++ fileN ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines, \"" ++ fileN ++ "01\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p, \"" ++ fileN ++ "10\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
-      wholeScript = header ++ plotLine
+      plottable     = getListToPlot input
+      rightInd      = show $ (findInd plotThis plottable) + 1 -- in GNUPLOT you cannot use index starting from 0...
+      gplOpt        = getgnuplotOptions input
+      nRootI        = pred $ getnRoot input
+      allJumps      = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y]
+      header        = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\n" ++ gplOpt ++ "\nset key off\n" ++ rangeOption ++ "\n"
+      hopPlotLine l = ", \"" ++ fileN ++ l ++ "\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
+      allHopsPlotL  = concat $ map hopPlotLine allJumps
+      wholePlotLine = "plot \"" ++ fileN ++ "\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines" ++ allHopsPlotL
+      wholeScript = header ++ wholePlotLine
   writeFile (fileN ++ "gnuplotScript") wholeScript
   system $ "gnuplot < " ++ (fileN ++ "gnuplotScript 2> /dev/null")
   
