@@ -32,7 +32,7 @@ writeInputTemplate fn = do
 
 dataplot = [Cccc, CcccCorrected, Beta, BetaCorrected, Tau, Delta, Bla, Ct, Root, Jump]
 gnuplotDefault = "set terminal pngcairo size 1224,830 enhanced font \", 12\"\nset xrange [1:10]"
-defaul = Inputs "lol" [1] [0.5] [1] [1] [[(1,1)]] Cis 0 dataplot gnuplotDefault
+defaul = Inputs "lol" [9999] [0.5] [1] [1] [[(1,1)]] Cis 0 dataplot gnuplotDefault
 
 getUpperAndIsomCond :: IsomType -> (Double, (Double -> Bool))
 getUpperAndIsomCond a = case a of
@@ -47,31 +47,31 @@ getInputInfos file = do
 
 parseInput = do
  b <- parseLine "chargeTrFragment"
- manyTill anyChar eoL 
+ manyTill anyChar $ try newline 
  let b1 = read b :: [Int]
  bb <- parseLine "chargeTrThresh"
- manyTill anyChar eoL 
+ manyTill anyChar $ try newline 
  let bb1 = read bb :: [Double]
  c <- parseLine "ccccList"    
- manyTill anyChar eoL
+ manyTill anyChar $ try newline
  let c1 = read c :: [Int]
  d <- parseLine "betaList"         
- manyTill anyChar eoL
+ manyTill anyChar $ try newline
  let d1 = read d :: [Int]
  e <- parseLine "blaList"        
- manyTill anyChar eoL 
+ manyTill anyChar $ try newline 
  let e1 = read e :: [[(Int,Int)]]
  f <- parseLine "isomType"
- manyTill anyChar eoL
+ manyTill anyChar $ try newline
  let f1 = read f :: IsomType
  g <- parseLine "nRoot"            
- manyTill anyChar eoL 
+ manyTill anyChar $ try newline 
  let g1 = read g :: Int
  h <- parseLine "dataPlot"    
- manyTill anyChar eoL 
+ manyTill anyChar $ try newline 
  let h1 = read h :: [Plottable]
  j <- parseLine "gnuplotOptions"    
- manyTill anyChar eoL 
+ manyTill anyChar $ try newline 
  let j1 = replace "\\n" "\n" j
  return $ Inputs "itWillBeReplacedByfn" b1 bb1 c1 d1 e1 f1 g1 h1 j1
 
@@ -84,8 +84,7 @@ parseLine label = do
    a <- manyTill anyChar eoI
    return a
 
-eoI = try eoL
-      <|> try (string "--")
+eoI = lookAhead (try (string "--") <|> try eoL)
 
 eoL = try (string "\r")
       <|> try (string "\n")

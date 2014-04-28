@@ -167,7 +167,7 @@ gnuplotCT input label plotThis atd thresh = do
       title         = folder ++ " " ++ label ++ " " ++ (show thresh) ++ " " ++ (show plotThis)
       pngName       = folder ++ label ++ (show plotThis) ++ (show thresh) ++ ".png"
       lw            = "2"
-      ps            = "3"
+      ps            = "2"
       isomK         = getisomType input
       rangeOption   = case isomK of
                         Cis   -> "set yrange [-300:300]"

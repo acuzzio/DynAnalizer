@@ -48,6 +48,9 @@ options = [
    Option "C" ["CheckInfo"]
      (ReqArg CheckInfo "FOLDERNAME")
      "it checks for consistency in info files inside specified folder",
+   Option "a" ["folder"]
+     (ReqArg DoAll "ProjectFolder")
+     "DO EVERYTHING in this folder",
    Option "f" ["folder"]
      (ReqArg InputFile "ProjectFolder")
      "It will run the program using the information into FOLDER. In case it does not exist, a template one will be created"
@@ -74,6 +77,24 @@ getExpression flag =
     CheckInfo folder   -> do
        let folderWithoutSlash = if (last folder == '/') then init folder else folder
        checkInfoFiles folderWithoutSlash
+    DoAll fnn -> do
+       let fn = if (last fnn == '/') then init fnn else fnn
+       setCurrentDirectory fn
+       inputFile <- getInputInfos "input"
+       let input = inputFile { getfolder = fn }
+       case (getchargeTrFragment input) == [9999] of
+          True  -> do putStrLn "There is a problem into input file."
+          False -> do plotEnergiesPopulations input 
+                      plotBondAngleDihedrals input $ getccccList input 
+                      genTrajectories input 
+                      graphicLifeTime input 2 
+                      createDATAs input
+                      mainfilter input
+                      putStrLn "Now doing the CT part:"
+                      chargeTmap input
+                      putStrLn "Done"
+
+
 
 --MENUUUU
 goIntoMenu fn = do
@@ -111,7 +132,7 @@ choices = zip [1.. ] [
    ("I want to know average lifetimes !!", menuLifeTimes),
    ("I want to create DATA files !!", menuData),
    ("I have DATA files, wanna do some Analysis !!", menuAnalysis),
-   ("I have DATA files, wanna do some Charge Transfer Graph !!", menuCT),
+   ("I have DATA files, wanna do some Charge Transfer graphs !!", menuCT),
    ("Wanna Do Them All !!", menuAll),
    ("Quit", quitWithStyle)
     ]
@@ -212,7 +233,9 @@ menuAll input = do
   graphicLifeTime input 2 
   createDATAs input
   mainfilter input
+  putStrLn "Now doing the CT part:"
   chargeTmap input
+  putStrLn "Done"
   blockScreenTillPress
 
 byeString="\nDynAnalyzer - by AcuZZio\n"
