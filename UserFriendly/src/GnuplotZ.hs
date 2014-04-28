@@ -164,6 +164,7 @@ gnuplotG input label plotThis atd = do
 gnuplotCT input label plotThis atd thresh = do
   let folder        = getfolder input
       fileN         = "chargeTr" ++ folder ++ (show thresh) ++ label
+      fileScript    = "chargeTr" ++ folder ++ (show thresh) ++ label ++ (show plotThis)
       title         = folder ++ " " ++ label ++ " " ++ (show thresh) ++ " " ++ (show plotThis)
       pngName       = folder ++ label ++ (show plotThis) ++ (show thresh) ++ ".png"
       lw            = "2"
@@ -182,10 +183,9 @@ gnuplotCT input label plotThis atd thresh = do
       allHopsPlotL  = concat $ map hopPlotLine allJumps
       wholePlotLine = "plot \"" ++ fileN ++ "HI\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"red\" w lines, \"" ++ fileN ++ "LO\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines" ++ allHopsPlotL
       wholeScript   = header ++ wholePlotLine 
-  writeFile (fileN ++ "gnuplotScript") wholeScript
-  system $ "gnuplot < " ++ (fileN ++ "gnuplotScript 2> /dev/null")
+  writeFile (fileScript ++ "gnuplotScript") wholeScript
+  system $ "gnuplot < " ++ (fileScript ++ "gnuplotScript 2> /dev/null")
   let folderCT = "ChargeTranfGraphs"
   createDirectoryIfMissing True folderCT
   system $ "mv " ++ pngName ++ " " ++ folderCT
-  --system $ "gnuplot < " ++ (fileN ++ "gnuplotScript")
 

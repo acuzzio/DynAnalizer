@@ -107,7 +107,7 @@ goIntoMenu fn = do
   inputFile <- getInputInfos "input"
   let input = inputFile { getfolder = fn }
 --  checkFolder fn
-  putStrLn "\nSo here we are again. What do you want to do now ?\n"
+  putStrLn $ "\nSo here we are again for the folder " ++ fn ++ ". What do you want to do now ?\n"
   putStrLn . unlines $ map concatNums choices
   choice <- getLine
   case validate choice of

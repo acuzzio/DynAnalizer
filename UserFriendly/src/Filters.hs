@@ -140,10 +140,29 @@ chargeTmap input = do
           doHopNoIsom   = (intersect doHop doesNotIsom, "HopAndNoIsom")
           noHopIsom     = (intersect doesNotHop doIsom, "NoHopAndIsom")
           noHopNoIsom   = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
-          listOfThem    = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom]
+          (doHopIsomS1,doHopIsomS0)     = divideS0S1 input doHopIsom
+          (doHopNoIsomS1,doHopNoIsomS0) = divideS0S1 input doHopNoIsom
+          listOfThem    = [allOfThem,doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom,doHopIsomS1,doHopIsomS0,doHopNoIsomS1,doHopNoIsomS0]
           listOfNonEmpt = filter (\x -> (length $ fst x) > 0 ) listOfThem
           thresh = getchargeTrThresh input
       mapM_ (\x -> chargeTMultiple input (fst x) (snd x) thresh) listOfNonEmpt 
+
+divideS0S1 :: Inputs -> (AllTrajData,String) -> ((AllTrajData,String),(AllTrajData,String))
+divideS0S1 input x = let 
+   label   = snd x
+   labelS1 = label ++ "S1"
+   labelS0 = label ++ "S0"
+   atdTOT  = fst x
+   (atdS0, atdS1) = divideATDS0S1 input atdTOT
+   in ((atdS0,labelS0),(atdS1,labelS1))
+
+divideATDS0S1 :: Inputs -> AllTrajData -> (AllTrajData,AllTrajData)
+divideATDS0S1 input atd = let
+   plottable   = getListToPlot input
+   rightIndex  = findInd Root plottable
+   inS0        = map (filter (\x -> x!!rightIndex=="S0")) atd
+   inS1        = map (filter (\x -> x!!rightIndex=="S1")) atd
+   in (inS0,inS1)
 
 chargeTMultiple :: Inputs -> AllTrajData -> String -> [Double] -> IO()
 chargeTMultiple input atd filtername thresh = mapM_ (\x -> chargeTsingle input atd filtername x ) thresh
@@ -171,12 +190,10 @@ chargeTsingle input atd filtername thresh = do
     system $ "mv " ++ fileName ++ "* ChargeTranfData"
     return ()
 
-
 -- I wanna fill the space between two different set in gnuplot splot lines
 correctGaps :: [[String]] -> [[String]] -> [[String]]
 correctGaps []    a      = []
 correctGaps small (x:[]) = x : []
 correctGaps small (x:xs) = if elem (head xs) small then x : correctGaps small xs else if elem x small then x : correctGaps small xs else [" "] : correctGaps small xs
-
 
 

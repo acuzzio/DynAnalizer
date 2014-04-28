@@ -88,13 +88,23 @@ blaD blaList geometries = let
     blaDV = map (blaPSB3 blaList) geometries
     in prt blaDV
 
+--blaPSB3 :: [[(Int,Int)]] -> [Vec Double] -> Double
+--blaPSB3 blaList geometry = let 
+--    (a:b:c:[])      = blaList !! 0 
+--    (d:e:[])        = blaList !! 1
+--    blaBond (fS,sN) = bond [geometry!!(pred fS), geometry!!(pred sN)]
+--    doubles         = (blaBond a + blaBond b + blaBond c) / 3 
+--    singles         = (blaBond d + blaBond e) / 2 
+--    res             = singles - doubles
+--    in res
+
 blaPSB3 :: [[(Int,Int)]] -> [Vec Double] -> Double
 blaPSB3 blaList geometry = let 
-    (a:b:c:[])      = blaList !! 0 
-    (d:e:[])        = blaList !! 1
+    double          = blaList !! 0
+    single          = blaList !! 1
     blaBond (fS,sN) = bond [geometry!!(pred fS), geometry!!(pred sN)]
-    doubles         = (blaBond a + blaBond b + blaBond c) / 3 
-    singles         = (blaBond d + blaBond e) / 2 
+    doubles         = (sum (map blaBond (double))) / (fromIntegral (length double))
+    singles         = (sum (map blaBond (single))) / (fromIntegral (length single))
     res             = singles - doubles
     in res
 
