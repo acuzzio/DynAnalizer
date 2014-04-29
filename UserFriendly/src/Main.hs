@@ -48,9 +48,12 @@ options = [
    Option "C" ["CheckInfo"]
      (ReqArg CheckInfo "FOLDERNAME")
      "it checks for consistency in info files inside specified folder",
-   Option "a" ["folder"]
+   Option "A" ["folder"]
      (ReqArg DoAll "ProjectFolder")
      "DO EVERYTHING in this folder",
+   Option "a" ["folder"]
+     (ReqArg Doall "ProjectFolder")
+     "I have data files, I just need graphs in this folder",
    Option "f" ["folder"]
      (ReqArg InputFile "ProjectFolder")
      "It will run the program using the information into FOLDER. In case it does not exist, a template one will be created"
@@ -93,7 +96,17 @@ getExpression flag =
                       putStrLn "Now doing the CT part:"
                       chargeTmap input
                       putStrLn "Done"
-
+    Doall fnn -> do
+       let fn = if (last fnn == '/') then init fnn else fnn 
+       setCurrentDirectory fn
+       inputFile <- getInputInfos "input"
+       let input = inputFile { getfolder = fn }
+       case (getchargeTrFragment input) == [9999] of
+          True  -> do putStrLn "There is a problem into input file."
+          False -> do mainfilter input
+                      putStrLn "Now doing the CT part:"
+                      chargeTmap input
+                      putStrLn "Done"
 
 
 --MENUUUU

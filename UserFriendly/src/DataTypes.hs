@@ -26,6 +26,7 @@ data Flag = Help
             | CheckInfo String
             | InputFile String
             | DoAll String
+            | Doall String
             deriving (Show, Eq)
 
 data IsomType = Cis | Trans deriving (Show, Read)

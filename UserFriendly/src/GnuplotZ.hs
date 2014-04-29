@@ -171,7 +171,8 @@ gnuplotCT input label plotThis atd thresh = do
       ps            = "2"
       isomK         = getisomType input
       rangeOption   = case plotThis of
-                         Bla -> "set yrange [-0.5:0.5]"
+                         Bla   -> "set yrange [-0.5:0.5]"
+                         Delta -> "set yrange [-150:150]"
                          otherwise -> case isomK of
                                         Cis   -> "set yrange [-300:300]"
                                         Trans -> "set yrange [-540:180]"
