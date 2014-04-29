@@ -185,7 +185,7 @@ chargeTsingle input atd filtername thresh = do
     mapM_ (\x -> writeFile (fileName ++ fst x) $ writeF (getHOPs !! snd x)) $ zip allJumps [0..]
     writeFile (fileName ++ "HI") $ writeF upperCorr
     writeFile (fileName ++ "LO") $ writeF lowerCorr
-    mapM (\x -> gnuplotCT input filtername x atd thresh) [CcccCorrected,BetaCorrected,Tau]
+    mapM (\x -> gnuplotCT input filtername x atd thresh) [CcccCorrected,BetaCorrected,Tau,Delta,Bla]
     createDirectoryIfMissing True "ChargeTranfData"
     system $ "mv " ++ fileName ++ "* ChargeTranfData"
     return ()

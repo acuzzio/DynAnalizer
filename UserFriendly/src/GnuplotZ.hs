@@ -170,9 +170,11 @@ gnuplotCT input label plotThis atd thresh = do
       lw            = "2"
       ps            = "2"
       isomK         = getisomType input
-      rangeOption   = case isomK of
-                        Cis   -> "set yrange [-300:300]"
-                        Trans -> "set yrange [-540:180]"
+      rangeOption   = case plotThis of
+                         Bla -> "set yrange [-0.5:0.5]"
+                         otherwise -> case isomK of
+                                        Cis   -> "set yrange [-300:300]"
+                                        Trans -> "set yrange [-540:180]"
       plottable     = getListToPlot input
       rightInd      = show $ (findInd plotThis plottable) + 1 
       gplOpt        = getgnuplotOptions input
