@@ -142,8 +142,8 @@ choices = zip [1.. ] [
    ("I want to see Energies and Populations graphics", menuGraphsEnePop),
    ("I want to plot a Bond, an Angle or a Dihedral angle", menuGraphsBAD),
    ("I want to see MD Trajectories !", menuTrajectories),
-   ("I want to know average lifetimes !!", menuLifeTimes),
    ("I want to create DATA files !!", menuData),
+   ("I want to know average lifetimes !!", menuLifeTimes2),
    ("I have DATA files, wanna do some Analysis !!", menuAnalysis),
    ("I have DATA files, wanna do some Charge Transfer graphs !!", menuCT),
    ("Wanna Do Them All !!", menuAll),
@@ -186,6 +186,20 @@ menuGraphsBAD input = do
 menuTrajectories input = do
   genTrajectories input
   blockScreenTillPress
+
+menuLifeTimes2 input = do
+  let nRoot = getnRoot input
+      menu  = intercalate "\n" $ map (\x -> " " ++ (show x) ++ " ) Graphic of lifetime in S" ++ (show $ pred x)) [1..nRoot]
+  putStrLn $ "\nWhich Root?\n\n" ++ menu ++ "\n"
+  choice1 <- getLine
+  let a = read choice1
+  if a `elem` [1..nRoot]
+    then do
+      graphicLifeTime2 input a
+    else do
+      putStrLn "\nI do not like you.\n"
+      menuLifeTimes2 input
+
 
 menuLifeTimes input = do
   let nRoot = getnRoot input

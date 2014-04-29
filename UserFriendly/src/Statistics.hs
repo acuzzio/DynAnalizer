@@ -9,6 +9,7 @@ import CreateInfo
 import Functions
 import DataTypes
 import ParseInput
+import CalculateData
 
 
 -- to be used    calculateLifeTime 2  30 120            with 1 = "S0" and 2 = "S1"
@@ -25,6 +26,21 @@ calculateLifeTime input root limitFrom limitTo = do
     putStrLn stringToWrite
     writeFile fileToWriteN stringToWrite
     putStrLn $ "\nThis information has been written into file: " ++ fileToWriteN ++ "\n"
+
+
+-- input <- getInputInfos "input"
+graphicLifeTime2 input root = do
+    atd   <- readerData
+    let plottable   = getListToPlot input
+        rightInd    = findInd Root plottable
+        states      = map (map (\x -> x!!rightInd)) atd
+        counter x   = if x == root then 1 else 0 
+        number      = transpose $ map (map counter) states
+        trajCounter = length $ number !! 0 -- need to average like this because some trajectories can be shorter
+        averages    = map (\x -> fromIntegral (sum x) / (fromIntegral trajCounter)) number
+        tupleForFit = zip (map (\x -> fromIntegral x :: Double) [1..]) averages
+        fitThis     = dropWhile (\x -> snd x == 1.0) tupleForFit
+    putStrLn "ciao"
 
 -- to be used with 1 = "S0" and 2 = "S1"
 graphicLifeTime :: Inputs -> Int -> IO ()
