@@ -1,5 +1,6 @@
 module CalculateData where
 
+import Data.Char (isDigit)
 import Data.List
 import Data.List.Split
 import System.Process
@@ -8,7 +9,6 @@ import System.ShQQ
 import Text.Printf
 
 import CreateInfo
-import Data.Char (isDigit)
 import DataTypes
 import Functions
 import IntCoor
@@ -22,28 +22,28 @@ readerData = do
     return $ map (map words) $ map lines dataContent
 
 createDATAs input = do
-   let listToPlot = getListToPlot input 
    outs <- readShell $ "ls INFO/*.info"
    let outputs    = lines outs
        dataFold   = "DATA" 
        folder = getfolder input
    createDirectoryIfMissing True dataFold
-   mapM_ (createDATA input listToPlot) outputs
+   mapM_ (createDATA input) outputs
    system $ "mv INFO/*.data " ++ dataFold
    joinAllDATA folder
    putStrLn $ "\nYou can find data files into: " ++ folder ++ "/" ++ dataFold ++ " .\nI also wrote an all data file, have fun with Gnuplot !!\n"
 
-createDATA input listToPlot fileInfo = do
+createDATA input fileInfo = do
    a             <- rdInfoFile fileInfo
-   let dataname  = (takeWhile (/= '.') fileInfo ) ++ ".data"
-       rlxR      = getStartRlxRt a
-       dynNum    = reverse $ takeWhile (isDigit) $ reverse $ takeWhile (/= '.') fileInfo -- take Label
-       outPut    = map (\x -> createPLOTDATA a input x) listToPlot
-       dynN      = take (length $ outPut !! 0 ) $ repeat dynNum
-       stepN     = take (length $ outPut !! 0 ) $ map show [1..]
-       transpos0 = dynN : stepN : outPut
-       transpos1 = map printWellSpacedColumn transpos0
-       transpos  = transpose transpos1  -- I need to transpose them
+   let dataname   = (takeWhile (/= '.') fileInfo ) ++ ".data"
+       listToPlot = getListToPlot input 
+       rlxR       = getStartRlxRt a
+       dynNum     = reverse $ takeWhile (isDigit) $ reverse $ takeWhile (/= '.') fileInfo --take Label
+       outPut     = map (\x -> createPLOTDATA a input x) listToPlot
+       dynN       = take (length $ outPut !! 0 ) $ repeat dynNum
+       stepN      = take (length $ outPut !! 0 ) $ map show [1..]
+       transpos0  = dynN : stepN : outPut
+       transpos1  = map printWellSpacedColumn transpos0
+       transpos   = transpose transpos1  -- I need to transpose them
    writeFile dataname $ unlines $ map unwords transpos
 
 createPLOTDATA :: Dinamica -> Inputs -> Plottable -> [String] 

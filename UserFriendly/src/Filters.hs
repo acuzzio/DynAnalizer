@@ -34,7 +34,7 @@ mainfilter input = do
           mapM_ (\x -> atdLogger fileN (snd x) (fst x)) listOfThem
           let lf = length . fst
               [all,yhyi,yhni,nhyi,nhni] = map lf listOfThem
-              z         = "TOTAL         -> " ++ (show all)
+              z         = "\n\nTOTAL         -> " ++ (show all)
               a         = "Hop and Iso   -> " ++ (show yhyi)
               b         = "Hop not Iso   -> " ++ (show yhni)
               c         = "NoHop and Iso -> " ++ (show nhyi)
