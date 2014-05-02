@@ -29,6 +29,7 @@ calculateLifeTime input root limitFrom limitTo = do
 
 
 -- input <- getInputInfos "input"
+-- writeFile "dataToFit" $ unlines $ map (\x -> (show $ fst x) ++ " " ++ (show $ snd x)) fitThis
 graphicLifeTime2 input root = do
     atd   <- readerData
     let plottable   = getListToPlot input

@@ -195,7 +195,8 @@ menuLifeTimes2 input = do
   let a = read choice1
   if a `elem` [1..nRoot]
     then do
-      graphicLifeTime2 input a
+      --graphicLifeTime2 input a
+      graphicLifeTime input a
     else do
       putStrLn "\nI do not like you.\n"
       menuLifeTimes2 input
