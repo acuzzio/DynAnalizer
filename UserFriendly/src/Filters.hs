@@ -29,7 +29,7 @@ mainfilter input = do
               noHopNoIsom   = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
               listOfThem    = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom]
               fileN         = folder ++ "-Stats"
-          system $ "rm " ++ fileN ++ " 2> /dev/null"
+--          system $ "rm " ++ fileN ++ " 2> /dev/null"
           mapM_ (\x -> buaaaah input (snd x) (fst x)) listOfThem
           mapM_ (\x -> atdLogger fileN (snd x) (fst x)) listOfThem
           let lf = length . fst

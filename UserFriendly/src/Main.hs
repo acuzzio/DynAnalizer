@@ -89,9 +89,9 @@ getExpression flag =
           True  -> do putStrLn "There is a problem into input file."
           False -> do plotEnergiesPopulations input 
                       plotBondAngleDihedrals input $ getccccList input 
+                      createDATAs input
                       genTrajectories input 
                       graphicLifeTime2 input 2 
-                      createDATAs input
                       mainfilter input
                       putStrLn "Now doing the CT part:"
                       chargeTmap input
@@ -260,8 +260,8 @@ menuAll input = do
   plotEnergiesPopulations input 
   plotBondAngleDihedrals input $ getccccList input 
   genTrajectories input 
-  graphicLifeTime2 input 2 
   createDATAs input
+  graphicLifeTime2 input 2 
   mainfilter input
   putStrLn "Now doing the CT part:"
   chargeTmap input

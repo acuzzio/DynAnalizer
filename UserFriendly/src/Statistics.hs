@@ -50,7 +50,7 @@ graphicLifeTime2 input root = do
         t1  = printZ $ fst $ snd $ fitData 
         t2  = printZ $ snd $ snd $ fitData
         tau = printZ $ fst fitData
-        resultsString = "\nt1 = " ++ t1 ++ "\nt2 = " ++ t2 ++ "\ntotal lifetime = " ++ tau ++ "\n"
+        resultsString = "\n\nt1 = " ++ t1 ++ "\nt2 = " ++ t2 ++ "\ntotal lifetime = " ++ tau ++ "\n"
         xrange       = "set xtics 20\nset yrange [0:1]"
         fnLabe       = "AverageOnState" ++ rootString
         fx           = "exp ((" ++ t1 ++ " - x)/" ++ t2 ++ ")"
