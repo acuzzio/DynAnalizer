@@ -90,7 +90,7 @@ getExpression flag =
           False -> do plotEnergiesPopulations input 
                       plotBondAngleDihedrals input $ getccccList input 
                       genTrajectories input 
-                      graphicLifeTime input 2 
+                      graphicLifeTime2 input 2 
                       createDATAs input
                       mainfilter input
                       putStrLn "Now doing the CT part:"
@@ -195,10 +195,12 @@ menuLifeTimes2 input = do
   let a = read choice1
   if a `elem` [1..nRoot]
     then do
-      --graphicLifeTime2 input a
-      graphicLifeTime input a
+      graphicLifeTime2 input a
+      blockScreenTillPress
+      --graphicLifeTime input a
     else do
       putStrLn "\nI do not like you.\n"
+      blockScreenTillPress
       menuLifeTimes2 input
 
 
@@ -258,7 +260,7 @@ menuAll input = do
   plotEnergiesPopulations input 
   plotBondAngleDihedrals input $ getccccList input 
   genTrajectories input 
-  graphicLifeTime input 2 
+  graphicLifeTime2 input 2 
   createDATAs input
   mainfilter input
   putStrLn "Now doing the CT part:"

@@ -31,17 +31,40 @@ calculateLifeTime input root limitFrom limitTo = do
 -- input <- getInputInfos "input"
 -- writeFile "dataToFit" $ unlines $ map (\x -> (show $ fst x) ++ " " ++ (show $ snd x)) fitThis
 graphicLifeTime2 input root = do
-    atd   <- readerData
-    let plottable   = getListToPlot input
-        rightInd    = findInd Root plottable
-        states      = map (map (\x -> x!!rightInd)) atd
-        counter x   = if x == root then 1 else 0 
-        number      = transpose $ map (map counter) states
-        trajCounter = length $ number !! 0 -- need to average like this because some trajectories can be shorter
-        averages    = map (\x -> fromIntegral (sum x) / (fromIntegral trajCounter)) number
-        tupleForFit = zip (map (\x -> fromIntegral x :: Double) [1..]) averages
-        fitThis     = dropWhile (\x -> snd x == 1.0) tupleForFit
-    putStrLn "ciao"
+    atd              <- readerData
+    let plottable    = getListToPlot input
+        folder       = getfolder input
+        fileN        = folder ++ "-Stats"
+        rootString   = "S" ++ (show $ pred root)
+        rightInd     = findInd Root plottable
+        states       = map (map (\x -> x!!rightInd)) atd
+        counter x    = if x == rootString then 1 else 0 
+        number       = transpose $ map (map counter) states
+        trajCounter  = length $ number !! 0 -- need to average like this because some trajectories can be shorter
+        averages     = map (\x -> fromIntegral (sum x) / (fromIntegral trajCounter)) number
+        tupleForFit  = zip (map (\x -> fromIntegral x :: Double) [1..]) averages
+        transf (x,y) = show x ++ " " ++ show y
+        tupleInFile  = unlines $ map transf tupleForFit 
+        fitThis      = dropWhile (\x -> snd x == 1.0) tupleForFit -- we need to exclude values = 1
+        fitData      = barbattiFitting fitThis
+        t1  = printZ $ fst $ snd $ fitData 
+        t2  = printZ $ snd $ snd $ fitData
+        tau = printZ $ fst fitData
+        resultsString = "\nt1 = " ++ t1 ++ "\nt2 = " ++ t2 ++ "\ntotal lifetime = " ++ tau ++ "\n"
+        xrange       = "set xtics 20\nset yrange [0:1]"
+        fnLabe       = "AverageOnState" ++ rootString
+        fx           = "exp ((" ++ t1 ++ " - x)/" ++ t2 ++ ")"
+        graphicpng   = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset output 'AvgTimeInRoot" ++ rootString ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines t 'Fraction of trajectories on " ++ rootString ++ "', " ++ fx
+        graphicDumb  = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset key off\nset terminal dumb\nset yrange [0:1]\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
+    writeFile (fnLabe ++ "gnuplotScript") graphicpng
+    writeFile (fnLabe ++ "gnuplotScriptD") graphicDumb
+    writeFile (fnLabe ++ "gnuplotValues") tupleInFile
+    system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
+    system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScriptD")
+    system $ "rm " ++ (fnLabe ++ "gnuplotScriptD")
+    appendFile fileN resultsString
+    putStrLn resultsString
+    putStrLn $ "\nFile AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"        
 
 -- to be used with 1 = "S0" and 2 = "S1"
 graphicLifeTime :: Inputs -> Int -> IO ()
