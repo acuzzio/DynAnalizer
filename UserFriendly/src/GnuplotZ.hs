@@ -141,8 +141,8 @@ gnuplotG input label plotThis atd = do
       fileN         = folder ++ label 
       title         = folder ++ " " ++ label ++ " " ++ (show plotThis)
       pngName       = folder ++ label ++ (show plotThis) ++ ".png"
-      lw            = "2"
-      ps            = "3"
+      lw            = "1"
+      ps            = "2"
       isomK         = getisomType input
       rangeOption   = case isomK of
                         Cis   -> "set yrange [-300:300]"  
