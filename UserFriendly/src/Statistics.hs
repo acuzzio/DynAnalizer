@@ -52,9 +52,9 @@ graphicLifeTime2 input root = do
         tau = printZ $ fst fitData
         resultsString = "\n\nt1 = " ++ t1 ++ "\nt2 = " ++ t2 ++ "\ntotal lifetime = " ++ tau ++ "\n"
         xrange       = "set xtics 20\nset yrange [0:1]"
-        fnLabe       = "AverageOnState" ++ rootString
+        fnLabe       = folder ++ "AverageOnState" ++ rootString
         fx           = "exp ((" ++ t1 ++ " - x)/" ++ t2 ++ ")"
-        graphicpng   = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset output 'AvgTimeInRoot" ++ rootString ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines t 'Fraction of trajectories on " ++ rootString ++ "', " ++ fx
+        graphicpng   = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset output '"++ fnLabe ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines t 'Fraction of trajectories on " ++ rootString ++ "', " ++ fx
         graphicDumb  = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset key off\nset terminal dumb\nset yrange [0:1]\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") graphicpng
     writeFile (fnLabe ++ "gnuplotScriptD") graphicDumb
@@ -64,7 +64,7 @@ graphicLifeTime2 input root = do
     system $ "rm " ++ (fnLabe ++ "gnuplotScriptD")
     appendFile fileN resultsString
     putStrLn resultsString
-    putStrLn $ "\nFile AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"        
+    putStrLn $ "\nFile " ++ fnLabe ++ ".png written !!\n"        
 
 -- to be used with 1 = "S0" and 2 = "S1"
 graphicLifeTime :: Inputs -> Int -> IO ()
@@ -75,7 +75,7 @@ graphicLifeTime input root = do
 --        xrange = "set xrange [0:200]\nset xtics 10\nset yrange [0:1]"
         xrange = "set xtics 10\nset yrange [0:1]"
        -- fnLabe = folder ++ "/AverageOnState" ++ (show root)
-        fnLabe = "AverageOnState" ++ (show root)
+        fnLabe = folder ++ "AverageOnState" ++ (show root)
         graphicpng       = "set title \"Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset output 'AvgTimeInRoot" ++ (show root) ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
         graphicDumb       = "set title \"Average Time Into" ++ (show root) ++ "\"\nset xlabel \"STEPS\"\nset key off\nset terminal dumb\nset yrange [0:1]\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") graphicpng
@@ -85,7 +85,7 @@ graphicLifeTime input root = do
     system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScriptD")
     system $ "rm " ++ (fnLabe ++ "gnuplotScriptD")
 --    system $ "rm " ++ (fnLabe ++ "GnupValues") ++ " " ++ (fnLabe ++ "gnuplotScript")
-    putStrLn $ "\nFile AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"
+    putStrLn $ "\nFile" ++ fnLabe ++ ".png written !!\n"
 
 
 -- this is the most accurate one, that calculates the average population to be used with root INDEX, 1 or 2
