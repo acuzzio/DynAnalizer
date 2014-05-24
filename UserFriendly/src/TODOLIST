@@ -1,9 +1,9 @@
 I   FEATURES
 
 METTI CREATEINFO PARALLELO COME opzione -c <- you must specify the infopath (not just the subfolder */*.info )
-metti nel primo menu il TAGLIATORE
-usa la FRAZIONE invece dei pesi e cambia la FORMULAAA
-metti il coso ceh crea una geometria per settare l'input
+metti nel primo menu il TAGLIATORE -- non troppo importante eh...
+usa la FRAZIONE invece dei pesi e cambia la FORMULAAA -- fatto ma non funziona mettere gnuplot?
+metti il coso che crea una geometria per settare l'input
 
 
 II  BUGS
