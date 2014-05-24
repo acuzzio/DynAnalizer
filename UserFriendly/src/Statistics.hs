@@ -127,3 +127,53 @@ barbattiFitting tuplas = let
     tau   = t1 + t2
     in (tau,(t1,t2))
 
+-- this HUGE function is simpler than it seems, it is using gnuplot variational method to plot the average lifetime (in barbatti way) on DATA files
+graphicLifeTime3 input root = do
+    atd                  <- readerData
+    let plottable        = getListToPlot input
+        folder           = getfolder input
+        fileN            = folder ++ "-Stats"
+        rootString       = "S" ++ (show $ pred root)
+        rightInd         = findInd Root plottable
+        states           = map (map (\x -> x!!rightInd)) atd 
+        counter x        = if x == rootString then 1 else 0 
+        number           = transpose $ map (map counter) states
+        trajCounter      = length $ number !! 0 -- need to average like this because some trajectories can be shorter
+        averages         = map (\x -> fromIntegral (sum x) / (fromIntegral trajCounter)) number
+        tupleForFit      = zip (map (\x -> fromIntegral x :: Double) [1..]) averages
+        transf (x,y)     = show x ++ " " ++ show y
+        tupleInFile      = unlines $ map transf tupleForFit 
+        fitThis          = dropWhile (\x -> snd x == 1.0) tupleForFit -- we need to exclude values = 1
+        toFitInFile      = unlines $ map transf fitThis
+        xrange           = "set xtics 20\nset yrange [0:1]"
+        fnLabe           = folder ++ "AverageLifeTimeOn" ++ rootString
+        dataToPlotName   = fnLabe ++ "ToFit"
+        scriptToPlotName = fnLabe ++ "ScriptToFit"
+        plotFileCont     = gnuplotFunctionBarb ++ (fitline dataToPlotName)
+    writeFile dataToPlotName toFitInFile
+    writeFile scriptToPlotName plotFileCont
+    system "rm fit.log"
+    system $ "gnuplot < " ++ scriptToPlotName ++ " > /dev/null"
+    t1S <- readShell $ "grep -A4 'Final set of parameters' fit.log | grep 't1' | awk '{print $3}'"
+    t2S <- readShell $ "grep -A4 'Final set of parameters' fit.log | grep 't2' | awk '{print $3}'"
+    let [t1,t2]              = map read2 [t1S,t2S]
+        tauS                 = t1 + t2
+        resultsString        = "Average LifeTime on " ++ rootString ++ ": " ++ printZ tauS     ++ "\nLatency Time   t1 = " ++ printZ t1 ++ "\nDecay Constant t2 = " ++ printZ t2 ++ "\n"
+    putStrLn $ "\n" ++ resultsString ++ "\nA fit.log file has been created with more information on this fit.\n\n"
+    appendFile fileN resultsString
+    let  xrange       = "set xtics 20\nset yrange [0:1]"
+         fnLabe       = "AverageOnState" ++ rootString
+         fx           = "exp ((" ++ printZ t1 ++ " - x)/" ++ printZ t2 ++ ")" 
+         graphicpng   = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset output 'AvgTimeInRoot" ++ rootString ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines t 'Fraction of trajectories on " ++ rootString ++ "', " ++ fx
+         graphicDumb  = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset key off\nset terminal dumb\nset yrange [0:1]\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
+    writeFile (fnLabe ++ "gnuplotScript") graphicpng
+    writeFile (fnLabe ++ "gnuplotScriptD") graphicDumb
+    writeFile (fnLabe ++ "gnuplotValues") tupleInFile
+    system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScript")
+    system $ "gnuplot < " ++ (fnLabe ++ "gnuplotScriptD")
+    system $ "rm " ++ (fnLabe ++ "gnuplotScriptD")
+    putStrLn $ "\nFile AvgTimeInRoot" ++ (show root) ++ ".png written !!\n"
+
+fitline filename = "fit f(x) \"" ++ filename ++ "\" u 1:2 via t1,t2\n"
+
+gnuplotFunctionBarb = "f(x) = exp(-(x-t1)/t2)\n"
