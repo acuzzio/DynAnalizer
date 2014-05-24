@@ -163,9 +163,9 @@ graphicLifeTime3 input root = do
     putStrLn $ "\n" ++ resultsString ++ "\nA fit.log file has been created with more information on this fit.\n\n"
     appendFile fileN resultsString
     let  xrange       = "set xtics 20\nset yrange [0:1]"
-         fnLabe       = "AverageOnState" ++ rootString
-         fx           = gnuplotFunctionBarb 
-         graphicpng   = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset output 'AvgTimeInRoot" ++ rootString ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines t 'Fraction of trajectories on " ++ rootString ++ "', " ++ fx
+         fnLabe       = folder ++ "AverageOnState" ++ rootString
+         fx           = "exp(-(x-" ++ printZ t1 ++ ")/" ++ printZ t2 ++ ")" 
+         graphicpng   = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset output '" ++ fnLabe ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines t 'Fraction of trajectories on " ++ rootString ++ "', " ++ fx
          graphicDumb  = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset key off\nset terminal dumb\nset yrange [0:1]\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") graphicpng
     writeFile (fnLabe ++ "gnuplotScriptD") graphicDumb

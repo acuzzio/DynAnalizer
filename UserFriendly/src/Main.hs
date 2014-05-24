@@ -217,7 +217,7 @@ menuLifeTimes input = do
          let b = read choice2 :: Int
          if b `elem` [1..nRoot] 
             then do
-              graphicLifeTime input b
+              graphicLifeTime3 input b
               blockScreenTillPress
             else do
               putStrLn "\nI do not like you.\n"
