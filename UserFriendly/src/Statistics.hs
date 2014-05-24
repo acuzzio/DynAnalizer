@@ -151,7 +151,6 @@ graphicLifeTime3 input root = do
         scriptToPlotName = fnLabe ++ "ScriptToFit"
         t1Guess          = fst $ head fitThis
         plotFileCont     = (intercalate "\n" [gnuplotFunctionBarb,("t1 = " ++ show t1Guess),(fitline dataToPlotName)]) ++ "\n"
-    print t1Guess
     writeFile dataToPlotName toFitInFile
     writeFile scriptToPlotName plotFileCont
     system "rm fit.log"
@@ -165,7 +164,7 @@ graphicLifeTime3 input root = do
     appendFile fileN resultsString
     let  xrange       = "set xtics 20\nset yrange [0:1]"
          fnLabe       = "AverageOnState" ++ rootString
-         fx           = "exp (-(" ++ printZ t1 ++ " - x)/" ++ printZ t2 ++ ")" 
+         fx           = gnuplotFunctionBarb 
          graphicpng   = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset output 'AvgTimeInRoot" ++ rootString ++ ".png'\nset terminal pngcairo size 1224,830 enhanced font \", 12\"\n" ++ xrange ++ "\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines t 'Fraction of trajectories on " ++ rootString ++ "', " ++ fx
          graphicDumb  = "set title \"Average Time Into" ++ rootString ++ "\"\nset xlabel \"STEPS\"\nset key off\nset terminal dumb\nset yrange [0:1]\nplot \"" ++ (fnLabe ++ "gnuplotValues") ++ "\" u 1:2 w lines"
     writeFile (fnLabe ++ "gnuplotScript") graphicpng
