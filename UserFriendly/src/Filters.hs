@@ -31,8 +31,8 @@ mainfilter input = do
               noHopNoIsom    = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
               doHopIsomLeft  = (doLeft,  "HopIsomLeft")
               doHopIsomRight = (doRight, "HopIsomRight")
-              noHopIsomLeft  = (doLeftNoIso,  "NoHopGoLeft")
-              noHopIsomRight = (doRightNoIso, "NoHopGoRight")
+              noHopIsomLeft  = (doLeftNoIso,  "HopNoIsoGoLeft")
+              noHopIsomRight = (doRightNoIso, "HopNoIsoGoRight")
               listOfThem     = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom,doHopIsomLeft,doHopIsomRight,noHopIsomLeft,noHopIsomRight]
               fileN          = folder ++ "-Stats"
 --          system $ "rm " ++ fileN ++ " 2> /dev/null"
