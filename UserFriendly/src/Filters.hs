@@ -22,18 +22,24 @@ mainfilter input = do
       False -> do 
           let (doHop,doesNotHop)   = whoHop input atd
               (doIsom,doesNotIsom) = whoIsom input atd
-              allOfThem     = (atd, "all")
-              doHopIsom     = (intersect doHop doIsom, "HopAndIsom")
-              doHopNoIsom   = (intersect doHop doesNotIsom, "HopAndNoIsom")
-              noHopIsom     = (intersect doesNotHop doIsom, "NoHopAndIsom")
-              noHopNoIsom   = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
-              listOfThem    = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom]
-              fileN         = folder ++ "-Stats"
+              (doLeft,doRight)     = whoLeftWhoRight input $ fst doHopIsom
+              (doLeftNoIso,doRightNoIso) = whoLeftWhoRight input $ fst doHopNoIsom
+              allOfThem      = (atd, "all")
+              doHopIsom      = (intersect doHop doIsom, "HopAndIsom")
+              doHopNoIsom    = (intersect doHop doesNotIsom, "HopAndNoIsom")
+              noHopIsom      = (intersect doesNotHop doIsom, "NoHopAndIsom")
+              noHopNoIsom    = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
+              doHopIsomLeft  = (doLeft,  "HopIsomLeft")
+              doHopIsomRight = (doRight, "HopIsomRight")
+              noHopIsomLeft  = (doLeftNoIso,  "NoHopGoLeft")
+              noHopIsomRight = (doRightNoIso, "NoHopGoRight")
+              listOfThem     = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom,doHopIsomLeft,doHopIsomRight,noHopIsomLeft,noHopIsomRight]
+              fileN          = folder ++ "-Stats"
 --          system $ "rm " ++ fileN ++ " 2> /dev/null"
-          mapM_ (\x -> buaaaah input (snd x) (fst x)) listOfThem
+          mapM_ (\x -> makeBasicGraphs input (snd x) (fst x)) listOfThem
           mapM_ (\x -> atdLogger fileN (snd x) (fst x)) listOfThem
           let lf = length . fst
-              [all,yhyi,yhni,nhyi,nhni] = map lf listOfThem
+              [all,yhyi,yhni,nhyi,nhni,hiL,hiR,hniL,hniR] = map lf listOfThem
               z         = "\n\nTOTAL         -> " ++ (show all)
               a         = "Hop and Iso   -> " ++ (show yhyi)
               b         = "Hop not Iso   -> " ++ (show yhni)
@@ -42,7 +48,13 @@ mainfilter input = do
               e         = "\nonly Hopped Iso/notIso -> " ++ (rateH yhyi yhni) ++ "%"
               f         = "only NON Hopped Iso/notIso -> " ++ (rateH nhyi nhni) ++ "%"
               g         = "Total Iso/notIso -> " ++ (rateH (yhyi+nhyi) (yhni+nhni)) ++ "%"
-              stringToW = intercalate "\n" [z,a,b,c,d,e,f,g] 
+              h         = "Hop, Isom and go Left  -> " ++ (show hiL)
+              i         = "Hop, Isom and go Right -> " ++ (show hiR)
+              j         = "Hop, NO Isom and go Left  -> " ++ (show hniL)
+              k         = "Hop, NO Isom and go Right -> " ++ (show hniR)
+              l         = "Hop, Total Left  -> " ++ show (hiL + hniL)
+              m         = "Hop, Total Right -> " ++ show (hiR + hniR)
+              stringToW = intercalate "\n" [z,a,b,c,d,e,f,g,h,i,j,k,l,m] 
           putStrLn stringToW
           appendFile fileN stringToW 
           putStrLn $ "\nEverything written down into file: " ++ fileN ++ " !!\n\n"
@@ -58,7 +70,7 @@ atdLogger filN lab atd = do
           appendFile filN $ ":\n" ++ (unwords $ trajNum atd)
           appendFile filN "\n"
 
-buaaaah input lab atd = do
+makeBasicGraphs input lab atd = do
     let folder      = getfolder input
         label       = folder ++ lab 
         nRoot       = getnRoot input
@@ -106,9 +118,20 @@ doThisHopOrNot index std = let
    jumpColumn = map (\x-> x!!index) std  
    in any (\x -> x == "10") jumpColumn
 
-clockWiseCounterClockWise :: AllTrajData -> AllTrajData
-clockWiseCounterClockWise atd = undefined
+whoLeftWhoRight :: Inputs-> AllTrajData -> (AllTrajData,AllTrajData)
+whoLeftWhoRight input atd = partition (leftRight input) atd
 
+-- this DOES NOT WORK IN CASE OF 20 (from S2 to S0) last hop correct plz
+leftRight :: Inputs -> SingleTrajData -> Bool
+leftRight input std = let
+   listPlot  = getListToPlot input
+   indexC    = findInd CcccCorrected listPlot
+   indexJ    = findInd Jump listPlot
+   hoppingCC = read2 $ (last $ filter (\x -> x!!indexJ == "10") std ) !! indexC -- here is why it will not work. It just looks for "10" transitions
+   in case getisomType input of
+           Cis   -> if hoppingCC >  0   then True else False
+           Trans -> if hoppingCC > -180 then True else False
+   
 filterHoppingPointsAll :: AllTrajData -> AllTrajData
 filterHoppingPointsAll atd = map filterHoppingPoints atd
 

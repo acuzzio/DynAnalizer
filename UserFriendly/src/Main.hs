@@ -91,7 +91,7 @@ getExpression flag =
                       plotBondAngleDihedrals input $ getccccList input 
                       createDATAs input
                       genTrajectories input 
-                      graphicLifeTime2 input 2 
+                      graphicLifeTime3 input 2 
                       mainfilter input
                       putStrLn "Now doing the CT part:"
                       chargeTmap input
@@ -143,7 +143,7 @@ choices = zip [1.. ] [
    ("I want to plot a Bond, an Angle or a Dihedral angle", menuGraphsBAD),
    ("I want to see MD Trajectories !", menuTrajectories),
    ("I want to create DATA files !!", menuData),
-   ("I want to know average lifetimes !!", menuLifeTimes2),
+   ("I have DATA files, I want to know average lifetimes !!", menuLifeTimes2),
    ("I have DATA files, wanna do some Analysis !!", menuAnalysis),
    ("I have DATA files, wanna do some Charge Transfer graphs !!", menuCT),
    ("Wanna Do Them All !!", menuAll),
@@ -195,7 +195,7 @@ menuLifeTimes2 input = do
   let a = read choice1
   if a `elem` [1..nRoot]
     then do
-      graphicLifeTime2 input a
+      graphicLifeTime3 input a
       blockScreenTillPress
       --graphicLifeTime input a
     else do
@@ -217,7 +217,7 @@ menuLifeTimes input = do
          let b = read choice2 :: Int
          if b `elem` [1..nRoot] 
             then do
-              graphicLifeTime input b
+              graphicLifeTime3 input b
               blockScreenTillPress
             else do
               putStrLn "\nI do not like you.\n"
@@ -261,7 +261,7 @@ menuAll input = do
   plotBondAngleDihedrals input $ getccccList input 
   genTrajectories input 
   createDATAs input
-  graphicLifeTime2 input 2 
+  graphicLifeTime3 input 2 
   mainfilter input
   putStrLn "Now doing the CT part:"
   chargeTmap input

@@ -141,8 +141,8 @@ gnuplotG input label plotThis atd = do
       fileN         = folder ++ label 
       title         = folder ++ " " ++ label ++ " " ++ (show plotThis)
       pngName       = folder ++ label ++ (show plotThis) ++ ".png"
-      lw            = "2"
-      ps            = "3"
+      lw            = "1"
+      ps            = "2"
       isomK         = getisomType input
       rangeOption   = case isomK of
                         Cis   -> "set yrange [-300:300]"  
@@ -167,8 +167,8 @@ gnuplotCT input label plotThis atd thresh = do
       fileScript    = "chargeTr" ++ folder ++ (show thresh) ++ label ++ (show plotThis)
       title         = folder ++ " " ++ label ++ " " ++ (show thresh) ++ " " ++ (show plotThis)
       pngName       = folder ++ label ++ (show plotThis) ++ (show thresh) ++ ".png"
-      lw            = "2"
-      ps            = "2"
+      lw            = "1"
+      ps            = "1"
       isomK         = getisomType input
       rangeOption   = case plotThis of
                          Bla   -> "set yrange [-0.5:0.5]"
@@ -182,8 +182,9 @@ gnuplotCT input label plotThis atd thresh = do
       nRootI        = pred $ getnRoot input
       allJumps      = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y]
       header        = "set title \"" ++ title ++ "\"\nset output '" ++ pngName ++ "'\n" ++ gplOpt ++ "\nset key off\n" ++ rangeOption ++ "\n"
-      hopPlotLine l = ", \"" ++ fileN ++ l ++ "\" u 2:" ++ rightInd ++ " pt 7 ps " ++ ps ++ " w p"
-      allHopsPlotL  = concat $ map hopPlotLine allJumps
+      hopPointColor = concat $ repeat ["green","blue","red","yellow","grey"]
+      hopPlotLine hopType color = ", \"" ++ fileN ++ hopType ++ "\" u 2:" ++ rightInd ++ " linecolor rgb \"" ++ color ++ "\" pt 7 ps " ++ ps ++ " w p"
+      allHopsPlotL  = concat $ zipWith (\x y -> hopPlotLine x y) allJumps hopPointColor
       wholePlotLine = "plot \"" ++ fileN ++ "HI\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"red\" w lines, \"" ++ fileN ++ "LO\" u 2:" ++ rightInd ++ " lw " ++ lw ++" linecolor rgb \"black\" w lines" ++ allHopsPlotL
       wholeScript   = header ++ wholePlotLine 
   writeFile (fileScript ++ "gnuplotScript") wholeScript
@@ -191,4 +192,6 @@ gnuplotCT input label plotThis atd thresh = do
   let folderCT = "ChargeTranfGraphs"
   createDirectoryIfMissing True folderCT
   system $ "mv " ++ pngName ++ " " ++ folderCT
+
+
 
