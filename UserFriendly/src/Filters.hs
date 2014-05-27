@@ -4,6 +4,7 @@ import Data.List
 import System.Directory
 import System.Process
 import System.ShQQ
+import Text.Printf
 
 import CalculateData
 import DataTypes
@@ -40,28 +41,37 @@ mainfilter input = do
           mapM_ (\x -> atdLogger fileN (snd x) (fst x)) listOfThem
           let lf = length . fst
               [all,yhyi,yhni,nhyi,nhni,hiL,hiR,hniL,hniR] = map lf listOfThem
-              z         = "\n\nTOTAL         -> " ++ (show all)
-              a         = "Hop and Iso   -> " ++ (show yhyi)
-              b         = "Hop not Iso   -> " ++ (show yhni)
-              c         = "NoHop and Iso -> " ++ (show nhyi)
-              d         = "NoHop not Iso -> " ++ (show nhni)
-              e         = "\nonly Hopped Iso/notIso -> " ++ (rateH yhyi yhni) ++ "%"
-              f         = "only NON Hopped Iso/notIso -> " ++ (rateH nhyi nhni) ++ "%"
-              g         = "Total Iso/notIso -> " ++ (rateH (yhyi+nhyi) (yhni+nhni)) ++ "%"
-              h         = "Hop, Isom and go Left  -> " ++ (show hiL)
-              i         = "Hop, Isom and go Right -> " ++ (show hiR)
-              j         = "Hop, NO Isom and go Left  -> " ++ (show hniL)
-              k         = "Hop, NO Isom and go Right -> " ++ (show hniR)
-              l         = "Hop, Total Left  -> " ++ show (hiL + hniL)
-              m         = "Hop, Total Right -> " ++ show (hiR + hniR)
-              stringToW = intercalate "\n" [z,a,b,c,d,e,f,g,h,i,j,k,l,m] 
+              z         = "\nSTATISTICS:\n\n                  Hop/NoHop(" ++ show (yhyi+yhni) ++ "/" ++ show (nhyi+nhni) ++ ")        TOTAL(" ++ (show all) ++ ")"
+              a         = "Hop and Isom:   | " ++ (printPercentage2 yhyi yhni all)
+              b         = "Hop not Isom:   | " ++ (printPercentage2 yhni yhyi all)
+              c         = "NoHop and Isom: | " ++ (printPercentage2 nhyi nhni all)
+              d         = "NoHop not Isom: | " ++ (printPercentage2 nhni nhyi all)
+              g         = "\n\nLEFT AND RIGHT SECTION:\n"
+              h         = "     HOP and ISOMERIZE             just Hop                  Total"
+              i         = "Left:    | " ++ printPercentage3 hiL (hiL+hiR) (hiL+hiR+hniL+hniR) all
+              j         = "Right:   | " ++ printPercentage3 hiR (hiL+hiR) (hiL+hiR+hniL+hniR) all
+              k         = "\n   HOP and NOT ISOMERIZE           just Hop                  Total"
+              l         = "Left:    | " ++ printPercentage3 hniL (hniL+hniR) (hiL+hiR+hniL+hniR) all
+              m         = "Right:   | " ++ printPercentage3 hniR (hniL+hniR) (hiL+hiR+hniL+hniR) all
+              n         = "\n       TOTAL                       just Hop                  Total"
+              o         = "Left:    | " ++ printPercentage3 (hiL+hniL) (hiL+hiR+hniL+hniR) (hiL+hiR+hniL+hniR) all
+              p         = "Right:   | " ++ printPercentage3 (hiR+hniR) (hiL+hiR+hniL+hniR) (hiL+hiR+hniL+hniR) all
+              stringToW = intercalate "\n" [z,a,b,c,d,g,h,i,j,k,l,m,n,o,p] 
           putStrLn stringToW
           appendFile fileN stringToW 
           putStrLn $ "\nEverything written down into file: " ++ fileN ++ " !!\n\n"
 
-rateH :: Int -> Int -> String
-rateH a b = printZ ((fromIntegral (a * 100) / (fromIntegral (a+b))) :: Double) 
+printPercentage2 :: Int -> Int -> Int -> String
+printPercentage2 x y all = let
+    percentage a b = printZ((fromIntegral2 a / fromIntegral2 b)*100.0) ++ "%"
+    goodString a b = (printf "%7s" (percentage a b) :: String) ++ " " ++ (printf "%-9s" ("(" ++ show a ++ "/" ++ show b ++ ")") :: String)
+    in (intercalate " | " [goodString x (x+y), goodString x all]) ++ " |"
 
+printPercentage3 :: Int -> Int -> Int -> Int -> String
+printPercentage3 x y allS allB = let 
+    percentage a b = printZ((fromIntegral2 a / fromIntegral2 b)*100.0) ++ "%"
+    goodString a b = (printf "%7s" (percentage a b) :: String) ++ " " ++ (printf "%-9s" ("(" ++ show a ++ "/" ++ show b ++ ")") :: String)
+    in (intercalate " | " [goodString x y, goodString x allS, goodString x allB]) ++ " |"
 
 atdLogger filN lab atd = do
           let trajNum x   = map (\x -> x!!0!!0) x

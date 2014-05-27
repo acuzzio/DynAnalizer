@@ -17,5 +17,7 @@ check points in filepath, or numbers after the traj number.
 check if info files EXISTS into folder
 check for dyns shorter than averages
 check for Dyns with Energies WAY bigger than the initial one. (quelle che esplodono)
+Check for strangely parsed geometries
 
-
+IV MISC
+in Filters.hs you can make the tables well formatted
