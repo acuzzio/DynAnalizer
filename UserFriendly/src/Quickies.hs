@@ -12,6 +12,7 @@ import System.ShQQ
 
 -- Molcas Dynamix in pratica fa cosi' lancia il primo step con la prima velocita' e poi lancia il primo tully, ma alla prima chiamata praticamente non ha i coefficienti CI e non genera niente. Ecco perche' le energie ci sono solo alla terza geometria.
 
+-- THIS FUNCTION WORS WITH JUST 2 ROOTS
 
 getEnerFromInfo input (infoName,dataName) = do
    info             <- rdInfoFile infoName
@@ -19,7 +20,8 @@ getEnerFromInfo input (infoName,dataName) = do
    let dataZZ       = map words $ lines dataZ
        enepop       = map (map show) $ getEnergies info
        energies     = transpose [enepop!!2, enepop!!3]
-       togheter     = zipWith (++) dataZZ ([]:[]:energies)
+       energiesDiff = map (\[x,y] -> [x,y, show ((read x :: Double) - (read y :: Double))]) energies
+       togheter     = zipWith (++) dataZZ ([]:[]:energiesDiff)
        filtr        = last $ filter (\x -> x !! 11 == "10") togheter
    return filtr
 
@@ -38,7 +40,7 @@ getAveragesFromData input a = do
    tupla           <- mapM getFileName label
    allHops         <- mapM (getEnerFromInfo input) tupla
    let transposT   = transpose allHops
-       rightLabel  = [3,5,6,7,8,12,13]
+       rightLabel  = [3,5,6,7,8,12,13,14]
        rightValues = map (\x -> transposT !! x) rightLabel
        averages    = map (avg . (map read2)) $ rightValues
    return averages
