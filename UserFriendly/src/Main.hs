@@ -20,6 +20,7 @@ import GnuplotZ
 import ParseInput
 import Statistics
 import Trajectories
+import Quickies
 
 
 main :: IO()
@@ -56,7 +57,10 @@ options = [
      "I have data files, I just need graphs in this folder",
    Option "f" ["folder"]
      (ReqArg InputFile "ProjectFolder")
-     "It will run the program using the information into FOLDER. In case it does not exist, a template one will be created"
+     "It will run the program using the information into FOLDER. In case it does not exist, a template one will be created",
+   Option "L" ["Luisma ASKED this"]
+     (ReqArg Quick "ProjectFolder")
+     "this option run the code into Quickies file, if you do not know what it is... you probably don't need it"
    ]
 
 getExpression :: Flag -> IO ()
@@ -107,6 +111,16 @@ getExpression flag =
                       putStrLn "Now doing the CT part:"
                       chargeTmap input
                       putStrLn "Done"
+    Quick fnn -> do
+       let fn = if (last fnn == '/') then init fnn else fnn
+       setCurrentDirectory fn
+       inputFile <- getInputInfos "input"
+       let input = inputFile { getfolder = fn }
+       case (getchargeTrFragment input) == [9999] of
+          True  -> do putStrLn "There is a problem into input file."
+          False -> do luismaAsk input
+                      putStrLn "Done"
+
 
 
 --MENUUUU
