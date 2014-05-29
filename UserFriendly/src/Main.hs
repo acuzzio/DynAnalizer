@@ -118,8 +118,8 @@ getExpression flag =
        let input = inputFile { getfolder = fn }
        case (getchargeTrFragment input) == [9999] of
           True  -> do putStrLn "There is a problem into input file."
-          False -> do luismaAsk input
-                      putStrLn "Done"
+          False -> do putStrLn fn
+                      luismaAsk input
 
 
 

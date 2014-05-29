@@ -30,7 +30,7 @@ luismaAsk input = do
    let (doHop,doesNotHop)   = whoHop input atd
        (doLeft,doRight)     = whoLeftWhoRight input doHop
    result <- mapM (getAveragesFromData input) [doLeft,doRight]
-   print result
+   putStrLn $ unlines $ map (unwords . (map show)) result 
 
 
 getAveragesFromData input a = do
@@ -38,7 +38,7 @@ getAveragesFromData input a = do
    tupla           <- mapM getFileName label
    allHops         <- mapM (getEnerFromInfo input) tupla
    let transposT   = transpose allHops
-       rightLabel  = [2,3,4,5,6,7,8,9,12,13]
+       rightLabel  = [3,5,6,7,8,12,13]
        rightValues = map (\x -> transposT !! x) rightLabel
        averages    = map (avg . (map read2)) $ rightValues
    return averages
