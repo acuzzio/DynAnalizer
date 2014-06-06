@@ -1,1 +1,0 @@
-UserFriendly/src/DataTypes.hs
