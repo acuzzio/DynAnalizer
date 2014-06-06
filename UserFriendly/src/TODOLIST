@@ -2,8 +2,11 @@ I   FEATURES
 
 METTI CREATEINFO PARALLELO COME opzione -c <- you must specify the infopath (not just the subfolder */*.info )
 metti nel primo menu il TAGLIATORE -- non troppo importante eh...
-usa la FRAZIONE invece dei pesi e cambia la FORMULAAA -- fatto ma non funziona mettere gnuplot?
 metti il coso che crea una geometria per settare l'input
+plot VELOCITIES
+plot coloured BLA/HOOP like charge transfer
+add the possibility to put another angle - bond - dihedral into input
+add the possibility to put ENERGIES and population array into the DATA file
 
 
 II  BUGS
@@ -15,7 +18,7 @@ III CHECKS
 
 check points in filepath, or numbers after the traj number.
 check if info files EXISTS into folder
-check for dyns shorter than averages
+check for Dyns shorter than averages
 check for Dyns with Energies WAY bigger than the initial one. (quelle che esplodono)
 Check for strangely parsed geometries
 
