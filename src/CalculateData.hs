@@ -24,10 +24,12 @@ readerData = do
 createDATAs input = do
    outs <- readShell $ "ls INFO/*.info"
    let outputs    = lines outs
+       chunks   = chunksOf 10 outputs
        dataFold   = "DATA" 
        folder = getfolder input
    createDirectoryIfMissing True dataFold
-   mapM_ (createDATA input) outputs
+   sequence_ $ fmap (parallelProcFiles (createDATA input)) chunks
+--   mapM_ (createDATA input) outputs
    system $ "mv INFO/*.data " ++ dataFold
    joinAllDATA folder
    putStrLn $ "\nYou can find data files into: " ++ folder ++ "/" ++ dataFold ++ " .\nI also wrote an all data file, have fun with Gnuplot !!\n"
