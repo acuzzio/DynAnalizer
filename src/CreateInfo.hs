@@ -12,8 +12,8 @@ import IntCoor
 import DataTypes
 
 -- Creates info files from molcas output
-createInfo folder = do
-       outs <- readShell $ "ls " ++ folder ++ "/*.out"
+createInfo path = do
+       outs <- readShell $ "ls " ++ path
        let outputs = lines outs
        mapM_ genInfoFile outputs
 

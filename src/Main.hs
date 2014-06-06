@@ -43,12 +43,12 @@ options = [
    Option "h" ["help"]
      (NoArg Help)
      "display this message",
-   Option "c" ["createInfo"]
-     (ReqArg CreateInfo "FOLDERNAME")
+   Option "o" ["createInfo"]
+     (ReqArg CreateInfo "OUTPUTPATH")
      "it creates info files from Molcas outputs in the specified folder",
-   Option "C" ["CheckInfo"]
+   Option "t" ["CheckInfo"]
      (ReqArg CheckInfo "FOLDERNAME")
-     "it checks for consistency in info files inside specified folder",
+     "it test for consistency in info files inside specified folder",
    Option "A" ["folder"]
      (ReqArg DoAll "ProjectFolder")
      "DO EVERYTHING in this folder",
@@ -66,9 +66,8 @@ options = [
 getExpression :: Flag -> IO ()
 getExpression flag = 
   case flag of
-    CreateInfo folder -> do
-       let folderWithoutSlash = if (last folder == '/') then init folder else folder
-       createInfo folderWithoutSlash
+    CreateInfo path -> do
+       createInfo path
     InputFile fnn     -> do
        let fn = if (last fnn == '/') then init fnn else fnn
        aa <- doesDirectoryExist fn
