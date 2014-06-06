@@ -1,15 +1,16 @@
 module CreateInfo where
 
-import System.ShQQ
-import Text.Printf
+import Control.Applicative
+import Control.Concurrent.Async
+import Control.Monad
 import Data.List.Split
 import Data.List
-import Control.Applicative
-import Control.Monad
-import Control.Concurrent.Async
+import System.ShQQ
+import Text.Printf
 
-import IntCoor
 import DataTypes
+import Functions
+import IntCoor
 
 -- Creates info files from molcas output
 createInfoQM path = do
@@ -17,11 +18,18 @@ createInfoQM path = do
        let outputs = lines outs
        mapM_ genInfoFileQM outputs
 
+---- Creates info files from molcas output
+--createInfoQMMM path = do
+--       outs <- readShell $ "ls " ++ path
+--       let outputs = lines outs
+--       mapM_ genInfoFileQMMM outputs
+
 -- Creates info files from molcas output
 createInfoQMMM path = do
        outs <- readShell $ "ls " ++ path
-       let outputs = lines outs
-       mapM_ genInfoFileQMMM outputs
+       let outputs  = lines outs
+           chunks   = chunksOf 10 outputs
+       sequence_ $ fmap (processFiles genInfoFileQMMM) chunks
 
 rdInfoFiles :: [FilePath] -> IO([Dinamica])
 rdInfoFiles fns = do

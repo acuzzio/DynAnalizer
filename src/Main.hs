@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Concurrent.Async
 import Control.Monad
 import Control.Exception
 import Data.List
@@ -43,25 +44,25 @@ options = [
    Option "h" ["help"]
      (NoArg Help)
      "display this message",
-   Option "o" ["createInfo"]
+   Option "o" ["createInfoQM"]
      (ReqArg CreateInfo "OUTPUTPATH")
-     "it creates info files from Molcas QM outputs. Can be used as: folder/*.log or */*.out",
-   Option "q" ["createInfo"]
+     "it creates info files from Molcas QM outputs. To be used with quotation marks: 'folder/*.log' or '*/*.out'",
+   Option "q" ["createInfoQMMM"]
      (ReqArg CreateInfoQMMM "OUTPUTPATH")
-     "it creates info files from Molcas QM/MM outputs. Can be used as: folder/*.log or */*.out",
+     "it creates info files from Molcas QM/MM outputs. To be used with quotation marks: 'folder/*.log' or '*/*.out'",
    Option "t" ["CheckInfo"]
      (ReqArg CheckInfo "INFOPATH")
-     "it test for consistency in info files inside specified folder. Can be used with: folder/*.info or */*.info",
-   Option "A" ["folder"]
+     "it test for consistency in info files inside specified folder. To be used with quotation marks: 'folder/*.info' or '*/*.info'",
+   Option "A" ["DOEVERYTHING"]
      (ReqArg DoAll "ProjectFolder")
      "DO EVERYTHING in this folder",
-   Option "a" ["folder"]
+   Option "a" ["dosomething"]
      (ReqArg Doall "ProjectFolder")
      "I have data files, I just need graphs in this folder",
    Option "f" ["folder"]
      (ReqArg InputFile "ProjectFolder")
      "It will run the program using the information into FOLDER. In case it does not exist, a template one will be created",
-   Option "L" ["Luisma ASKED this"]
+   Option "L" ["LuismaASKEDthis"]
      (ReqArg Quick "ProjectFolder")
      "this option run the code into Quickies file, if you do not know what it is... you probably don't need it"
    ]
@@ -304,3 +305,5 @@ blockScreenTillPress = do
   putStrLn "\nPress ENTER to go back to main menu..."
   choice2 <- getLine
   return ()
+
+

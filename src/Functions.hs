@@ -1,8 +1,10 @@
 module Functions where
 
+import Control.Concurrent.Async
 import Data.List.Split
 import Data.List
 import Text.Printf
+import System.Process
 
 import DataTypes
 
@@ -35,4 +37,11 @@ compress = map head . group
 findInd :: Plottable -> [Plottable] -> Int
 findInd plo plos = let Just x = elemIndex plo plos
                      in x + 2
+
+-- parallel attempt
+
+processFiles :: (a -> IO b) -> [a] -> IO ()
+processFiles function outputs = do
+       pids <- mapM (\x -> async $ function x) outputs
+       mapM_ wait pids
 
