@@ -40,8 +40,8 @@ findInd plo plos = let Just x = elemIndex plo plos
 
 -- parallel attempt
 
-processFiles :: (a -> IO b) -> [a] -> IO ()
-processFiles function outputs = do
+parallelProcFiles :: (a -> IO b) -> [a] -> IO ()
+parallelProcFiles function outputs = do
        pids <- mapM (\x -> async $ function x) outputs
        mapM_ wait pids
 

@@ -16,9 +16,10 @@ import IntCoor
 createInfoQM path = do
        outs <- readShell $ "ls " ++ path
        let outputs = lines outs
-       mapM_ genInfoFileQM outputs
+           chunks   = chunksOf 10 outputs
+       sequence_ $ fmap (parallelProcFiles genInfoFileQM) chunks
 
----- Creates info files from molcas output
+---- Creates info files from molcas output   SEQUENTIAL VERSION
 --createInfoQMMM path = do
 --       outs <- readShell $ "ls " ++ path
 --       let outputs = lines outs
@@ -29,7 +30,7 @@ createInfoQMMM path = do
        outs <- readShell $ "ls " ++ path
        let outputs  = lines outs
            chunks   = chunksOf 10 outputs
-       sequence_ $ fmap (processFiles genInfoFileQMMM) chunks
+       sequence_ $ fmap (parallelProcFiles genInfoFileQMMM) chunks   -- PARALLEL STUFF : D
 
 rdInfoFiles :: [FilePath] -> IO([Dinamica])
 rdInfoFiles fns = do

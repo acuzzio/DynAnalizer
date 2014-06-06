@@ -22,8 +22,10 @@ plotEnergiesPopulations :: Inputs -> IO ()
 plotEnergiesPopulations inputs = do
        let folder = getfolder inputs
        a <- readShell $ "ls INFO/*.info"
-       let files = lines a
-       mapM_ (plotEnergiesPopulation inputs) files
+       let files    = lines a
+           chunks   = chunksOf 10 files
+       sequence_ $ fmap (parallelProcFiles (plotEnergiesPopulation inputs)) chunks   -- PARALLEL STUFF : D 
+--       mapM_ (plotEnergiesPopulation inputs) files
        putStrLn $ "\nYou can find those graphics into: " ++ folder ++ "/EnePop\n"
 
 plotEnergiesPopulation :: Inputs -> FilePath -> IO ()
@@ -33,17 +35,19 @@ plotEnergiesPopulation input file = do
        dt     = getDT dina 
        rlxRoot= getStartRlxRt dina
        eneFol = "EnePop"
+       fileZ  = takeWhile (/='.') file
    writeGnuplots input dt rlxRoot file popEne 
    createDirectoryIfMissing True eneFol
-   system "gnuplot < gnuplotScript"
-   system "rm sdafrffile* gnuplotScript"
-   system $ "mv INFO/*EnergiesPopulation.png " ++ eneFol
+   system $ "gnuplot < " ++ fileZ ++ "gnuplotScript"
+   system $ "rm " ++ fileZ ++ "temptemp* " ++ fileZ ++ "gnuplotScript"
+   system $ "mv " ++ fileZ ++ "EnergiesPopulation.png " ++ eneFol
    putStrLn $ file ++ ": done"
 
 writeGnuplots :: Inputs -> Double -> Int -> FilePath -> [[Double]] -> IO()
 writeGnuplots input dt rlxRoot file xss = do
       let valuesS   = map (unlines . (map show)) xss
-          filenames = map (\x -> "sdafrffile" ++ (show x)) [1..]
+          fileZ  = takeWhile (/='.') file
+          filenames = map (\x -> fileZ ++ "temptemp" ++ (show x)) [1..]
           lengthV   = length valuesS
 --      print values
       zipWithM writeFile filenames valuesS
@@ -60,7 +64,7 @@ createGnuplotFile input file dt' n rlxRt = do
           tag    = map (\x -> "S" ++ (show x)) [0..]
           header = "set title \"" ++ fileZ ++ " Population and Energies\"\nset xlabel \"fs\"\nset key outside\nset format y \"%6.3f\"\nset y2range[0:1.001]\nset output '" ++ fileZ ++ "EnergiesPopulation.png'\n" ++ gplOpt ++ "\nplot "
           states = div (n-1) 2
-          filenames = map (\x -> "sdafrffile" ++ (show x)) [1..]
+          filenames = map (\x -> fileZ ++ "temptemp" ++ (show x)) [1..]
           list   = (take states $ repeat Pop) ++ (take states $ repeat Ene) ++ [Dyn]
 --          removerlXrootPopu = take rlxRt list ++ drop (succ rlxRt) list
 --          removerlXtootfilename = take rlxRt filenames ++ drop (succ rlxRt) filenames
@@ -69,13 +73,13 @@ createGnuplotFile input file dt' n rlxRt = do
           jen x  = case head x of
                     Pop -> zip3 x hexColo tag
                     Ene -> zip3 x colors tag
-                    Dyn -> zip3 x hexColo tag --hexColo tag does not matter
+                    Dyn -> zip3 x hexColo tag --hexColo tag does not matter here
           lol    = concat $ map jen groupZ -- lol :: [(PlotType, String, String)]
 --          almost = zipWith (\x y -> createPlotLine x y dt) lol removerlXtootfilename
           almost = zipWith (\x y -> createPlotLine x y dt) lol filenames
           secondPart = concat almost
           wholeFile  = header ++ secondPart
-      writeFile "gnuplotScript" wholeFile
+      writeFile (fileZ ++ "gnuplotScript") wholeFile
 
 createPlotLine :: (PlotType, String, String) -> FilePath -> String -> String
 createPlotLine (Pop,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 axes x1y2 w filledcurves x1 lt 1 lc rgb " ++ "\"" ++ c ++ "\"" ++ " t '" ++ d ++ " Population',"
@@ -96,8 +100,10 @@ plotBondAngleDihedrals :: Inputs -> [Int] -> IO()
 plotBondAngleDihedrals inputs xs = do
    let folder = getfolder inputs
    a <- readShell $ "ls INFO/*.info"
-   let files = lines a        
-   mapM_ (\x -> plotBondAngleDihedral inputs x xs) files
+   let files    = lines a        
+       chunks   = chunksOf 10 files
+   sequence_ $ fmap (parallelProcFiles (\x -> plotBondAngleDihedral inputs x xs)) chunks   -- PARALLEL STUFF : D 
+--   mapM_ (\x -> plotBondAngleDihedral inputs x xs) files
    putStrLn $ "\nYou can find those graphs into folder: " ++ folder ++ "/\n"
 
 plotBondAngleDihedral :: Inputs -> FilePath -> [Int] -> IO()
