@@ -12,10 +12,16 @@ import IntCoor
 import DataTypes
 
 -- Creates info files from molcas output
-createInfo path = do
+createInfoQM path = do
        outs <- readShell $ "ls " ++ path
        let outputs = lines outs
-       mapM_ genInfoFile outputs
+       mapM_ genInfoFileQM outputs
+
+-- Creates info files from molcas output
+createInfoQMMM path = do
+       outs <- readShell $ "ls " ++ path
+       let outputs = lines outs
+       mapM_ genInfoFileQMMM outputs
 
 rdInfoFiles :: [FilePath] -> IO([Dinamica])
 rdInfoFiles fns = do
@@ -54,8 +60,8 @@ cutInfoFile fn steps = do
   writeFile (fn ++ "CUT") wholefile 
 
 checkInfoFiles :: FilePath -> IO()
-checkInfoFiles folder = do
-  outs <- readShell $ "ls " ++ folder ++ "/*.info"
+checkInfoFiles path = do
+  outs <- readShell $ "ls " ++ path
   let outputs = lines outs
   putStrLn "A Good one of 100 step should be like [98,98,98,98,98,100,99,100]"
   putStrLn "Tully's energies/populations are STEP-2, then we have STEP geometries, STEP-1 Oscillator strength and STEP charge transfers (one for each geometry)"
@@ -81,8 +87,8 @@ checkInfoFile fn = do
                        False -> " ->  This one has problems !"
   putStrLn $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4])) ++ " " ++ resultMsg
 
-genInfoFile :: String -> IO ()
-genInfoFile fn = do
+genInfoFileQM :: String -> IO ()
+genInfoFileQM fn = do
     atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
     rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
     rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
@@ -93,12 +99,12 @@ genInfoFile fn = do
         dT                  = read dTS    :: Double
         grepLength          = show $ atomNumber + 3
         numberFields        = (rootN * 2) + 1
-    atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " ' Cartesian Coordinates' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}'"
+    atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}' | head -" ++ (show atomNumber)
     energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the string gnuplot
     coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
     chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: 1/ {flag=1;next} /Expectation values of various properties for root number:  1/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
-    let infoname            = (takeWhile (/= '.') fn ) ++ ".info"
+    let infoname            = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "info"
         div                 = "DIVISION\n"
         subDiv              = "SUBDIVISION\n"
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
@@ -107,6 +113,35 @@ genInfoFile fn = do
         wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
     writeFile infoname wholefile
     putStrLn $ fn ++ " done"
+
+genInfoFileQMMM :: String -> IO ()
+genInfoFileQMMM fn = do
+    let infoname            = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "info"
+        keyname             = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "key"
+    atomNS                  <- readShell $ "grep -B2 'Nuclear repulsion energy' " ++ fn ++ " | head -1 | awk '{print $1}'"
+    rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
+    rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
+    dTS                     <- readShell $ "head -200 " ++ fn ++ " | grep -i -A1 dt | tail -1 | awk '{print $1}'" 
+    let atomNumber          = read atomNS :: Int
+        rootN               = read rootNS :: Int
+        rlxRtN              = read rlxRtS :: Int
+        dT                  = read dTS    :: Double
+        grepLength          = show $ atomNumber + 3
+        numberFields        = (rootN * 2) + 1
+    atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}' | head -" ++ (show atomNumber)
+    energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the string "OOLgnuplt"
+    coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
+    oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
+    chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: 1/ {flag=1;next} /Expectation values of various properties for root number:  1/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
+    let div                 = "DIVISION\n"
+        subDiv              = "SUBDIVISION\n"
+        atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
+        energiesPop'        = concat $ intersperse subDiv energiesPop
+        chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
+        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
+    writeFile infoname wholefile
+    putStrLn $ fn ++ " done"
+
 
 parseTriplet :: String -> [Vec Double]
 parseTriplet = fmap (Vec .fmap (readDouble) . words) . lines

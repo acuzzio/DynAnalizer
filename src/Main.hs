@@ -45,10 +45,13 @@ options = [
      "display this message",
    Option "o" ["createInfo"]
      (ReqArg CreateInfo "OUTPUTPATH")
-     "it creates info files from Molcas outputs in the specified folder",
+     "it creates info files from Molcas QM outputs. Can be used as: folder/*.log or */*.out",
+   Option "q" ["createInfo"]
+     (ReqArg CreateInfoQMMM "OUTPUTPATH")
+     "it creates info files from Molcas QM/MM outputs. Can be used as: folder/*.log or */*.out",
    Option "t" ["CheckInfo"]
-     (ReqArg CheckInfo "FOLDERNAME")
-     "it test for consistency in info files inside specified folder",
+     (ReqArg CheckInfo "INFOPATH")
+     "it test for consistency in info files inside specified folder. Can be used with: folder/*.info or */*.info",
    Option "A" ["folder"]
      (ReqArg DoAll "ProjectFolder")
      "DO EVERYTHING in this folder",
@@ -67,7 +70,9 @@ getExpression :: Flag -> IO ()
 getExpression flag = 
   case flag of
     CreateInfo path -> do
-       createInfo path
+       createInfoQM path
+    CreateInfoQMMM path -> do
+       createInfoQMMM path
     InputFile fnn     -> do
        let fn = if (last fnn == '/') then init fnn else fnn
        aa <- doesDirectoryExist fn

@@ -22,12 +22,13 @@ data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
 data Plottable = Cccc | CcccCorrected | Beta | BetaCorrected | Tau | Delta | Bla | Ct | Root | Jump deriving (Eq, Show, Read)
 
 data Flag = Help
-            | CreateInfo String
-            | CheckInfo String
-            | InputFile String
-            | DoAll String
-            | Doall String
-            | Quick String
+            | CreateInfo     String
+            | CreateInfoQMMM String
+            | CheckInfo      String
+            | InputFile      String
+            | DoAll          String
+            | Doall          String
+            | Quick          String
             deriving (Show, Eq)
 
 data IsomType = Cis | Trans deriving (Show, Read)
