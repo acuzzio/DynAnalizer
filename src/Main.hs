@@ -85,9 +85,9 @@ getExpression flag =
               createDirectory $ fn ++ "/INFO"
               writeInputTemplate $ fn ++ "/input"
               putStrLn $ "\nNow you should copy your info files into folder " ++ fn ++ "/INFO/ and modify " ++ fn ++ "/input according to your system\n"
-    CheckInfo folder   -> do
-       let folderWithoutSlash = if (last folder == '/') then init folder else folder
-       checkInfoFiles folderWithoutSlash
+    CheckInfo path   -> do
+--       let folderWithoutSlash = if (last folder == '/') then init folder else folder
+       checkInfoFiles path
     DoAll fnn -> do
        let fn = if (last fnn == '/') then init fnn else fnn
        setCurrentDirectory fn
