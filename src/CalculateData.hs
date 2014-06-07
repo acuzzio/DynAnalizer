@@ -78,6 +78,18 @@ createPLOTDATA a input listToPlot = do
     Ct            -> calculateCT cTFragment mullChar
     Root          -> rootDiscov energies initialRlx
     Jump          -> justHopd energies initialRlx
+    Energy      x -> getEnergyOrPopulation energies x Ene
+    Population  x -> getEnergyOrPopulation energies x Pop
+
+getEnergyOrPopulation :: [[Double]] -> Root -> PlotType -> [String]
+getEnergyOrPopulation energies root whichOne = let
+    rootS          = div (length energies - 1) 2
+    [popu,ene,dyn] = chunksOf rootS energies
+    indexRight     = fromEnum root
+    listRigth      = case whichOne of
+                          Pop    -> map printZ12 $ popu !! indexRight
+                          Ene    -> map printZ12 $ ene  !! indexRight 
+    in [" "," "] ++ listRigth
 
 dihedro :: [Int] -> [[Vec Double]] -> [String]
 dihedro listAtom geometries = let

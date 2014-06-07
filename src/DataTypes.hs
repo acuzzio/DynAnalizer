@@ -19,7 +19,21 @@ data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
 
 --data PlotType2 = Red | Black | Hop deriving (Eq,Show)
 
-data Plottable = Cccc | CcccCorrected | Beta | BetaCorrected | Tau | Delta | Bla | Ct | Root | Jump deriving (Eq, Show, Read)
+data Plottable = Cccc 
+               | CcccCorrected 
+               | Beta 
+               | BetaCorrected 
+               | Tau 
+               | Delta 
+               | Bla 
+               | Ct 
+               | Root 
+               | Jump 
+               | Energy      Root
+               | Population  Root
+               deriving (Eq, Show, Read)
+
+data Root = S0 | S1 | S2 | S3 | S4 deriving (Eq, Show, Read, Enum)
 
 data Flag = Help
             | CreateInfo     String

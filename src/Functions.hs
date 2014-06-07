@@ -31,6 +31,8 @@ devSt xs = let
 
 printZ x    = (printf "%.2f" x) :: String
 
+printZ12 x    = (printf "%.10f" x) :: String
+
 compress :: Eq a => [a] -> [a] 
 compress = map head . group
 
