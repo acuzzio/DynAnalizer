@@ -1,3 +1,0 @@
-module Inputs where
-
-folder = "*"

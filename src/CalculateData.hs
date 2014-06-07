@@ -60,27 +60,36 @@ createPLOTDATA a input listToPlot = do
       blaList    = getblaList input
       cTFragment = getchargeTrFragment input
   case listToPlot of
-    Cccc          -> corrDihedro2 input $ dihedro ccccList geometries 
-    CcccCorrected -> corrDihedro3 $ dihedro ccccList geometries 
-    Beta          -> corrDihedro2 input $ dihedro betaList geometries
-    BetaCorrected -> corrDihedro3 $ dihedro betaList geometries
-    Tau           -> let
-                     cccc = map read2 $ corrDihedro3 $ dihedro ccccList geometries
-                     beta = map read2 $ corrDihedro3 $ dihedro betaList geometries
-                     tau  = zipWith (\x y -> (x+y)*0.5) cccc beta 
-                     in prt tau
-    Delta         -> let
-                     cccc = map read2 $ corrDihedro3 $ dihedro ccccList geometries
-                     beta = map read2 $ corrDihedro3 $ dihedro betaList geometries
-                     delta= zipWith (-) cccc beta         
-                     in prt delta
-    Bla           -> blaD blaList geometries  
-    Ct            -> calculateCT cTFragment mullChar
-    Root          -> rootDiscov energies initialRlx
-    Jump          -> justHopd energies initialRlx
-    EnergyDyn     -> getEnergyOrPopulation energies S0 Dyn
-    Energy      x -> getEnergyOrPopulation energies x Ene
-    Population  x -> getEnergyOrPopulation energies x Pop
+    Cccc           -> corrDihedro2 input $ dihedro ccccList geometries 
+    CcccCorrected  -> corrDihedro3 $ dihedro ccccList geometries 
+    Beta           -> corrDihedro2 input $ dihedro betaList geometries
+    BetaCorrected  -> corrDihedro3 $ dihedro betaList geometries
+    Tau            -> let
+                      cccc = map read2 $ corrDihedro3 $ dihedro ccccList geometries
+                      beta = map read2 $ corrDihedro3 $ dihedro betaList geometries
+                      tau  = zipWith (\x y -> (x+y)*0.5) cccc beta 
+                      in prt tau
+    Delta          -> let
+                      cccc = map read2 $ corrDihedro3 $ dihedro ccccList geometries
+                      beta = map read2 $ corrDihedro3 $ dihedro betaList geometries
+                      delta= zipWith (-) cccc beta         
+                      in prt delta
+    Bla            -> blaD blaList geometries  
+    Ct             -> calculateCT cTFragment mullChar
+    Root           -> rootDiscov energies initialRlx
+    Jump           -> justHopd energies initialRlx
+    EnergyDyn      -> getEnergyOrPopulation energies S0 Dyn
+    EnergyDiff x y -> getEnergyDiff energies x y Ene
+    Energy      x  -> getEnergyOrPopulation energies x Ene
+    Population  x  -> getEnergyOrPopulation energies x Pop
+
+getEnergyDiff :: [[Double]]  -> Root  -> Root -> PlotType -> [String]
+getEnergyDiff energies root1 root2 whichOne = let
+    rootS          = div (length energies - 1) 2
+    [popu,ene,dyn] = chunksOf rootS energies
+    indexRight x   = fromEnum x
+    rightArray     = zipWith (-) (ene !! (indexRight root1)) (ene !! (indexRight root2))
+    in [" "," "] ++ (map printZ12 rightArray)
 
 getEnergyOrPopulation :: [[Double]] -> Root -> PlotType -> [String]
 getEnergyOrPopulation energies root whichOne = let
