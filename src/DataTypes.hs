@@ -29,6 +29,7 @@ data Plottable = Cccc
                | Ct 
                | Root 
                | Jump 
+               | EnergyDyn  
                | Energy      Root
                | Population  Root
                deriving (Eq, Show, Read)

@@ -78,6 +78,7 @@ createPLOTDATA a input listToPlot = do
     Ct            -> calculateCT cTFragment mullChar
     Root          -> rootDiscov energies initialRlx
     Jump          -> justHopd energies initialRlx
+    EnergyDyn     -> getEnergyOrPopulation energies S0 Dyn
     Energy      x -> getEnergyOrPopulation energies x Ene
     Population  x -> getEnergyOrPopulation energies x Pop
 
@@ -89,6 +90,7 @@ getEnergyOrPopulation energies root whichOne = let
     listRigth      = case whichOne of
                           Pop    -> map printZ12 $ popu !! indexRight
                           Ene    -> map printZ12 $ ene  !! indexRight 
+                          Dyn    -> map printZ12 $ dyn  !! 0
     in [" "," "] ++ listRigth
 
 dihedro :: [Int] -> [[Vec Double]] -> [String]
