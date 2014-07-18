@@ -23,7 +23,7 @@ import Statistics
 import Trajectories
 import Quickies
 
-
+-- Main function, that takes care of argouments. If you launch without arguments, it will display help, then checks which flags you call and pass them to getOpt. If no flags is recognized ( [] ) then display the help as well. the successfull computation here is the mapM_ of getExpressions
 main :: IO()
 main = do
   gotArgs <- getArgs
@@ -33,11 +33,21 @@ main = do
      else do
        (flags,args,_) <- return $ getOpt RequireOrder options gotArgs
        when (Help `elem` flags) $ useMessage >> exitSuccess
-       mapM_ getExpression flags
+       if flags == []
+          then putStrLn "\nI cannot understand ... Why r u overestimating me ? To get some help:\n\n$ DynAnalyzer -h\n\n "
+          else mapM_ getExpression flags
   
+--options is of type [OptDescr Flag] and it has his own istance of show, so we do not have to care about his print formatting. here I just want to display a small message and show the options  
 useMessage = putStrLn $ usageInfo startMessage options
 
 startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\nThose are the options avaiable:"
+
+
+-- avaiable command line direct option in this program. Each option has 
+-- 1) "LETTER"
+-- 2) ["quick help string"]
+-- 3) (some options)
+-- 4) "a long explanation line that appears in printout
 
 options :: [OptDescr Flag]
 options = [
@@ -67,29 +77,29 @@ options = [
      "this option run the code into Quickies file, if you do not know what it is... you probably don't need it"
    ]
 
+-- So this is the main function for command line use of dynanalyzer. Just takes the flag, case on the datatype Flag and do what the option is supposed to do. All of them MUST be IO(). The purpose of the program is to take a bunch of big files (molcas outputs) and exctract just the information we need for the analysis into info files (waaay smaller). 
+
 getExpression :: Flag -> IO ()
 getExpression flag = 
   case flag of
-    CreateInfo path -> do
+    CreateInfo path -> do     -- this takes care of the creation of INFO files part.
        createInfoQM path
-    CreateInfoQMMM path -> do
+    CreateInfoQMMM path -> do -- same, but with QM/MM files.
        createInfoQMMM path
-    InputFile fnn     -> do
+    InputFile fnn     -> do   -- this creates a new folder to work in, or set the working folder.
        let fn = if (last fnn == '/') then init fnn else fnn
        aa <- doesDirectoryExist fn
        case aa of
           True -> do handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fn
-        --  True -> do goIntoMenu fn
           False -> do
               createDirectory fn
               putStrLn $ "\nFolder " ++ fn ++ " does not exist. So I created it.\n"
               createDirectory $ fn ++ "/INFO"
               writeInputTemplate $ fn ++ "/input"
               putStrLn $ "\nNow you should copy your info files into folder " ++ fn ++ "/INFO/ and modify " ++ fn ++ "/input according to your system\n"
-    CheckInfo path   -> do
---       let folderWithoutSlash = if (last folder == '/') then init folder else folder
+    CheckInfo path   -> do     -- this triggers the tests on info files
        checkInfoFiles path
-    DoAll fnn -> do
+    DoAll fnn -> do            -- this is the all in one command
        let fn = if (last fnn == '/') then init fnn else fnn
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
@@ -105,7 +115,7 @@ getExpression flag =
                       putStrLn "Now doing the CT part:"
                       chargeTmap input
                       putStrLn "Done"
-    Doall fnn -> do
+    Doall fnn -> do           -- this is the all in one command, but just for the last functions
        let fn = if (last fnn == '/') then init fnn else fnn 
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
@@ -116,7 +126,7 @@ getExpression flag =
                       putStrLn "Now doing the CT part:"
                       chargeTmap input
                       putStrLn "Done"
-    Quick fnn -> do
+    Quick fnn -> do           -- I use this options when I do not have time and I want to do something quickly
        let fn = if (last fnn == '/') then init fnn else fnn
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
@@ -128,7 +138,7 @@ getExpression flag =
 
 
 
---MENUUUU
+-- This function opens the menu.
 goIntoMenu fn = do
   let concatNums (i, (s, _)) = " " ++ show i ++ " ) " ++ s
   setTitle "DynAnalyzer by AcuZZio"

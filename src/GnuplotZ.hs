@@ -51,10 +51,10 @@ writeGnuplots input dt rlxRoot file xss = do
           lengthV   = length valuesS
 --      print values
       zipWithM writeFile filenames valuesS
-      createGnuplotFile input file dt lengthV rlxRoot
+      createPopEneGnuplotFile input file dt lengthV rlxRoot
 
-createGnuplotFile :: Inputs -> FilePath -> Double -> Int -> Int -> IO()
-createGnuplotFile input file dt' n rlxRt = do
+createPopEneGnuplotFile :: Inputs -> FilePath -> Double -> Int -> Int -> IO()
+createPopEneGnuplotFile input file dt' n rlxRt = do
       let gplOpt = getgnuplotOptions input
           fileZ  = takeWhile (/='.') file
           dt     = show dt'
