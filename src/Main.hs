@@ -37,9 +37,10 @@ main = do
           then putStrLn "\nI cannot understand ... Why r u overestimating me ? To get some help:\n\n$ DynAnalyzer -h\n\n "
           else mapM_ getExpression flags
   
---options is of type [OptDescr Flag] and it has his own istance of show, so we do not have to care about his print formatting. here I just want to display a small message and show the options  
+-- options is of type [OptDescr Flag] and it has his own istance of show, so we do not have to care about his print formatting. here I just want to display a small message and show the options  
 useMessage = putStrLn $ usageInfo startMessage options
 
+-- welcoming message
 startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\nThose are the options avaiable:"
 
 
@@ -47,7 +48,7 @@ startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molc
 -- 1) "LETTER"
 -- 2) ["quick help string"]
 -- 3) (some options)
--- 4) "a long explanation line that appears in printout
+-- 4) "a long explanation line that appears in printout"
 
 options :: [OptDescr Flag]
 options = [
@@ -77,7 +78,7 @@ options = [
      "this option run the code into Quickies file, if you do not know what it is... you probably don't need it"
    ]
 
--- So this is the main function for command line use of dynanalyzer. Just takes the flag, case on the datatype Flag and do what the option is supposed to do. All of them MUST be IO(). The purpose of the program is to take a bunch of big files (molcas outputs) and exctract just the information we need for the analysis into info files (waaay smaller). 
+-- So this is the main function for command line use of dynanalyzer. Just takes the flag, case on the datatype Flag and do what the option is supposed to do. All of them MUST be IO(). The purpose of the program is to take a bunch of big files (molcas outputs) and exctract just the information we need for the analysis into info files (waaay smaller). Then do some analysis on data.
 
 getExpression :: Flag -> IO ()
 getExpression flag = 
@@ -86,7 +87,7 @@ getExpression flag =
        createInfoQM path
     CreateInfoQMMM path -> do -- same, but with QM/MM files.
        createInfoQMMM path
-    InputFile fnn     -> do   -- this creates a new folder to work in, or set the working folder.
+    InputFile fnn     -> do   -- this creates a new folder to work in, or set the working folder to call a menu.
        let fn = if (last fnn == '/') then init fnn else fnn
        aa <- doesDirectoryExist fn
        case aa of
@@ -99,7 +100,7 @@ getExpression flag =
               putStrLn $ "\nNow you should copy your info files into folder " ++ fn ++ "/INFO/ and modify " ++ fn ++ "/input according to your system\n"
     CheckInfo path   -> do     -- this triggers the tests on info files
        checkInfoFiles path
-    DoAll fnn -> do            -- this is the all in one command
+    DoAll fnn -> do            -- this is the DO EVERYTHING "all in one" command
        let fn = if (last fnn == '/') then init fnn else fnn
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
@@ -115,7 +116,7 @@ getExpression flag =
                       putStrLn "Now doing the CT part:"
                       chargeTmap input
                       putStrLn "Done"
-    Doall fnn -> do           -- this is the all in one command, but just for the last functions
+    Doall fnn -> do           -- this is the all in one command, but just for the analysis part
        let fn = if (last fnn == '/') then init fnn else fnn 
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
@@ -158,6 +159,7 @@ goIntoMenu fn = do
   setCurrentDirectory curDir
   goIntoMenu fn
 
+-- This function checks if the user choice is valid
 validate :: String -> Maybe Int
 validate s = isValid (reads s)
    where isValid []            = Nothing
@@ -166,6 +168,7 @@ validate s = isValid (reads s)
                | otherwise     = Just n
          outOfBounds n = (n < 1) || (n > length choices)
 
+-- those are the menu entries
 choices :: [(Int, (String, (Inputs -> IO ())))]
 choices = zip [1.. ] [
    ("I want to see Energies and Populations graphics", menuGraphsEnePop),
@@ -179,6 +182,8 @@ choices = zip [1.. ] [
    ("Quit", quitWithStyle)
     ]
 
+-- the actual "execution" command.
+execute :: (Int, Inputs) -> IO ()
 execute (n, input) = let     
      doExec ((_, (_,f)):_) = f input
      in doExec $ filter (\(i, _) -> i == n) choices
