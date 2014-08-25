@@ -58,7 +58,7 @@ mainfilter input = do
               p         = "Right:   | " ++ printPercentage3 (hiR+hniR) (hiL+hiR+hniL+hniR) (hiL+hiR+hniL+hniR) all
               stringToW = intercalate "\n" [z,a,b,c,d,g,h,i,j,k,l,m,n,o,p] 
           putStrLn stringToW
-          appendFile fileN stringToW 
+          appendFile fileN (stringToW ++ "\n")
           putStrLn $ "\nEverything written down into file: " ++ fileN ++ " !!\n\n"
 
 printPercentage2 :: Int -> Int -> Int -> String
