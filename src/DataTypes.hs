@@ -39,6 +39,7 @@ data Root = S0 | S1 | S2 | S3 | S4 deriving (Eq, Show, Read, Enum)
 
 data Flag = Help
             | CreateInfo     String
+            | CreateInfoBin  String
             | CreateInfoQMMM String
             | CheckInfo      String
             | InputFile      String
@@ -67,6 +68,8 @@ data IsomType = Cis | Trans deriving (Show, Read)
 type AllTrajData = [SingleTrajData]
 type SingleTrajData = [PlottableData]
 type PlottableData = [String]
+
+data FileType = Binary | Normal deriving Show
 
 convFStoAU = 41.3414472
 convAUtoFS =  0.0241888

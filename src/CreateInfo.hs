@@ -13,11 +13,11 @@ import Functions
 import IntCoor
 
 -- Creates info files from molcas output
-createInfoQM path = do
+createInfoQM fileType path = do
        outs <- readShell $ "ls " ++ path
        let outputs = lines outs
            chunks   = chunksOf 10 outputs
-       sequence_ $ fmap (parallelProcFiles genInfoFileQM) chunks
+       sequence_ $ fmap (parallelProcFiles $ genInfoFileQM fileType) chunks
 
 ---- Creates info files from molcas output   SEQUENTIAL VERSION
 --createInfoQMMM path = do
@@ -96,22 +96,25 @@ checkInfoFile fn = do
                        False -> " ->  This one has problems !"
   putStrLn $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4])) ++ " " ++ resultMsg
 
-genInfoFileQM :: String -> IO ()
-genInfoFileQM fn = do
-    atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
-    rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i ciro | tail -1 | awk '{print $1}'"
-    rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep -A1 -i mdrl | tail -1 | awk '{print $1}'" 
-    dTS                     <- readShell $ "head -200 " ++ fn ++ " | grep -i -A1 dt | tail -1 | awk '{print $1}'" 
+genInfoFileQM :: FileType -> String -> IO ()
+genInfoFileQM fileType fn = do
+    let binaryGrep = case fileType of
+                          Binary -> "-a "
+                          Normal -> ""
+    atomNS                  <- readShell $ "head -500 " ++ fn ++ " | grep " ++ binaryGrep ++ " -B3 'InterNuclear Distances' | head -1 | awk '{print $1}'"
+    rootNS                  <- readShell $ "head -200 " ++ fn ++ " | grep " ++ binaryGrep ++ " -A1 -i ciro | tail -1 | awk '{print $1}'"
+    rlxRtS                  <- readShell $ "head -200 " ++ fn ++ " | grep " ++ binaryGrep ++ " -A1 -i mdrl | tail -1 | awk '{print $1}'" 
+    dTS                     <- readShell $ "head -200 " ++ fn ++ " | grep " ++ binaryGrep ++ " -i -A1 dt | tail -1 | awk '{print $1}'" 
     let atomNumber          = read atomNS :: Int
         rootN               = read rootNS :: Int
         rlxRtN              = read rlxRtS :: Int
         dT                  = read dTS    :: Double
         grepLength          = show $ atomNumber + 3
         numberFields        = (rootN * 2) + 1
-    atomTS                  <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}' | head -" ++ (show atomNumber)
-    energiesPop             <- mapM (\a -> readShell $ "grep OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the string gnuplot
-    coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
-    oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
+    atomTS                  <- readShell $ "grep " ++ binaryGrep ++ " -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | tail -" ++ (show atomNumber) ++ " | awk '{print $2}' | head -" ++ (show atomNumber)
+    energiesPop             <- mapM (\a -> readShell $ "grep " ++ binaryGrep ++ " OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the string gnuplot
+    coordinates             <- readShell $ "grep " ++ binaryGrep ++ " -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
+    oscStr                  <- readShell $ "grep " ++ binaryGrep ++ " -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
     chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: 1/ {flag=1;next} /Expectation values of various properties for root number:  1/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
     let infoname            = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "info"
         div                 = "DIVISION\n"

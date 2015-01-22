@@ -55,6 +55,9 @@ options = [
    Option "h" ["help"]
      (NoArg Help)
      "display this message",
+   Option "b" ["createInfoQMBinary"]
+     (ReqArg CreateInfoBin "OUTPUTPATH")
+     "it creates info files from Molcas QM outputs if they're binary. To be used with quotation marks: 'folder/*.log' or '*/*.out'",
    Option "o" ["createInfoQM"]
      (ReqArg CreateInfo "OUTPUTPATH")
      "it creates info files from Molcas QM outputs. To be used with quotation marks: 'folder/*.log' or '*/*.out'",
@@ -84,7 +87,9 @@ getExpression :: Flag -> IO ()
 getExpression flag = 
   case flag of
     CreateInfo path -> do     -- this takes care of the creation of INFO files part.
-       createInfoQM path
+       createInfoQM Normal path
+    CreateInfoBin path -> do  -- this takes care of the creation of INFO files when binary
+       createInfoQM Binary path
     CreateInfoQMMM path -> do -- same, but with QM/MM files.
        createInfoQMMM path
     InputFile fnn     -> do   -- this creates a new folder to work in, or set the working folder to call a menu.
