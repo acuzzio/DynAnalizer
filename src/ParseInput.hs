@@ -1,14 +1,17 @@
+{-# Language QuasiQuotes #-}
 module ParseInput where
 
 import Data.Char
 import Data.String.Utils
 import Text.Parsec
 import Text.Parsec.Combinator
---import Text.Parsec.String
-import Text.Parsec.ByteString -- Felipe suggested
+import Text.Parsec.String
+--import Text.Parsec.ByteString -- Felipe suggested
 import Data.Functor.Identity
 
 import DataTypes
+import Verbatim
+import VerbatimParser
 
 data Inputs = Inputs {
      getfolder            :: String,        -- Here Info foldername
@@ -23,9 +26,23 @@ data Inputs = Inputs {
      getgnuplotOptions    :: String       -- Those are gnuplot optionsin a LIST
      } deriving Show
 
+
+inputTempl = [verbatim|
+chargeTrFragment = [1,2,3]                         -- Here list of Atom in charge transfer fraction
+chargeTrThresh   = [0.4,0.5,0.6]                   -- Here list of Threshold for CT graphics
+ccccList   = [6,7,8,9]                             -- Here the central dihedral
+betaList   = [19,7,8,16]                           -- Here beta angle
+blaList    = [[(2,6),(7,8),(9,10)],[(6,7),(8,9)]]  -- BLA list of single bonds, list of double bonds
+isomType   = Trans                                 -- Here Cis or Trans
+nRoot      = 2                                     -- This is the number of root in the system
+dataPlot   = [Cccc,CcccCorrected,Beta,BetaCorrected,Tau,Delta,Bla,Ct,Root,Jump,Energy S1,Internal[1,2,3]] -- Data file Columns, you can use also: EnergyDyn, Energy S0, Population S1, EnergyDiff S1 S0 ecc. Or Internal to print a coordinate.
+gnuplotOptions = set terminal pngcairo size 1224,830 enhanced font ", 12"  -- Gnuplot options separated by \\n \n
+|]
+
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
-  let content = "chargeTrFragment = [1,2,3]                         -- Here list of Atom in charge transfer fraction\nchargeTrThresh   = [0.4,0.5,0.6]                   -- Here list of Threshold for CT graphics\nccccList   = [6,7,8,9]                             -- Here the central dihedral\nbetaList   = [19,7,8,16]                           -- Here beta angle\nblaList    = [[(2,6),(7,8),(9,10)],[(6,7),(8,9)]]  -- BLA list of single bonds, list of double bonds\nisomType   = Trans                                 -- Here Cis or Trans\nnRoot      = 2                                     -- This is the number of root in the system\ndataPlot   = [Cccc,CcccCorrected,Beta,BetaCorrected,Tau,Delta,Bla,Ct,Root,Jump,Energy S1] -- Data file Columns, you can use also: EnergyDyn, Energy S0, Population S1, EnergyDiff S1 S0 ecc.\ngnuplotOptions = set terminal pngcairo size 1224,830 enhanced font \", 12\" \\nset xrange [0:200]    -- Gnuplot options separated by \\n \n"
+--  let content = "chargeTrFragment = [1,2,3]                         -- Here list of Atom in charge transfer fraction\nchargeTrThresh   = [0.4,0.5,0.6]                   -- Here list of Threshold for CT graphics\nccccList   = [6,7,8,9]                             -- Here the central dihedral\nbetaList   = [19,7,8,16]                           -- Here beta angle\nblaList    = [[(2,6),(7,8),(9,10)],[(6,7),(8,9)]]  -- BLA list of single bonds, list of double bonds\nisomType   = Trans                                 -- Here Cis or Trans\nnRoot      = 2                                     -- This is the number of root in the system\ndataPlot   = [Cccc,CcccCorrected,Beta,BetaCorrected,Tau,Delta,Bla,Ct,Root,Jump,Energy S1] -- Data file Columns, you can use also: EnergyDyn, Energy S0, Population S1, EnergyDiff S1 S0 ecc.\ngnuplotOptions = set terminal pngcairo size 1224,830 enhanced font \", 12\" \\nset xrange [0:200]    -- Gnuplot options separated by \\n \n"
+  let content = printVerbatim inputTempl
   putStrLn $ "Template input file: " ++ fn ++ " written."
   writeFile fn content
 

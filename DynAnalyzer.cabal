@@ -53,9 +53,11 @@ executable DynAnalyzer
     , shqq
     , async
     , ansi-terminal
+    , template-haskell
+    , syb
 
   hs-source-dirs:      src 
   main-is: Main.hs
-  other-modules: CreateInfo, IntCoor, GnuplotZ, Functions, ParseInput, Statistics, CalculateData, DataTypes, Filters
+  other-modules: CreateInfo, IntCoor, GnuplotZ, Functions, ParseInput, Statistics, CalculateData, DataTypes, Filters, Verbatim, VerbatimParser
 
 

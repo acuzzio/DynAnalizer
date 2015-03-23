@@ -60,28 +60,33 @@ createPLOTDATA a input listToPlot = do
       blaList    = getblaList input
       cTFragment = getchargeTrFragment input
   case listToPlot of
-    Cccc           -> corrDihedro2 input $ dihedro ccccList geometries 
-    CcccCorrected  -> corrDihedro3 $ dihedro ccccList geometries 
-    Beta           -> corrDihedro2 input $ dihedro betaList geometries
-    BetaCorrected  -> corrDihedro3 $ dihedro betaList geometries
-    Tau            -> let
+    Cccc            -> corrDihedro2 input $ dihedro ccccList geometries 
+    CcccCorrected   -> corrDihedro3 $ dihedro ccccList geometries 
+    Beta            -> corrDihedro2 input $ dihedro betaList geometries
+    BetaCorrected   -> corrDihedro3 $ dihedro betaList geometries
+    Tau             -> let
                       cccc = map read2 $ corrDihedro3 $ dihedro ccccList geometries
                       beta = map read2 $ corrDihedro3 $ dihedro betaList geometries
                       tau  = zipWith (\x y -> (x+y)*0.5) cccc beta 
                       in prt tau
-    Delta          -> let
+    Delta           -> let
                       cccc = map read2 $ corrDihedro3 $ dihedro ccccList geometries
                       beta = map read2 $ corrDihedro3 $ dihedro betaList geometries
                       delta= zipWith (-) cccc beta         
                       in prt delta
-    Bla            -> blaD blaList geometries  
-    Ct             -> calculateCT cTFragment mullChar
-    Root           -> rootDiscov energies initialRlx
-    Jump           -> justHopd energies initialRlx
-    EnergyDyn      -> getEnergyOrPopulation energies S0 Dyn
-    EnergyDiff x y -> getEnergyDiff energies x y Ene
-    Energy      x  -> getEnergyOrPopulation energies x Ene
-    Population  x  -> getEnergyOrPopulation energies x Pop
+    Bla             -> blaD blaList geometries  
+    Ct              -> calculateCT cTFragment mullChar
+    Root            -> rootDiscov energies initialRlx
+    Jump            -> justHopd energies initialRlx
+    EnergyDyn       -> getEnergyOrPopulation energies S0 Dyn
+    EnergyDiff x y  -> getEnergyDiff energies x y Ene
+    Energy      x   -> getEnergyOrPopulation energies x Ene
+    Population  x   -> getEnergyOrPopulation energies x Pop
+    Internal atlist -> case length atlist of
+                           4 -> dihedro atlist geometries
+                           3 -> angleStr atlist geometries
+                           2 -> bondStr atlist geometries
+                           otherwise -> ["some","error","occurred","the","user","asked","for","too","many","atoms"]
 
 getEnergyDiff :: [[Double]]  -> Root  -> Root -> PlotType -> [String]
 getEnergyDiff energies root1 root2 whichOne = let
@@ -107,6 +112,18 @@ dihedro listAtom geometries = let
    aLIndex = map pred listAtom
    dihedrV = map dihedral $ map (\x -> map ( x !!) aLIndex) geometries
    in prt dihedrV
+
+angleStr :: [Int] -> [[Vec Double]] -> [String]
+angleStr listAtom geometries = let
+   aLIndex = map pred listAtom
+   angleV  = map angle $ map (\x -> map ( x !!) aLIndex) geometries
+   in prt angleV
+
+bondStr :: [Int] -> [[Vec Double]] -> [String]
+bondStr listAtom geometries = let
+   aLIndex = map pred listAtom
+   bondV  = map bond $ map (\x -> map ( x !!) aLIndex) geometries
+   in prt bondV
 
 blaD :: [[(Int,Int)]] -> [[Vec Double]] -> [String]
 blaD blaList geometries = let 

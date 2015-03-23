@@ -33,9 +33,10 @@ data Plottable = Cccc
                | EnergyDiff  Root Root
                | Energy      Root
                | Population  Root
+               | Internal [Int]
                deriving (Eq, Show, Read)
 
-data Root = S0 | S1 | S2 | S3 | S4 deriving (Eq, Show, Read, Enum)
+data Root = S0 | S1 | S2 | S3 | S4 | S5 | S6 deriving (Eq, Show, Read, Enum)
 
 data Flag = Help
             | CreateInfo     String
