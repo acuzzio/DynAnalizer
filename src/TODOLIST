@@ -4,7 +4,6 @@ metti nel primo menu il TAGLIATORE -- non troppo importante eh...
 metti il coso che crea una geometria per settare l'input
 plot VELOCITIES
 plot coloured BLA/HOOP like charge transfer
-add the possibility to put another angle - bond - dihedral into input
 
 
 II  BUGS
@@ -17,7 +16,7 @@ III CHECKS
 check points in filepath, or numbers after the traj number.
 check if info files EXISTS into folder
 check for Dyns shorter than averages
-check for Dyns with Energies WAY bigger than the initial one. (quelle che esplodono)
+check for Dyns with Energies WAY bigger than the initial one.
 Check for strangely parsed geometries
 
 IV MISC
