@@ -47,7 +47,7 @@ executable DynAnalyzer
     , parsec == 3.1.*
     , ParsecTools
     , MissingH  
-    , transformers == 0.3.*
+    , transformers 
     , process   == 1.1.*
     , split
     , shqq
