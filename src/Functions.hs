@@ -4,6 +4,7 @@ import Control.Concurrent.Async
 import Data.List.Split
 import Data.List
 import Text.Printf
+import System.Directory
 import System.Process
 
 import DataTypes
@@ -46,4 +47,13 @@ parallelProcFiles :: (a -> IO b) -> [a] -> IO ()
 parallelProcFiles function outputs = do
        pids <- mapM (\x -> async $ function x) outputs
        mapM_ wait pids
+
+ifPointGetFolderName :: String -> IO String
+ifPointGetFolderName fn = if fn == "." 
+   then do
+        a  <- getCurrentDirectory
+        let aa  = if (last a == '/') then init a else a
+            aaa = reverse $ takeWhile (/= '/') $ reverse aa
+        return aaa
+   else return fn
 

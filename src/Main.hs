@@ -22,6 +22,7 @@ import ParseInput
 import Statistics
 import Trajectories
 import Quickies
+import Functions
 
 -- Main function, that takes care of argouments. If you launch without arguments, it will display help, then checks which flags you call and pass them to getOpt. If no flags is recognized ( [] ) then display the help as well. the successfull computation here is the mapM_ of getExpressions
 main :: IO()
@@ -96,7 +97,9 @@ getExpression flag =
        let fn = if (last fnn == '/') then init fnn else fnn
        aa <- doesDirectoryExist fn
        case aa of
-          True -> do handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fn
+          True -> do 
+                  fnPointLess <- ifPointGetFolderName fn -- this was the bug of using Dynanalizer with the '.' from inside the project folder.
+                  handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fnPointLess
           False -> do
               createDirectory fn
               putStrLn $ "\nFolder " ++ fn ++ " does not exist. So I created it.\n"
