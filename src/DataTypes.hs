@@ -47,6 +47,7 @@ data Flag = Help
             | DoAll          String
             | Doall          String
             | Quick          String
+            | Dani           String
             deriving (Show, Eq)
 
 data IsomType = Cis | Trans deriving (Show, Read)

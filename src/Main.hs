@@ -79,7 +79,10 @@ options = [
      "It will run the program using the information into FOLDER. In case it does not exist, a template one will be created",
    Option "L" ["LuismaASKEDthis"]
      (ReqArg Quick "ProjectFolder")
-     "this option run the code into Quickies file, if you do not know what it is... you probably don't need it"
+     "this option run the code into Quickies file, if you do not know what it is... you probably don't need it",
+   Option "D" ["Dani"]
+     (ReqArg Dani "ProjectFolder")
+     "this option run the code for Dani analysis"
    ]
 
 -- So this is the main function for command line use of dynanalyzer. Just takes the flag, case on the datatype Flag and do what the option is supposed to do. All of them MUST be IO(). The purpose of the program is to take a bunch of big files (molcas outputs) and exctract just the information we need for the analysis into info files (waaay smaller). Then do some analysis on data.
@@ -93,13 +96,12 @@ getExpression flag =
        createInfoQM Binary path
     CreateInfoQMMM path -> do -- same, but with QM/MM files.
        createInfoQMMM path
-    InputFile fnn     -> do   -- this creates a new folder to work in, or set the working folder to call a menu.
-       let fn = if (last fnn == '/') then init fnn else fnn
+    InputFile fn     -> do   -- this creates a new folder to work in, or set the working folder to call a menu.
        aa <- doesDirectoryExist fn
        case aa of
           True -> do 
-                  fnPointLess <- ifPointGetFolderName fn -- this was the bug of using Dynanalizer with the '.' from inside the project folder.
-                  handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fnPointLess
+                  fnCorrect <- correctFolderName fn 
+                  handle ((\_ -> quitNoStyle) :: AsyncException -> IO ()) $ goIntoMenu fnCorrect
           False -> do
               createDirectory fn
               putStrLn $ "\nFolder " ++ fn ++ " does not exist. So I created it.\n"
@@ -109,7 +111,7 @@ getExpression flag =
     CheckInfo path   -> do     -- this triggers the tests on info files
        checkInfoFiles path
     DoAll fnn -> do            -- this is the DO EVERYTHING "all in one" command
-       let fn = if (last fnn == '/') then init fnn else fnn
+       fn <- correctFolderName fnn
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
        let input = inputFile { getfolder = fn }
@@ -125,7 +127,7 @@ getExpression flag =
                       chargeTmap input
                       putStrLn "Done"
     Doall fnn -> do           -- this is the all in one command, but just for the analysis part
-       let fn = if (last fnn == '/') then init fnn else fnn 
+       fn <- correctFolderName fnn
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
        let input = inputFile { getfolder = fn }
@@ -136,7 +138,7 @@ getExpression flag =
                       chargeTmap input
                       putStrLn "Done"
     Quick fnn -> do           -- I use this options when I do not have time and I want to do something quickly
-       let fn = if (last fnn == '/') then init fnn else fnn
+       fn <- correctFolderName fnn
        setCurrentDirectory fn
        inputFile <- getInputInfos "input"
        let input = inputFile { getfolder = fn }
@@ -144,8 +146,12 @@ getExpression flag =
           True  -> do putStrLn "There is a problem into input file."
           False -> do putStrLn fn
                       luismaAsk input
-
-
+    Dani fnn -> do
+       fn <- correctFolderName fnn
+       setCurrentDirectory fn
+       inputFile <- getInputInfos "input"
+       let input = inputFile { getfolder = fn }
+       dani input
 
 -- This function opens the menu.
 goIntoMenu fn = do

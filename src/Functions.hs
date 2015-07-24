@@ -48,12 +48,14 @@ parallelProcFiles function outputs = do
        pids <- mapM (\x -> async $ function x) outputs
        mapM_ wait pids
 
-ifPointGetFolderName :: String -> IO String
-ifPointGetFolderName fn = if fn == "." 
+correctFolderName :: String -> IO String
+correctFolderName fn = if fn == "." 
    then do
         a  <- getCurrentDirectory
-        let aa  = if (last a == '/') then init a else a
-            aaa = reverse $ takeWhile (/= '/') $ reverse aa
-        return aaa
-   else return fn
+        let aa  = if (last a == '/') then init a else a     -- when the folder has '/' at the end
+            -- aaa = reverse $ takeWhile (/= '/') $ reverse aa -- this was the bug of using Dynanalizer with the '.' from inside the project folder.
+        return aa
+   else do
+        let aa  = if (last fn == '/') then init fn else fn
+        return aa
 

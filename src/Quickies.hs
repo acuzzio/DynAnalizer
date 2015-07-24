@@ -5,7 +5,10 @@ import CreateInfo
 import DataTypes
 import Filters
 import Functions
+import GnuplotZ
 import ParseInput
+import Statistics
+import Trajectories
 
 import Data.List
 import System.ShQQ
@@ -49,3 +52,12 @@ getFileName x = do
   a <- readShell $ "ls INFO/*" ++ x ++ "*"
   b <- readShell $ "ls DATA/*" ++ x ++ "*"
   return (head (lines a), head (lines b))
+
+dani input = do
+  plotEnergiesPopulations input
+  createDATAs input
+  genTrajectories input
+  graphicLifeTime3 input 2
+  putStrLn "ciao Dani !! Done"
+
+
