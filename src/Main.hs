@@ -42,7 +42,7 @@ main = do
 useMessage = putStrLn $ usageInfo startMessage options
 
 -- welcoming message
-startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\nThose are the options avaiable:"
+startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\n\nTHIS IS THE SURFACE HOP VERSION!!!!\n\n\nThose are the options avaiable:"
 
 
 -- avaiable command line direct option in this program. Each option has 

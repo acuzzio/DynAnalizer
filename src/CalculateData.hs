@@ -105,7 +105,8 @@ getEnergyOrPopulation energies root whichOne = let
                           Pop    -> map printZ12 $ popu !! indexRight
                           Ene    -> map printZ12 $ ene  !! indexRight 
                           Dyn    -> map printZ12 $ dyn  !! 0
-    in [" "," "] ++ listRigth
+    in listRigth
+    -- in [" "," "] ++ listRigth  -- Correzioni per surfacehop elisa
 
 dihedro :: [Int] -> [[Vec Double]] -> [String]
 dihedro listAtom geometries = let
@@ -212,7 +213,8 @@ rootDiscov energy rlxInit = let
     getI ls nu     = snd $ head $ dropWhile (\x-> fst x /= nu) $ zip ls [0..]
     rightRootI     = zipWith getI (transpose ene) (head dyn) -- dyn is still in a list because of ChunksOf
     rightRootS     = map (\x -> "S" ++ (show x)) rightRootI
-    in startingRootS:startingRootS:rightRootS
+    in rightRootS
+    --in startingRootS:startingRootS:rightRootS -- Correzioni per surfacehop elisa
 
 justHopd :: [[Double]] -> Int -> [String]
 justHopd energy rlxInit = let
