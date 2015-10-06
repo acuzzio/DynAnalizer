@@ -5,16 +5,40 @@ import qualified Data.ByteString.Char8  as B
 import Data.Attoparsec.ByteString.Char8 as C
 
 main = do
- a     <- B.readFile "geom067S.out"
- case parseOnly (manyTill parseGeom a) of
+ a <- B.readFile "geom067S.out"
+ case parseOnly parseFile a of
       Left msg -> error "eeeeh"
-      Right x  -> print x
+      Right x  -> return x
 
-parseGeom :: Parser B.ByteString
-parseGeom = do
-  manyTill anyChar (string "Cartesian coordinates in Angstrom:") *> count 4 anyLine' 
-  a <- takeTill (== '=')
-  return a
+parseFile = do
+  nAtom <- countAtoms
+  parseGeom nAtom
+  parseCharge
+  parseGeom nAtom
+
+parseGeom :: Int -> Parser B.ByteString
+parseGeom atomN = do
+  manyTill anyChar (string "Cartesian coordinates in Angstrom:") 
+  count 4 anyLine' 
+  parseSingleGeometry atomN
+
+parseCharge :: Parser B.ByteString
+parseCharge = do
+   let mark = "Mulliken charges per centre and basis function type"
+   manyTill anyChar (string mark) *> anyLine'
+   takeTill (== 'T') 
+
+parseSingleGeometry :: Int -> Parser B.ByteString
+parseSingleGeometry atomN = do
+    a <- count atomN $ skipSpace *> decimal *> spaceAscii *> decimal *> skipSpace *> anyLine
+    return $ B.unlines a
+
+countAtoms :: Parser Int 
+countAtoms = do
+     manyTill anyChar (string "Center  Label")  *> anyLine'
+     xs <- B.unpack <$> takeTill (== '*')
+     return $ length $ filter (isAlpha_ascii . head ) $ words xs
+            
 
 anyLine :: Parser B.ByteString
 anyLine = takeTill  (== '\n')
@@ -22,4 +46,12 @@ anyLine = takeTill  (== '\n')
 anyLine' :: Parser ()
 anyLine' = anyLine *> endOfLine 
 
+spaceDecimal :: Parser Int
+spaceDecimal = takeWhile1 isSpace *> decimal
+
+spaceDouble :: Parser Double
+spaceDouble = takeWhile1 isSpace *> double
+
+spaceAscii :: Parser B.ByteString
+spaceAscii =  takeWhile1 isSpace *> takeWhile1 isAlpha_ascii
 
