@@ -12,9 +12,9 @@ main = do
 
 parseFile = do
   nAtom <- countAtoms
-  parseGeom nAtom
-  parseCharge
-  parseGeom nAtom
+  a <- parseGeom nAtom
+  b <- parseCharge
+  return (a,b)
 
 parseGeom :: Int -> Parser B.ByteString
 parseGeom atomN = do
@@ -24,9 +24,14 @@ parseGeom atomN = do
 
 parseCharge :: Parser B.ByteString
 parseCharge = do
-   let mark = "Mulliken charges per centre and basis function type"
-   manyTill anyChar (string mark) *> anyLine'
-   takeTill (== 'T') 
+   let start = "Mulliken charges per centre and basis function type"
+       stop  = "Total electronic charge="
+   a <- manyTill anyChar (string start) *>  manyTill anyChar (string stop) 
+   let match = "N-E" 
+   return $ transformCharge match a 
+   
+transformCharge :: String -> String -> B.ByteString
+transformCharge str x =  B.unwords . concat . map tail . filter (\x -> (head x) == (B.pack str)) . filter (/= []) . map B.words . B.lines $ B.pack x
 
 parseSingleGeometry :: Int -> Parser B.ByteString
 parseSingleGeometry atomN = do
