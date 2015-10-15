@@ -60,3 +60,6 @@ spaceDouble = takeWhile1 isSpace *> double
 spaceAscii :: Parser B.ByteString
 spaceAscii =  takeWhile1 isSpace *> takeWhile1 isAlpha_ascii
 
+skipTill :: B.ByteString -> Parser ()
+skipTill pattern = skipWhile (/= head (B.unpack pattern)) *> ( (string pattern *> pure () )  <|> (anyChar *> skipTill pattern))
+
