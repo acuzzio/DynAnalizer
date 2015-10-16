@@ -12,7 +12,7 @@ main = do
 
 parseFile = do
   nAtom <- countAtoms
-  a <- parseGeom nAtom
+  a <- parseGeom2 nAtom
   b <- parseCharge
   return (a,b)
 
@@ -24,17 +24,19 @@ parseGeom atomN = do
 
 parseGeom2 :: Int -> Parser B.ByteString
 parseGeom2 atomN = do
-  manyTill anyChar (string "Cartesian coordinates in Angstrom:") 
+  let start = "Cartesian coordinates in Angstrom:"
+      stop  = "-------"
+  skipTill start
   count 4 anyLine' 
-  parseSingleGeometry atomN
+  parseGeom
 
-parseCharge :: Parser B.ByteString
 parseCharge :: Parser B.ByteString
 parseCharge = do
    let start     = "Mulliken charges per centre and basis function type"
        stop      = "Total electronic charge="
    skipTill start
-   whilePatt stop (linePattern "N-E")
+   withSpaces <- whilePatt stop (lineChargePattern "N-E")
+   return $ trimDoubleSpaces withSpaces
 
 whilePatt :: B.ByteString -> Parser B.ByteString -> Parser B.ByteString 
 whilePatt stop p = loop B.empty 
@@ -44,11 +46,10 @@ whilePatt stop p = loop B.empty
                          else let rs = B.append acc xs
                               in loop rs 
  
-linePattern :: B.ByteString -> Parser B.ByteString
-linePattern pat = findPatern <|> (anyLine' *> pure "")
+lineChargePattern :: B.ByteString -> Parser B.ByteString
+lineChargePattern pat = findPattern <|> (anyLine' *> pure "")
  where       
-       findPatern = spaces *> string pat *> anyLine <* endOfLine
- 
+       findPattern = spaces *> string pat *> anyLine <* endOfLine
 
 parseSingleGeometry :: Int -> Parser B.ByteString
 parseSingleGeometry atomN = do
@@ -80,7 +81,10 @@ spaceAscii =  spaces *> takeWhile1 isAlpha_ascii
 spaces :: Parser ()
 spaces = skipWhile isSpace
 
--- | Skip Chars until the pattern is found 
+trimDoubleSpaces :: B.ByteString -> B.ByteString 
+trimDoubleSpaces = B.unwords . B.words
+
+-- | Skip Chars until the pattern is found UNUSED
 skipTill' :: Char -> B.ByteString -> Parser ()
 skipTill' letter pat = skipWhile (/= letter) *> ( (string pat *> pure () )  <|> (anyChar *> skipTill' letter pat))
 

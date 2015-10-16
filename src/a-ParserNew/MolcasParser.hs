@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Control.Applicative ((<|>),(*>),(<*),(<$>),(<*>))
+import Control.Applicative (pure,(<|>),(*>),(<*),(<$>),(<*>))
 import qualified Data.ByteString.Char8  as B
 import Data.Attoparsec.ByteString.Char8 as C
 
@@ -43,7 +43,6 @@ countAtoms = do
      manyTill anyChar (string "Center  Label")  *> anyLine'
      xs <- B.unpack <$> takeTill (== '*')
      return $ length $ filter (isAlpha_ascii . head ) $ words xs
-            
 
 anyLine :: Parser B.ByteString
 anyLine = takeTill  (== '\n')
