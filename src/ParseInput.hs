@@ -35,7 +35,7 @@ betaList   = [19,7,8,16]                           -- Here beta angle
 blaList    = [[(2,6),(7,8),(9,10)],[(6,7),(8,9)]]  -- BLA list of single bonds, list of double bonds
 isomType   = Trans                                 -- Here Cis or Trans
 nRoot      = 2                                     -- This is the number of root in the system
-dataPlot   = [Cccc,CcccCorrected,Beta,BetaCorrected,Tau,Delta,Bla,Ct,Root,Jump,Energy S1,Internal[1,2,3]] -- Data file Columns, you can use also: EnergyDyn, Energy S0, Population S1, EnergyDiff S1 S0 ecc. Or Internal to print a coordinate.
+dataPlot   = [Cccc,CcccCorrected,Beta,BetaCorrected,Tau,Delta,Bla,Ct,Root,Jump,Energy S1,Internal[1,2,3],Charge[1,2,3]] -- Data file Columns, you can use also: EnergyDyn, Energy S0, Population S1, EnergyDiff S1 S0 ecc. Internal to print a coordinate or Charge to sum mulliken charges in a fragment.
 gnuplotOptions = set terminal pngcairo size 1224,830 enhanced font ", 12"  -- Gnuplot options separated by \\n \n
 |]
 

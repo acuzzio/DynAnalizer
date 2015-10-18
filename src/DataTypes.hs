@@ -34,6 +34,7 @@ data Plottable = Cccc
                | Energy      Root
                | Population  Root
                | Internal [Int]
+               | Charge [Int]
                deriving (Eq, Show, Read)
 
 data Root = S0 | S1 | S2 | S3 | S4 | S5 | S6 deriving (Eq, Show, Read, Enum)

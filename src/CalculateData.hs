@@ -87,6 +87,7 @@ createPLOTDATA a input listToPlot = do
                            3 -> angleStr atlist geometries
                            2 -> bondStr atlist geometries
                            otherwise -> ["some","error","occurred","the","user","asked","for","too","many","atoms"]
+    Charge charList -> calculateCT charList mullChar
 
 getEnergyDiff :: [[Double]]  -> Root  -> Root -> PlotType -> [String]
 getEnergyDiff energies root1 root2 whichOne = let
