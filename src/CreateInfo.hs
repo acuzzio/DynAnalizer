@@ -115,7 +115,7 @@ genInfoFileQM fileType fn = do
     energiesPop             <- mapM (\a -> readShell $ "grep " ++ binaryGrep ++ " OOLgnuplt " ++ fn ++ " | awk '{print $" ++ (show a) ++ "}'") $ map succ [1..numberFields] -- map succ because the first field is the string gnuplot
     coordinates             <- readShell $ "grep " ++ binaryGrep ++ " -A" ++ grepLength ++ " '       Old Coordinates (time' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep " ++ binaryGrep ++ " -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
-    chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: *1/ {flag=1;next} /Expectation values of various properties for root number: *1/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
+    chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: *2/ {flag=1;next} /Expectation values of various properties for root number: *2/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
     let infoname            = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "info"
         div                 = "DIVISION\n"
         subDiv              = "SUBDIVISION\n"
