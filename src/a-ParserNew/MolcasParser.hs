@@ -16,17 +16,18 @@ parseFile :: Parser [B.ByteString]
 parseFile = do
   dt <- parseDT
   nAtom <- countAtoms
-  a <- parseGeom nAtom
-  b <- parseCharge
-  c <- parseEnePop
-  cc<- parseGradient nAtom
-  d <- parseEnePop
-  return [dt,a,b,c,cc,d]
+  a  <- parseGeom nAtom
+  b  <- parseCharge -- it has to be done nRoot times
+  bb <- parseCharge -- it has to be done nRoot times
+  c  <- parseEnePop
+  cc <- parseGradient nAtom
+  d  <- parseEnePop
+  return [dt,a,b,bb,c,cc,d]
 
 -- seek for the string "dt" (in any case) in the input section of the output
 parseDT :: Parser B.ByteString
 parseDT = do
-  skipTill "dt" 
+  skipTillCase "dt" 
   count 1 anyLine'
   a <- anyLine
   return $ trimDoubleSpaces a
@@ -79,6 +80,7 @@ lineChargePattern pat = findPattern <|> (anyLine' *> pure "")
  where
        findPattern = spaces *> string pat *> anyLine <* endOfLine
 
+-- Get the atom numbers from Gateway
 countAtoms :: Parser Int 
 countAtoms = do
      manyTill anyChar (string "Center  Label")  *> anyLine'
@@ -91,24 +93,30 @@ anyLine = takeTill  (== '\n')
 anyLine' :: Parser ()
 anyLine' = anyLine *> endOfLine 
 
+-- "     12"
 spaceDecimal :: Parser Int
 spaceDecimal = takeWhile1 isSpace *> decimal
 
+-- "     12.12"
 spaceDouble :: Parser Double
 spaceDouble = takeWhile1 isSpace *> double
 
+-- "     asdsa"
 spaceAscii :: Parser B.ByteString
 spaceAscii =  takeWhile1 isSpace *> takeWhile1 isAlpha_ascii
 
+-- throw away everything until the string pattern
 skipTill :: B.ByteString -> Parser ()
 skipTill pattern = skipWhile (/= head (B.unpack pattern)) *> ( (string pattern *> pure () )  <|> (anyChar *> skipTill pattern))
 
+-- throw away everything until the string pattern CASE UNSEnSiTiVE
 skipTillCase :: B.ByteString -> Parser ()
 skipTillCase pattern = do
   let firstLetter = toUpper . head $ B.unpack pattern
-      condition fL x = x == fL || x == (toLower fL)
+      condition fL x = x /= fL && x /= (toLower fL)
   skipWhile (\x -> condition firstLetter x) *> ( (stringCI pattern *> pure () )  <|> (anyChar *> skipTillCase pattern))
 
+-- transform " 34 12 123    1234  1234  " into "34 12 123 1234 1234"
 trimDoubleSpaces :: B.ByteString -> B.ByteString
 trimDoubleSpaces = B.unwords . B.words
 
