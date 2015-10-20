@@ -58,7 +58,6 @@ parseGeom atomN = do
   a <- count atomN $ skipSpace *> decimal *> spaceAscii *> decimal *> skipSpace *> anyLine
   return $ B.unlines $ map trimDoubleSpaces a
 
-
 parseCharge :: Parser B.ByteString
 parseCharge = do
    let start     = "Mulliken charges per centre and basis function type"
@@ -113,7 +112,8 @@ skipTill pattern = skipWhile (/= head (B.unpack pattern)) *> ( (string pattern *
 skipTillCase :: B.ByteString -> Parser ()
 skipTillCase pattern = do
   let firstLetter = toUpper . head $ B.unpack pattern
-      condition fL x = x /= fL && x /= (toLower fL)
+      condition fL x = all (/=x) [fL, toLower fL] 
+      --x /= fL && x /= (toLower fL)
   skipWhile (\x -> condition firstLetter x) *> ( (stringCI pattern *> pure () )  <|> (anyChar *> skipTillCase pattern))
 
 -- transform " 34 12 123    1234  1234  " into "34 12 123 1234 1234"
