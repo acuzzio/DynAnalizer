@@ -24,8 +24,13 @@ parseFile = do
   b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
   c     <- parseEnePop
   cc    <- parseGradient nAtom
+  d     <- parseInVelo
   --return (nR,dt,aType,a,b,c,cc,d)
   return [nR,dt,aType,a,b,c,cc]
+
+parseInVelo :: Parser B.ByteString
+parseInVelo = undefined
+
 
 pp = B.putStrLn . B.unlines
 
