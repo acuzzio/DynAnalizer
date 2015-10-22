@@ -6,31 +6,54 @@ import Data.Attoparsec.ByteString.Char8 as C
 import Data.Char (toUpper,toLower)
 import Control.Monad
 
+fn = "geom067.out"
+
 main = do
- a <- B.readFile "geom067S.out"
+ a <- B.readFile fn
+ let  infoName = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "info"
  case parseOnly parseFile a of
       Left msg -> error "eeeeh"
-      Right x  -> return x
+      Right x  -> do
+                  let a = B.unlines x
+                  B.writeFile infoName a
 
 -- this will be the main structure of the MD file
 --parseFile :: Parser [B.ByteString] 
 parseFile = do
-  nR    <- parseNRoot
+  nR     <- parseNRoot
   let nRoot = read [(B.head nR)] :: Int
-  dt    <- parseDT
-  aType <- parseAtomTypes
+  dt     <- parseDT
+  aType  <- parseAtomTypes
   let nAtom = B.length aType
+  all    <- many' $ parseMDStep nAtom nRoot
+  return $ [nR,dt,aType] ++ all
+
+
+parseMDStep :: Int -> Int -> Parser B.ByteString
+parseMDStep nAtom nRoot = do
   a     <- parseGeom nAtom
   b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
   c     <- parseEnePop
-  cc    <- parseGradient nAtom
-  d     <- parseInVelo
-  --return (nR,dt,aType,a,b,c,cc,d)
-  return [nR,dt,aType,a,b,c,cc]
+  d     <- parseGradient nAtom
+  e     <- parseInVelo nAtom
+  return $ B.intercalate "\n" [a,b,c,d,e]
+  
+parseInVelo :: Int -> Parser B.ByteString
+parseInVelo atomN = do 
+  skipTill "Velocities"
+  count 4 anyLine'
+  a <- count atomN $ veloLine
+  return $ treatTriplets a
 
-parseInVelo :: Parser B.ByteString
-parseInVelo = undefined
-
+veloLine = do 
+  skipSpace *> decimal
+  spaceAscii
+  let condition x = x == ' ' || x == '\n'
+  x <- skipSpace *> takeTill (== ' ')
+  y <- skipSpace *> takeTill (== ' ')
+  z <- skipSpace *> takeTill (condition)
+  anyLine'
+  return $ B.unwords [x,y,z]
 
 pp = B.putStrLn . B.unlines
 
@@ -61,7 +84,6 @@ parseAtomTypes = do
 atomTypeLineParser :: Parser B.ByteString
 atomTypeLineParser = skipSpace *> decimal *> skipSpace *> takeWhile1 isAlpha_ascii <* anyLine'
 
-
 -- enters in Alaska and parse out the gradient
 parseGradient :: Int -> Parser B.ByteString
 parseGradient atomN = do
@@ -69,7 +91,7 @@ parseGradient atomN = do
   skipTill start
   count 8 anyLine'
   a <- count atomN $ spaceAscii *> decimal *> skipSpace *> anyLine
-  return $ B.unlines $ map trimDoubleSpaces a
+  return $ treatTriplets a 
 
 -- at step 1 the code prints "Cannot do deltas" and the other steps are "\n --- Stop module". This is why we stop the parser to both letter C and S, filtering out the "---" string.
 parseEnePop :: Parser B.ByteString
@@ -86,7 +108,7 @@ parseGeom atomN = do
   manyTill anyChar (string "Cartesian coordinates in Angstrom:") 
   count 4 anyLine' 
   a <- count atomN $ skipSpace *> decimal *> spaceAscii *> decimal *> skipSpace *> anyLine
-  return $ B.unlines $ map trimDoubleSpaces a
+  return $ treatTriplets a
 
 parseSingleCharge :: Parser B.ByteString
 parseSingleCharge = do
@@ -158,6 +180,8 @@ skipTillCase pattern = do
 -- transform " 34 12 123    1234  1234  " into "34 12 123 1234 1234"
 trimDoubleSpaces :: B.ByteString -> B.ByteString
 trimDoubleSpaces = B.unwords . B.words
+
+treatTriplets = B.init . B.unlines . map trimDoubleSpaces 
 
 spaces :: Parser ()
 spaces = skipWhile isSpace
