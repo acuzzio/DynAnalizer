@@ -6,7 +6,8 @@ import Data.Attoparsec.ByteString.Char8 as C
 import Data.Char (toUpper,toLower)
 import Control.Monad
 
-fn = "geom067.out"
+--fn = "geom067.out"
+fn = "HopS.out"
 
 main = do
  a <- B.readFile fn
@@ -16,6 +17,7 @@ main = do
       Right x  -> do
                   let a = B.unlines x
                   B.writeFile infoName a
+                  return a
 
 -- this will be the main structure of the MD file
 --parseFile :: Parser [B.ByteString] 
@@ -28,6 +30,15 @@ parseFile = do
   all    <- many' $ parseMDStep nAtom nRoot
   return $ [nR,dt,aType] ++ all
 
+parseMDStepDBG :: Int -> Int -> Parser B.ByteString
+parseMDStepDBG nAtom nRoot = do
+--  a     <- parseGeom nAtom
+  b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
+--  c     <- parseEnePop
+--  d     <- parseGradient nAtom
+--  e     <- parseInVelo nAtom
+  return $ B.intercalate "\n" [b]
+  
 
 parseMDStep :: Int -> Int -> Parser B.ByteString
 parseMDStep nAtom nRoot = do
@@ -36,7 +47,18 @@ parseMDStep nAtom nRoot = do
   c     <- parseEnePop
   d     <- parseGradient nAtom
   e     <- parseInVelo nAtom
-  return $ B.intercalate "\n" [a,b,c,d,e]
+  f     <- parseKinTot
+  return $ B.intercalate "\n" [a,b,c,d,e,f]
+
+parseKinTot :: Parser B.ByteString
+parseKinTot = do
+  skipTillCase "kinetic energy" 
+  x <- skipSpace *> takeTill (== ' ')
+  skipTillCase "total energy"
+  y <- skipSpace *> takeTill (== ' ')
+  let replaceD = map (\c -> if c =='D' then 'E'; else c)
+  return $ B.pack $ replaceD $ B.unpack $ B.unwords [x,y]
+  --return $ replaceD $ B.unwords [x,y]
   
 parseInVelo :: Int -> Parser B.ByteString
 parseInVelo atomN = do 
@@ -56,6 +78,8 @@ veloLine = do
   return $ B.unwords [x,y,z]
 
 pp = B.putStrLn . B.unlines
+
+ppp x = B.putStrLn $ B.unlines [x]
 
 -- seek for "ciroot" keyword in molcas input section of the output.
 parseNRoot :: Parser B.ByteString
