@@ -52,10 +52,13 @@ parseMDStep nAtom nRoot = do
 
 parseKinTot :: Parser B.ByteString
 parseKinTot = do
+  let condition x =  any (==x) [' ','\n'] 
   skipTillCase "kinetic energy" 
-  x <- skipSpace *> takeTill (== ' ')
+  option "" (skipSpace *> string "(Hartree) is:")
+  x <- skipSpace *> takeTill condition
   skipTillCase "total energy"
-  y <- skipSpace *> takeTill (== ' ')
+  option "" (skipSpace *> string "(Hartree) is:")
+  y <- skipSpace *> takeTill condition
   let replaceD = map (\c -> if c =='D' then 'E'; else c)
   return $ B.pack $ replaceD $ B.unpack $ B.unwords [x,y]
   --return $ replaceD $ B.unwords [x,y]
