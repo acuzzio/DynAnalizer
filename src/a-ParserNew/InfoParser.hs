@@ -8,11 +8,19 @@ import Control.Monad
 
 import DataTypes
 
-fn = "short.info"
+fn = "HopS.info"
 
 main = do
-  a <- readFile fn
-  return a
+  a <- B.readFile fn
+  case parseOnly parseInfo a of
+       Left msg -> error "eeeeh InFo !@#$@#$"
+       Right x  -> return x
+
+parseInfo = do
+  parseHeader
+
+parseHeader = do
+  decimal <* anyLine'
 
 --fn = "geom067.out"
 --
