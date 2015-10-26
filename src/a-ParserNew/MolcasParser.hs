@@ -8,8 +8,8 @@ import Control.Monad
 
 import ParserFunctions
 
---fn = "geom067.out"
-fn = "HopS.out"
+fn = "geom067.out"
+--fn = "HopS.out"
 
 main = do
  a <- B.readFile fn

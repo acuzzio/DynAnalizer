@@ -2,6 +2,17 @@ module DataTypes where
 
 import IntCoor
 
+data Step = Step {
+        gtCoor           :: [Vec Double],
+        gtCharge         :: [[Double]],
+        gtDipole         :: [[Double]],
+        gtEnePop         :: [Double],
+        gtGrad           :: [Vec Double],
+        gtVelo           :: [Vec Double],
+        gtKin            :: Double,
+        gtTot            :: Double 
+        } deriving Show
+
 data Dinamica = Dinamica {
           getOutputNam   :: String,
           getAtomN       :: Int,

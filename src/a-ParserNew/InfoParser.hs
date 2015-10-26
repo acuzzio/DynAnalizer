@@ -41,12 +41,12 @@ parseStep nRoot nAtom = do
   grad        <- parseVector nAtom
   velo        <- parseVector nAtom
   [kin,tot]   <- parseKinTot 
-  return (geom,charge,dipo,enepop,grad,velo,kin,tot)
+  return $ Step geom charge dipo enepop grad velo kin tot
 
 parseKinTot = do
   kin <- double
   space
-  tot <- double
+  tot <- double <* anyLine'
   return [kin,tot]
 
 parseEnePop = double `sepBy` " " <* anyLine'

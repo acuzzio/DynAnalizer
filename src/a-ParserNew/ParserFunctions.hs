@@ -21,7 +21,7 @@ whilePatt stop p = loop B.empty
 whilePatt2 :: B.ByteString -> B.ByteString -> Parser B.ByteString -> Parser B.ByteString 
 whilePatt2 stop1 stop2 p = loop B.empty 
   where loop acc = do
-           xs <- (spaces *> string stop1) <|> (spaces *> string stop2) <|> p
+           xs <- (spaces *> (string stop1 <|> string stop2)) <|> p
            if xs == stop1 || xs == stop2 then pure acc
                          else let rs = B.append acc xs
                               in loop rs
