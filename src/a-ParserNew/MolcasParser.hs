@@ -6,8 +6,8 @@ import Data.Attoparsec.ByteString.Char8 as C
 import Data.Char (toUpper,toLower)
 import Control.Monad
 
---fn = "geom067.out"
-fn = "HopS.out"
+fn = "geom067.out"
+--fn = "HopS.out"
 
 main = do
  a <- B.readFile fn
@@ -30,25 +30,42 @@ parseFile = do
   all    <- many' $ parseMDStep nAtom nRoot
   return $ [nR,dt,aType] ++ all
 
+-- This function for debug purposes
 parseMDStepDBG :: Int -> Int -> Parser B.ByteString
 parseMDStepDBG nAtom nRoot = do
+  a     <- B.intercalate "\n" <$> count nRoot parseWF
 --  a     <- parseGeom nAtom
-  b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
+--  b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
 --  c     <- parseEnePop
 --  d     <- parseGradient nAtom
 --  e     <- parseInVelo nAtom
-  return $ B.intercalate "\n" [b]
-  
+  return $ a
 
+-- this structure is repeated nStep times
 parseMDStep :: Int -> Int -> Parser B.ByteString
 parseMDStep nAtom nRoot = do
-  a     <- parseGeom nAtom
-  b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
-  c     <- parseEnePop
-  d     <- parseGradient nAtom
-  e     <- parseInVelo nAtom
-  f     <- parseKinTot
-  return $ B.intercalate "\n" [a,b,c,d,e,f]
+  geom     <- parseGeom nAtom
+  wf       <- B.intercalate "\n" <$> count nRoot parseWF
+  charge   <- B.intercalate "\n" <$> count nRoot parseChargeDipole
+  enepop   <- parseEnePop
+  grad     <- parseGradient nAtom
+  velo     <- parseInVelo nAtom
+  kintot   <- parseKinTot
+  return $ B.intercalate "\n" [wf,geom,charge,enepop,grad,velo,kintot]
+
+parseWF :: Parser B.ByteString
+parseWF = do
+  let start = "conf/sym"
+      stop1  = "printout"
+      stop2  = "Natural"
+  skipTill start
+  count 1 anyLine'
+  whilePatt2 stop1 stop2 parseSingleLineWF
+
+parseSingleLineWF :: Parser B.ByteString
+parseSingleLineWF = do
+  a <- anyLine <* endOfLine
+  return $ B.append (trimDoubleSpaces a) (" ")
 
 parseKinTot :: Parser B.ByteString
 parseKinTot = do
@@ -70,6 +87,7 @@ parseInVelo atomN = do
   a <- count atomN $ veloLine
   return $ treatTriplets a
 
+veloLine :: Parser B.ByteString
 veloLine = do 
   skipSpace *> decimal
   spaceAscii
@@ -137,6 +155,25 @@ parseGeom atomN = do
   a <- count atomN $ skipSpace *> decimal *> spaceAscii *> decimal *> skipSpace *> anyLine
   return $ treatTriplets a
 
+-- this parse the mulliken charge + the dipole
+parseChargeDipole :: Parser B.ByteString
+parseChargeDipole = do
+  a <- parseSingleCharge 
+  b <- parseDipole
+  return $ B.intercalate "\n" [a,b]
+
+parseDipole :: Parser B.ByteString
+parseDipole = do
+  skipTill "Dipole Moment (Debye):"
+  count 2 anyLine'
+  skipSpace *> string "X=" 
+  x <- skipSpace *> takeTill (== ' ')
+  skipSpace *> string "Y=" 
+  y <- skipSpace *> takeTill (== ' ')
+  skipSpace *> string "Z=" 
+  z <- skipSpace *> takeTill (== ' ')
+  return $ B.unwords [x,y,z]
+
 parseSingleCharge :: Parser B.ByteString
 parseSingleCharge = do
   let start     = "Mulliken charges per centre and basis function type"
@@ -145,21 +182,21 @@ parseSingleCharge = do
   withSpaces <- whilePatt stop (lineChargePattern "N-E")
   return $ trimDoubleSpaces withSpaces
 
--- repeat the parser N times and concatenate results
-repeatParserNTimes :: Int -> Parser B.ByteString -> Parser B.ByteString
-repeatParserNTimes n p = loop n B.empty
-  where loop n acc = do
-           xs <- p
-           if n == 0 then pure acc
-                     else let rs = B.append acc xs
-                          in loop (n-1) rs
-
 -- repeat the parser until the "stop" string is found
 whilePatt :: B.ByteString -> Parser B.ByteString -> Parser B.ByteString 
 whilePatt stop p = loop B.empty 
   where loop acc = do
-           xs <- (spaces *> string stop ) <|>  p
+           xs <- (spaces *> string stop) <|>  p
            if xs == stop then pure acc
+                         else let rs = B.append acc xs
+                              in loop rs
+
+-- repeat the parser until the "stop1" OR "stop2" string is found
+whilePatt2 :: B.ByteString -> B.ByteString -> Parser B.ByteString -> Parser B.ByteString 
+whilePatt2 stop1 stop2 p = loop B.empty 
+  where loop acc = do
+           xs <- (spaces *> string stop1) <|> (spaces *> string stop2) <|> p
+           if xs == stop1 || xs == stop2 then pure acc
                          else let rs = B.append acc xs
                               in loop rs
 
