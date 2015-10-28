@@ -18,6 +18,7 @@ main = do
        Left msg -> error "eeeeh InFo !@#$@#$"
        Right x  -> return x
 
+-- main file
 parseInfo = do
   (nRoot,dt,aT) <- parseHeader
   let nAtom = length aT
