@@ -19,7 +19,7 @@ main = do
       Right x  -> do
                   let a = B.unlines x
                   B.writeFile infoName a
-                  return a
+--                  return a
 
 -- this will be the main structure of the MD file !
 --parseFile :: Parser [B.ByteString] 

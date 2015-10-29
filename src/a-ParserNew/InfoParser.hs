@@ -10,7 +10,8 @@ import DataTypes
 import IntCoor
 import ParserFunctions
 
-fn = "HopS.info"
+--fn = "HopS.info"
+fn = "geom067.info"
 
 main = do
   a <- B.readFile fn
