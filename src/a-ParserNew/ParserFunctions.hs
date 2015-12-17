@@ -44,18 +44,6 @@ spaceDouble = takeWhile1 isSpace *> double
 spaceAscii :: Parser B.ByteString
 spaceAscii =  takeWhile1 isSpace *> takeWhile1 isAlpha_ascii
 
----- throw away everything until the string pattern
---skipTill :: B.ByteString -> Parser ()
---skipTill pattern = skipWhile (/= head (B.unpack pattern)) *> ( (string pattern *> pure () )  <|> (anyChar *> skipTill pattern))
---
----- throw away everything until the string pattern CASE UNSEnSiTiVE
---skipTillCase :: B.ByteString -> Parser ()
---skipTillCase pattern = do
---  let firstLetter = toUpper . head $ B.unpack pattern
---      condition fL x = all (/=x) [fL, toLower fL] 
---      --x /= fL && x /= (toLower fL)
---  skipWhile (\x -> condition firstLetter x) *> ( (stringCI pattern *> pure () )  <|> (anyChar *> skipTillCase pattern))
-
 -- transform " 34 12 123    1234  1234  " into "34 12 123 1234 1234"
 trimDoubleSpaces :: B.ByteString -> B.ByteString
 trimDoubleSpaces = B.unwords . B.words
@@ -73,17 +61,43 @@ skipTill pattern = skipWhile funL *> ( (string pattern *> pure () )  <|> (anyCha
 skipTillCase :: B.ByteString -> Parser ()
 skipTillCase pattern = skipWhile (\x -> condition l x) *> ( (stringCI pattern *> pure () )  <|> (anyChar *> skipTillCase pattern))
  
-  where l = firstLetter pattern
+  where l = firstLetterU pattern
  
 -- throw away everything until patternRight is found. In case patternWrong is found I will fail/return error/return a certain string with the parser
-skipTillCaseSafe :: B.ByteString -> B.ByteString -> Parser ()
-skipTillCaseSafe patternRight patternWrong =  parseRight <|> parseWrong <|> skipWord <|> (skipTillCaseSafe patternRight patternWrong)
+skipTillSafe :: B.ByteString -> B.ByteString -> Parser ()
+skipTillSafe patternRight patternWrong =  skipWhile condition2 *> controlLetter
+  
+  where controlLetter = do 
+              try (stringCI patternRight *> pure ())
+          <|> stringCI patternWrong *> pure () --fail "Porco Dio" 
+          <|> anyChar *> skipTillCaseSafe patternRight patternWrong
+
+        condition2 x =  part1 x  && part2 x 
+        part1 x    = lRight /= x
+        part2 x    = lWrong /= x
+        lRight     = firstLetter patternRight 
+        lWrong     = firstLetter patternWrong
  
-  where parseRight = spaces *> stringCI patternRight *> pure ()
-        parseWrong = spaces *> stringCI patternWrong *> fail "I found the ERROR string, CONTROL THIS TRAJECTORY"
+-- throw away everything until patternRight is found. In case patternWrong is found I will fail/return error/return a certain string with the parser. CAse UnSeNSItive.
+skipTillCaseSafe :: B.ByteString -> B.ByteString -> Parser ()
+skipTillCaseSafe patternRight patternWrong =  skipWhile condition2 *> controlLetter
+  
+  where controlLetter = do 
+              stringCI patternRight *> pure ()  
+          <|> stringCI patternWrong *> pure () --fail "Porco Dio" 
+          <|> anyChar *> skipTillCaseSafe patternRight patternWrong
+
+        condition2 x =  part1 x  && part2 x 
+        part1      = condition lRight
+        part2      = condition lWrong 
+        lRight     = firstLetterU patternRight 
+        lWrong     = firstLetterU patternWrong
  
 firstLetter :: B.ByteString -> Char
-firstLetter  = toUpper .  B.head
+firstLetter  = B.head
+
+firstLetterU :: B.ByteString -> Char
+firstLetterU  = toUpper .  B.head
  
 condition :: Char -> Char -> Bool
 condition l x = all (/=x) [l, toLower l]

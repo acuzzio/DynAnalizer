@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module MolcasParser where
+
 import Control.Applicative (pure,(<|>),(*>),(<*),(<$>),(<*>))
 import qualified Data.ByteString.Char8  as B
 import Data.Attoparsec.ByteString.Char8 as C
@@ -8,10 +10,11 @@ import Control.Monad
 
 import ParserFunctions
 
-fn = "geom067.out"
---fn = "HopS.out"
+--fn = "geom067.out"
+fn = "HopS.out"
+aaaa=":set -XOverloadedStrings"
 
-main = do
+createINFOnew fn = do
  a <- B.readFile fn
  let  infoName = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "info"
  case parseOnly parseFile a of
@@ -29,19 +32,19 @@ parseFile = do
   dt     <- parseDT
   aType  <- parseAtomTypes
   let nAtom = B.length aType
-  all    <- many' $ parseMDStep nAtom nRoot
+  all    <- many' $ parseMDStepDBG nAtom nRoot
   return $ [nR,dt,aType] ++ all
 
 -- This function for debug purposes
 parseMDStepDBG :: Int -> Int -> Parser B.ByteString
 parseMDStepDBG nAtom nRoot = do
-  a     <- B.intercalate "\n" <$> count nRoot parseWF
+--  a     <- B.intercalate "\n" <$> count nRoot parseWF
 --  a     <- parseGeom nAtom
 --  b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
 --  c     <- parseEnePop
 --  d     <- parseGradient nAtom
---  e     <- parseInVelo nAtom
-  return $ a
+  e     <- parseInVelo nAtom
+  return $ e
 
 -- this structure is repeated nStep times
 parseMDStep :: Int -> Int -> Parser B.ByteString
@@ -84,7 +87,8 @@ parseKinTot = do
   
 parseInVelo :: Int -> Parser B.ByteString
 parseInVelo atomN = do 
-  skipTillCaseSafe "velocities" "seward"
+--  skipTillSafe "Velocities" "SEWARD"  
+  skipTill "Velocities"  
   count 4 anyLine'
   a <- count atomN $ veloLine
   return $ treatTriplets a
