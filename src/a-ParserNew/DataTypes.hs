@@ -10,6 +10,7 @@ data Dynam = Dynam {
            } deriving Show
 
 data Step = Step {
+        gtWf             :: [String],
         gtCoor           :: [Vec Double],
         gtCharge         :: [[Double]],
         gtDipole         :: [[Double]],
