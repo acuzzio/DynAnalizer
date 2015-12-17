@@ -2,6 +2,13 @@ module DataTypes where
 
 import IntCoor
 
+data Dynam = Dynam {
+           gtRootN       :: Int,
+           gtDT          :: Double,
+           gtAType       :: String,
+           gtStep        :: [Step]
+           } deriving Show
+
 data Step = Step {
         gtCoor           :: [Vec Double],
         gtCharge         :: [[Double]],

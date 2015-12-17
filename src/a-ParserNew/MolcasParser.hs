@@ -84,7 +84,7 @@ parseKinTot = do
   
 parseInVelo :: Int -> Parser B.ByteString
 parseInVelo atomN = do 
-  skipTill "Velocities"
+  skipTillCaseSafe "velocities" "seward"
   count 4 anyLine'
   a <- count atomN $ veloLine
   return $ treatTriplets a
