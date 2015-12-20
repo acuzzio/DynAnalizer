@@ -32,7 +32,7 @@ parseFile = do
   dt     <- parseDT
   aType  <- parseAtomTypes
   let nAtom = B.length aType
-  all    <- many' $ parseMDStepDBG nAtom nRoot
+  all    <- many' $ parseMDStep nAtom nRoot
   return $ [nR,dt,aType] ++ all
 
 -- This function for debug purposes

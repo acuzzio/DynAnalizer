@@ -68,7 +68,7 @@ skipTillSafe :: B.ByteString -> B.ByteString -> Parser ()
 skipTillSafe patternRight patternWrong =  skipWhile condition2 *> controlLetter
   
   where controlLetter = do 
-              try (stringCI patternRight *> pure ())
+              stringCI patternRight *> pure ()
           <|> stringCI patternWrong *> pure () --fail "Porco Dio" 
           <|> anyChar *> skipTillCaseSafe patternRight patternWrong
 
