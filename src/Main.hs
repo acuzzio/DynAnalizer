@@ -23,6 +23,8 @@ import Statistics
 import Trajectories
 import Quickies
 import Functions
+import MolcasParser
+import InfoParser
 
 -- Main function, that takes care of argouments. If you launch without arguments, it will display help, then checks which flags you call and pass them to getOpt. If no flags is recognized ( [] ) then display the help as well. the successfull computation here is the mapM_ of getExpressions
 main :: IO()
@@ -82,7 +84,13 @@ options = [
      "this option run the code into Quickies file, if you do not know what it is... you probably don't need it",
    Option "D" ["Dani"]
      (ReqArg Dani "ProjectFolder")
-     "this option run the code for Dani analysis"
+     "this option run the code for Dani analysis",
+   Option "P" ["NewParser"]
+     (ReqArg CreateInfo2 "OUTPUTPATH")
+     "this enables the new parser. To be used with quotation marks: 'folder/*.log' or '*/*.out'",
+   Option "l" ["LabelInfo"]
+     (ReqArg Label "INFOPATH")
+     "this labels the infos in case you need to read them better. To be used with quotation marks: 'folder/*.info' or '*/*.info'"
    ]
 
 -- So this is the main function for command line use of dynanalyzer. Just takes the flag, case on the datatype Flag and do what the option is supposed to do. All of them MUST be IO(). The purpose of the program is to take a bunch of big files (molcas outputs) and exctract just the information we need for the analysis into info files (waaay smaller). Then do some analysis on data.
@@ -152,6 +160,10 @@ getExpression flag =
        inputFile <- getInputInfos "input"
        let input = inputFile { getfolder = fn }
        dani input
+    CreateInfo2 path -> do
+      createInfo2 path
+    Label path -> do
+      labelInfo path
 
 -- This function opens the menu.
 goIntoMenu fn = do

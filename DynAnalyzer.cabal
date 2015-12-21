@@ -44,8 +44,10 @@ executable DynAnalyzer
   build-depends:
       base  
     , directory
-    , parsec == 3.1.*
-    , ParsecTools
+    , parsec 
+    , attoparsec
+    , bytestring
+--    , ParsecTools
     , MissingH  
     , transformers 
     , process   == 1.1.*
@@ -58,6 +60,6 @@ executable DynAnalyzer
 
   hs-source-dirs:      src 
   main-is: Main.hs
-  other-modules: CreateInfo, IntCoor, GnuplotZ, Functions, ParseInput, Statistics, CalculateData, DataTypes, Filters, Verbatim, VerbatimParser
+  other-modules: CreateInfo, IntCoor, GnuplotZ, Functions, ParseInput, Statistics, CalculateData, DataTypes, Filters, Verbatim, VerbatimParser, MolcasParser, InfoParser, ParserFunctions
 
 

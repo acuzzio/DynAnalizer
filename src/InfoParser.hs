@@ -3,19 +3,28 @@
 module InfoParser where
 
 import Control.Applicative (pure,(<|>),(*>),(<*),(<$>),(<*>))
+import Control.Concurrent.Async
 import Control.Monad
 import qualified Data.ByteString.Char8  as B
 import Data.Attoparsec.ByteString.Char8 as C
 import Data.Char (toUpper,toLower)
 import Data.List.Split (chunksOf)
+import System.ShQQ
 import Text.Printf
 
 import DataTypes
 import IntCoor
 import ParserFunctions
+import Functions
 
 --fn = "HopS.info"
 --fn = "geom067.info"
+
+labelInfo path = do
+       infos <- readShell $ "ls " ++ path
+       let outputs = lines infos
+           chunks   = chunksOf 10 outputs
+       sequence_ $ fmap (parallelProcFiles writeLabeledINFO) chunks
 
 writeLabeledINFO :: FilePath -> IO()
 writeLabeledINFO fn = do
@@ -95,6 +104,7 @@ parseTripletVec = do
 --
 -- 
 -- PRETTY PRINTERS
+--
 --
 --
 

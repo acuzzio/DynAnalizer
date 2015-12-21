@@ -3,16 +3,27 @@
 module MolcasParser where
 
 import Control.Applicative (pure,(<|>),(*>),(<*),(<$>),(<*>))
+import Control.Concurrent.Async
+import Control.Monad
 import qualified Data.ByteString.Char8  as B
 import Data.Attoparsec.ByteString.Char8 as C
 import Data.Char (toUpper,toLower)
-import Control.Monad
+import Data.List.Split
+import System.ShQQ
+
 
 import ParserFunctions
+import Functions
 
 --fn = "geom067.out"
-fn = "HopS.out"
+--fn = "HopS.out"
 aaaa=":set -XOverloadedStrings"
+
+createInfo2 path = do
+       outs <- readShell $ "ls " ++ path
+       let outputs = lines outs
+           chunks   = chunksOf 10 outputs
+       sequence_ $ fmap (parallelProcFiles createINFOnew) chunks
 
 createINFOnew fn = do
  a <- B.readFile fn
@@ -81,7 +92,7 @@ parseKinTot = do
   skipTillCase "total energy"
   option "" (skipSpace *> string "(Hartree) is:")
   y <- skipSpace *> takeTill condition
-  let replaceD = map (\c -> if c =='D' then 'E'; else c)
+  let replaceD = map (\c -> if c =='D' then 'E' else c)
   return $ B.pack $ replaceD $ B.unpack $ B.unwords [x,y]
   --return $ replaceD $ B.unwords [x,y]
   
