@@ -65,3 +65,8 @@ correctFolderName fn = if fn == "."
 mosaic = map words . lines
 
 unmosaic = unlines . map unwords
+
+convFStoAU = 41.3414472
+convAUtoFS =  0.0241888
+
+

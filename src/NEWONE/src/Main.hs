@@ -13,16 +13,16 @@ import System.Exit
 --import System.IO.Error
 import System.ShQQ
 
---import CalculateData
+import CalculateData
 import CreateInfo
 import DataTypes
 --import Filters
---import GnuplotZ
+import GnuplotZ
 import ParseInput
 --import Statistics
---import Trajectories
+import Trajectories
 --import Quickies
---import Functions
+import Functions
 --import MolcasParser
 --import InfoParser
 --
@@ -44,7 +44,9 @@ main = do
 useMessage = putStrLn $ usageInfo startMessage options
 
 -- welcoming message
-startMessage = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\n\nTHIS IS THE SURFACE HOP VERSION!!!!\n\n\nThose are the options avaiable:"
+welcome = "\n\nWelcome to DynAnalyzer, a tool to get informations from Molcas Molecular Dynamics with Tully\n\n\nVERSION 0.2.0\n"
+
+startMessage = welcome ++ "\nThese are the options available:"
 
 -- avaiable command line direct option in this program. Each option has 
 -- 1) "LETTER"
@@ -85,12 +87,16 @@ getExpression flag =
        createInfoQM Binary path
     CreateInfoQMMM path -> do -- same, but with QM/MM files.
        createInfoQMMM path
-    InputFile fn     -> do   -- this creates a new folder to work in, or set the working folder to call a menu.
+    InputFile fn    -> do   -- this creates a new folder to work in, or set the working folder to call a menu.
        aa <- doesDirectoryExist fn
        case aa of
           True -> do  -- execute the input 
-                  tasks <- parseInput (fn ++ "/input")
-                  putStrLn $ show tasks
+                  putStrLn welcome
+                  input <- parseInput fn
+                  checkFolder fn
+                  setCurrentDirectory fn
+                  executeTasks input
+                  putStrLn "Done"
           False -> do
               createDirectory fn
               putStrLn $ "\nFolder " ++ fn ++ " does not exist. So I created it.\n"
@@ -104,133 +110,34 @@ checkFolder folder = do
   infos <- readShell $ "ls " ++ folder ++ "/INFO/*.info"
   let infosNames = lines infos
       infosNum   = length infosNames
+      infofolder = folder ++ "INFO"
   case infosNum of
-    0 -> putStrLn $ "I did not find any Info files into " ++ folder ++ " folder !"
-    otherwise -> putStrLn $ "I found " ++ show infosNum ++ " info files into " ++ folder ++ " folder."
+    0 -> putStrLn $ "I did not find any Info files into " ++ infofolder ++ " folder !\n"
+    1 -> putStrLn $ "I found a single info file into " ++ infofolder ++ " folder.\n"
+    otherwise -> putStrLn $ "I found " ++ show infosNum ++ " info files into " ++ infofolder ++ " folder.\n"
 
---menuGraphsEnePop input = do
---  plotEnergiesPopulations input
---  blockScreenTillPress
---
---menuGraphsBAD input = do
---  putStrLn "\nWhich graphs do you want?\n 1 ) Central Dihedral\n 2 ) Beta\n 3 ) Other\n"
---  choice1 <- getLine
---  let a = read choice1
---  case a of
---    1 -> plotBondAngleDihedrals input $ getccccList input
---    2 -> plotBondAngleDihedrals input $ getbetaList input
---    3 -> do 
---         putStrLn "\nPlease give me a list with atom numbers, like [1,2,3]:\n"
---         choice2 <- getLine
---         let a = read choice2 :: [Int]
---         plotBondAngleDihedrals input a
---    otherwise -> do 
---                 putStrLn "\nI do not like you.\n"
---                 menuGraphsBAD input
---  blockScreenTillPress
---
---menuTrajectories input = do
---  genTrajectories input
---  blockScreenTillPress
---
---menuLifeTimes2 input = do
---  let nRoot = getnRoot input
---      menu  = intercalate "\n" $ map (\x -> " " ++ (show x) ++ " ) Graphic of lifetime in S" ++ (show $ pred x)) [1..nRoot]
---  putStrLn $ "\nWhich Root?\n\n" ++ menu ++ "\n"
---  choice1 <- getLine
---  let a = read choice1
---  if a `elem` [1..nRoot]
---    then do
---      graphicLifeTime3 input a
---      blockScreenTillPress
---      --graphicLifeTime input a
---    else do
---      putStrLn "\nI do not like you.\n"
---      blockScreenTillPress
---      menuLifeTimes2 input
---
---
---menuLifeTimes input = do
---  let nRoot = getnRoot input
---  putStrLn "\nDo you know the range already or you want to print the graphic?\n\n 1 ) Graphic, please\n 2 ) Yes, I know the range\n"
---  choice1 <- getLine
---  let a = read choice1
---  case a of
---    1 -> do
---         let menu = intercalate "\n" $ map (\x -> " " ++ (show x) ++ " ) Graphic of lifetime in S" ++ (show $ pred x)) [1..nRoot]
---         putStrLn $ "\nWhich Root?\n\n" ++ menu ++ "\n"
---         choice2 <- getLine
---         let b = read choice2 :: Int
---         if b `elem` [1..nRoot] 
---            then do
---              graphicLifeTime3 input b
---              blockScreenTillPress
---            else do
---              putStrLn "\nI do not like you.\n"
---              menuLifeTimes input
---    2 -> do
---         let menu = intercalate "\n" $ map (\x -> " " ++ (show x) ++ " ) S" ++ (show $ pred x)) [1..nRoot]
---         putStrLn $ "\nWhich Root?\n\n" ++ menu ++ "\n"
---         choice3 <- getLine
---         let c = read choice3 :: Int
---         if c `elem` [1..nRoot]
---            then do
---              putStrLn $ "\nAt which step does that exponential curve start?\n"
---              choice4 <- getLine
---              let d = read choice4 :: Int
---              putStrLn $ "\nAt which step does it finish?\n"
---              choice5 <- getLine
---              let e = read choice5 :: Int
---              calculateLifeTime input c d e
---              blockScreenTillPress
---            else do
---              putStrLn "\nI do not like you.\n"
---              menuLifeTimes input
---    otherwise -> do
---                 putStrLn "\nI do not like you.\n"
---                 menuLifeTimes input
---
---menuData input = do
---  createDATAs input  
---  blockScreenTillPress
---
---menuAnalysis input = do
---  mainfilter input
---  blockScreenTillPress
---
---menuCT input = do
---  chargeTmap input 
---  blockScreenTillPress
---
---menuAll input = do 
---  plotEnergiesPopulations input 
---  plotBondAngleDihedrals input $ getccccList input 
---  genTrajectories input 
---  createDATAs input
---  graphicLifeTime3 input 2 
---  mainfilter input
---  putStrLn "Now doing the CT part:"
---  chargeTmap input
---  putStrLn "Done"
---  blockScreenTillPress
---
---byeString="\nDynAnalyzer - by AcuZZio\n"
---
---quitWithStyle input = do
---  setSGR [Reset]
---  clearScreen
---  putStrLn $ byeString ++ "\nBye Bye !!\n"
---  exitSuccess
---
---quitNoStyle = do
---  setSGR [Reset]
---  clearScreen
---  putStrLn $ byeString ++ "\nRemember, it was your fault, not mine.\n"
---  exitSuccess
---
---blockScreenTillPress = do
---  putStrLn "\nPress ENTER to go back to main menu..."
---  choice2 <- getLine
---  return ()
---
---
+executeTasks :: Inputs -> IO () 
+executeTasks input = do
+  let tasks = getTasks input
+  plottableForDataFile <- mapM (executeSingleTask input) tasks
+  let plottableForDataFileNoEmpty = filter (/= Empty) plottableForDataFile
+  putStrLn "Creating DATA files:"
+  createDATAs input plottableForDataFileNoEmpty
+
+executeSingleTask :: Inputs -> Task -> IO (Plottable)
+executeSingleTask input task = do
+  case task of
+    EnergiesPopulation -> do
+                          plotEnergiesPopulations input
+                          return EnergyPop
+    Trajectories       -> do
+                          genTrajectories input
+                          return Empty
+--    DihedralSingle xs
+--    DihedralGlobal xs 
+--    Bla blai
+--    Internal xs
+--    Charge (label,xs  
+
+
+
