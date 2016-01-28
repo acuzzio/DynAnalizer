@@ -96,7 +96,7 @@ getExpression flag =
                   checkFolder fn
                   setCurrentDirectory fn
                   executeTasks input
-                  putStrLn "Done"
+                  putStrLn "Tasks done."
           False -> do
               createDirectory fn
               putStrLn $ "\nFolder " ++ fn ++ " does not exist. So I created it.\n"
@@ -133,6 +133,9 @@ executeSingleTask input task = do
     Trajectories       -> do
                           genTrajectories input
                           return Empty
+    Internal     xs    -> do
+                          putStrLn "Fare i grafici di tutto"
+                          return $ InternalPlot xs
 --    DihedralSingle xs
 --    DihedralGlobal xs 
 --    Bla blai

@@ -27,7 +27,7 @@ plotEnergiesPopulations inputs = do
        putStrLn $ "Making energy population graphics"
        sequence_ $ fmap (parallelProcFiles (plotEnergiesPopulation inputs)) chunks   -- PARALLEL STUFF : D 
 --       mapM_ (plotEnergiesPopulation inputs) files
-       putStrLn $ "\nYou can find those graphics into: " ++ folder ++ "/EnePop\n"
+       putStrLn $ "You can find energy/population graphics into: " ++ folder ++ "/EnePop\n"
 
 plotEnergiesPopulation :: Inputs -> FilePath -> IO ()
 plotEnergiesPopulation input file = do
@@ -50,7 +50,6 @@ writeGnuplots input dt rlxRoot file xss = do
           fileZ  = takeWhile (/='.') file
           filenames = map (\x -> fileZ ++ "temptemp" ++ (show x)) [1..]
           lengthV   = length valuesS
---      print values
       zipWithM writeFile filenames valuesS
       createPopEneGnuplotFile input file dt lengthV rlxRoot
 

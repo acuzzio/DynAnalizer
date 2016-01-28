@@ -37,4 +37,4 @@ genTrajectories input = do
        chunks   = chunksOf 10 outputs
    sequence_ $ fmap (parallelProcFiles (genTrajectory input)) chunks   -- PARALLEL STUFF : D                    
 --   mapM_ (genTrajectory input) outputs
-   putStrLn $ "\nTrajectories extracted into folder: " ++ folder ++ "/Trajectories\n"
+   putStrLn $ "Trajectories extracted into folder: " ++ folder ++ "/Trajectories\n"

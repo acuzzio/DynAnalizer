@@ -32,7 +32,7 @@ createDATAs input plottables = do
 --   mapM_ (createDATA input) outputs
    system $ "mv INFO/*.data " ++ dataFold
    joinAllDATA folder
-   putStrLn $ "\nYou can find data files into: " ++ folder ++ "/" ++ dataFold ++ " .\nI also wrote an all data file: " ++ (folder ++ "-all.data")
+   putStrLn $ "You can find data files from single trajectories into: " ++ folder ++ "/" ++ dataFold ++ ". Total data file: " ++ (folder ++ "-all.data")
 
 createDATA input plottables fileInfo = do
    a               <- rdInfoFile fileInfo
@@ -63,6 +63,11 @@ createPLOTDATA a input listToPlot = do
                      root   = rootDiscov energies initialRlx
                      jump   = justHopd energies initialRlx
                  in  root : jump : enepop
+    InternalPlot atlist -> case length atlist of
+                           4 -> [dihedro atlist geometries]
+                           3 -> [angleStr atlist geometries]
+                           2 -> [bondStr atlist geometries]
+                           otherwise -> [["some","error","occurred","the","user","asked","for","too","many","atoms"]]
 --    Cccc            -> corrDihedro2 input $ dihedro ccccList geometries 
 --    CcccCorrected   -> corrDihedro3 $ dihedro ccccList geometries 
 --    Beta            -> corrDihedro2 input $ dihedro betaList geometries
@@ -79,17 +84,10 @@ createPLOTDATA a input listToPlot = do
 --                      in prt delta
 --    Bla             -> blaD blaList geometries  
 --    Ct              -> calculateCT cTFragment mullChar
---    Root            -> rootDiscov energies initialRlx
---    Jump            -> justHopd energies initialRlx
 --    EnergyDyn       -> getEnergyOrPopulation energies S0 Dyn
 --    EnergyDiff x y  -> getEnergyDiff energies x y Ene
 --    Energy      x   -> getEnergyOrPopulation energies x Ene
 --    Population  x   -> getEnergyOrPopulation energies x Pop
---    Internal atlist -> case length atlist of
---                           4 -> dihedro atlist geometries
---                           3 -> angleStr atlist geometries
---                           2 -> bondStr atlist geometries
---                           otherwise -> ["some","error","occurred","the","user","asked","for","too","many","atoms"]
 --    Charge charList -> calculateCT charList mullChar
 
 --getEnergyDiff :: [[Double]]  -> Root  -> Root -> PlotType -> [String]
@@ -112,24 +110,24 @@ createPLOTDATA a input listToPlot = do
 --    in listRigth
 --    -- in [" "," "] ++ listRigth  -- Correzioni per surfacehop elisa
 --
---dihedro :: [Int] -> [[Vec Double]] -> [String]
---dihedro listAtom geometries = let
---   aLIndex = map pred listAtom
---   dihedrV = map dihedral $ map (\x -> map ( x !!) aLIndex) geometries
---   in prt dihedrV
---
---angleStr :: [Int] -> [[Vec Double]] -> [String]
---angleStr listAtom geometries = let
---   aLIndex = map pred listAtom
---   angleV  = map angle $ map (\x -> map ( x !!) aLIndex) geometries
---   in prt angleV
---
---bondStr :: [Int] -> [[Vec Double]] -> [String]
---bondStr listAtom geometries = let
---   aLIndex = map pred listAtom
---   bondV  = map bond $ map (\x -> map ( x !!) aLIndex) geometries
---   in prt bondV
---
+dihedro :: [Int] -> [[Vec Double]] -> [String]
+dihedro listAtom geometries = let
+   aLIndex = map pred listAtom
+   dihedrV = map dihedral $ map (\x -> map ( x !!) aLIndex) geometries
+   in prt dihedrV
+
+angleStr :: [Int] -> [[Vec Double]] -> [String]
+angleStr listAtom geometries = let
+   aLIndex = map pred listAtom
+   angleV  = map angle $ map (\x -> map ( x !!) aLIndex) geometries
+   in prt angleV
+
+bondStr :: [Int] -> [[Vec Double]] -> [String]
+bondStr listAtom geometries = let
+   aLIndex = map pred listAtom
+   bondV  = map bond $ map (\x -> map ( x !!) aLIndex) geometries
+   in prt bondV
+
 --blaD :: [[(Int,Int)]] -> [[Vec Double]] -> [String]
 --blaD blaList geometries = let 
 --    blaDV = map (blaPSB3 blaList) geometries
@@ -236,8 +234,8 @@ printWellSpacedColumn xs = let
     maxLength = maximum $ map length xs
     in map (matchLength maxLength) xs
 
---prt :: [Double] -> [String]
---prt doubles = map (\x -> printf "%.3f" x :: String) doubles
+prt :: [Double] -> [String]
+prt doubles = map (\x -> printf "%.3f" x :: String) doubles
 
 joinAllDATA :: FilePath -> IO ()
 joinAllDATA folder = do  

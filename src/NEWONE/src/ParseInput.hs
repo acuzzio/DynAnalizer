@@ -12,7 +12,7 @@ import VerbatimParser
 
 data Task = DihedralSingle [Int] 
           | Bla [[(Int, Int)]]
-          | DihedralGlobal [Int] 
+          | DihedralS [Int] 
           | EnergiesPopulation
           | Trajectories
           | Internal [Int]
@@ -47,10 +47,8 @@ readTask line = let
   name  = map toUpper $ head noEqual
   atoms = tail noEqual
   task  = case name of
-     "DIHEDRALSINGLE"     -> let indexes = map readI atoms
-                             in DihedralSingle indexes
-     "DIHEDRALGLOBAL"     -> let indexes = map readI atoms
-                             in DihedralGlobal indexes
+     "DIHEDRALS"          -> let indexes = map readI atoms
+                             in DihedralS indexes
      "BLA"                -> let indexes = map readI atoms
                              in Bla (takeBlaFormat indexes)
      "ENERGIESPOPULATION" -> EnergiesPopulation
