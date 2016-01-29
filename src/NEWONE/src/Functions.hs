@@ -44,6 +44,9 @@ findInd :: Plottable -> [Plottable] -> Int
 findInd plo plos = let Just x = elemIndex plo plos
                      in x + 2
 
+findIndM2 :: Plottable -> [Plottable] -> Int
+findIndM2 plo plos = let Just x = elemIndex plo plos
+                     in x 
 -- parallel attempt
 
 parallelProcFiles :: (a -> IO b) -> [a] -> IO ()

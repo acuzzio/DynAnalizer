@@ -14,12 +14,12 @@ import Functions
 import IntCoor
 import ParseInput
 
---readerData :: IO AllTrajData
---readerData = do
---    outs            <- readShell $ "ls DATA/*.data"
---    let outputs     = lines outs
---    dataContent     <- mapM readFile outputs
---    return $ map (map words) $ map lines dataContent
+readerData :: IO AllTrajData
+readerData = do
+    outs            <- readShell $ "ls DATA/*.data"
+    let outputs     = lines outs
+    dataContent     <- mapM readFile outputs
+    return $ map (map words) $ map lines dataContent
 
 createDATAs input plottables = do
    outs <- readShell $ "ls INFO/*.info"

@@ -16,7 +16,7 @@ import System.ShQQ
 import CalculateData
 import CreateInfo
 import DataTypes
---import Filters
+import Filters
 import GnuplotZ
 import ParseInput
 --import Statistics
@@ -87,16 +87,16 @@ getExpression flag =
        createInfoQM Binary path
     CreateInfoQMMM path -> do -- same, but with QM/MM files.
        createInfoQMMM path
-    InputFile fn    -> do   -- this creates a new folder to work in, or set the working folder to call a menu.
+    InputFile fn    -> do   -- this executes the task of the folder fn. If fn deos not exists, it creates a new template folder. 
        aa <- doesDirectoryExist fn
        case aa of
           True -> do  -- execute the input 
-                  putStrLn welcome
-                  input <- parseInput fn
-                  checkFolder fn
-                  setCurrentDirectory fn
-                  executeTasks input
-                  putStrLn "Tasks done."
+              putStrLn welcome
+              input <- parseInput fn
+              checkFolder fn
+              setCurrentDirectory fn
+              executeTasks input
+              putStrLn "Tasks done."
           False -> do
               createDirectory fn
               putStrLn $ "\nFolder " ++ fn ++ " does not exist. So I created it.\n"
@@ -106,6 +106,7 @@ getExpression flag =
     CheckInfo path   -> do     -- this triggers the tests on info files
        checkInfoFiles path
 
+checkFolder :: FilePath -> IO ()
 checkFolder folder = do
   infos <- readShell $ "ls " ++ folder ++ "/INFO/*.info"
   let infosNames = lines infos
@@ -116,16 +117,28 @@ checkFolder folder = do
     1 -> putStrLn $ "I found a single info file into " ++ infofolder ++ " folder.\n"
     otherwise -> putStrLn $ "I found " ++ show infosNum ++ " info files into " ++ infofolder ++ " folder.\n"
 
+getRootNumber :: FilePath -> IO(Int)
+getRootNumber folder = do
+  --infos <- readShell $ "ls " ++ folder ++ "/INFO/*.info"
+  infos <- readShell $ "ls INFO/*.info"
+  let infosNames = lines infos
+      first      = head infosNames
+  a <- rdInfoFile first    
+  return $ getRootN a
+
 executeTasks :: Inputs -> IO () 
 executeTasks input = do
+  nroot <- getRootNumber $ getfolder input 
   let tasks = getTasks input
-  plottableForDataFile <- mapM (executeSingleTask input) tasks
+  plottableForDataFile <- mapM (executeSingleTaskPreData input) tasks
   let plottableForDataFileNoEmpty = filter (/= Empty) plottableForDataFile
   putStrLn "Creating DATA files:"
   createDATAs input plottableForDataFileNoEmpty
+  atd <- readerData
+  mapM_ (executeSingleTaskPostData input plottableForDataFileNoEmpty nroot atd) tasks
 
-executeSingleTask :: Inputs -> Task -> IO (Plottable)
-executeSingleTask input task = do
+executeSingleTaskPreData :: Inputs -> Task -> IO (Plottable)
+executeSingleTaskPreData input task = do
   case task of
     EnergiesPopulation -> do
                           plotEnergiesPopulations input
@@ -134,7 +147,7 @@ executeSingleTask input task = do
                           genTrajectories input
                           return Empty
     Internal     xs    -> do
-                          putStrLn "Fare i grafici di tutto"
+                          plotBondAngleDihedrals input xs
                           return $ InternalPlot xs
 --    DihedralSingle xs
 --    DihedralGlobal xs 
@@ -143,4 +156,13 @@ executeSingleTask input task = do
 --    Charge (label,xs  
 
 
+executeSingleTaskPostData :: Inputs -> [Plottable] -> Int -> AllTrajData -> Task -> IO ()
+executeSingleTaskPostData input plottable nroot atd task = do
+  case task of
+    EnergiesPopulation -> return ()
+    Trajectories       -> return ()
+    Internal     xs    -> do
+       let firstLabel  = "All"
+           secondLabel = show $ InternalPlot xs      
+       gnuplotG input firstLabel secondLabel nroot plottable (InternalPlot xs) atd     
 
