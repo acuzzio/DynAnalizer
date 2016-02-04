@@ -34,18 +34,19 @@ plotEnergiesPopulation input file = do
    let popEne = getEnergies dina
        dt     = getDT dina 
        rlxRoot= getStartRlxRt dina
+       eToT   = getTotEn dina
        eneFol = "EnePop"
        fileZ  = takeWhile (/='.') file
-   writeGnuplots input dt rlxRoot file popEne 
+   writeGnuplots input dt rlxRoot file popEne eToT
    createDirectoryIfMissing True eneFol
    system $ "gnuplot < " ++ fileZ ++ "gnuplotScript"
    system $ "rm " ++ fileZ ++ "temptemp* " ++ fileZ ++ "gnuplotScript"
    system $ "mv " ++ fileZ ++ "EnergiesPopulation.png " ++ eneFol
    putStrLn $ file ++ ": done"
 
-writeGnuplots :: Inputs -> Double -> Int -> FilePath -> [[Double]] -> IO()
-writeGnuplots input dt rlxRoot file xss = do
-      let valuesS   = map (unlines . (map show)) xss
+writeGnuplots :: Inputs -> Double -> Int -> FilePath -> [[Double]] -> [Double] -> IO()
+writeGnuplots input dt rlxRoot file xss eTot = do
+      let valuesS   = map (unlines . (map show)) (xss ++ [eTot])
           fileZ  = takeWhile (/='.') file
           filenames = map (\x -> fileZ ++ "temptemp" ++ (show x)) [1..]
           lengthV   = length valuesS
@@ -58,14 +59,15 @@ createPopEneGnuplotFile input file dt' n rlxRt = do
       let gplOpt = getgnuplotOptions input
           fileZ  = takeWhile (/='.') file
           dt     = show dt'
--- wanna new colors? http://hexcolorgenerator.com/          
-          hexColo= ["#FFF7F7","#F7FFF7","#E5FFFF","#FFF7F7","#FFFFF7","#F9F7FF","#FFF7FF"]
+-- wanna new colors? http://www.2createawebsite.com/build/hex-colors.html#colorscheme
+--          hexColo= ["#FFF7F7","#F7FFF7","#E5FFFF","#FFF7F7","#FFFFF7","#F9F7FF","#FFF7FF"]
+          hexColo= ["#FF0600","#06FF00","#E5FFFF","#FFF7F7","#FFFFF7","#F9F7FF","#FFF7FF"]
           colors = ["#FF0600","#06FF00","#00FFFF","#FFB400","#FFF600","#4E00FF","#FF00FC"]
           tag    = map (\x -> "S" ++ (show x)) [0..]
-          header = "set title \"" ++ fileZ ++ " Population and Energies\"\nset xlabel \"fs\"\nset key outside\nset format y \"%6.3f\"\nset y2range[0:1.001]\nset output '" ++ fileZ ++ "EnergiesPopulation.png'\n" ++ gplOpt ++ "\nplot "
-          states = div (n-1) 2
+          header = "set title \"" ++ fileZ ++ " Population and Energies\"\nset xlabel \"fs\"\nset key outside\nset format y \"%6.3f\"\nset y2range[0:1.001]\nset output '" ++ fileZ ++ "EnergiesPopulation.png'\nset style fill transparent solid 0.2 noborder\n" ++ gplOpt ++ "\nplot "
+          states = div (n-2) 2
           filenames = map (\x -> fileZ ++ "temptemp" ++ (show x)) [1..]
-          list   = (take states $ repeat Pop) ++ (take states $ repeat Ene) ++ [Dyn]
+          list   = (take states $ repeat Pop) ++ (take states $ repeat Ene) ++ [Dyn] ++ [Tot]
 --          removerlXrootPopu = take rlxRt list ++ drop (succ rlxRt) list
 --          removerlXtootfilename = take rlxRt filenames ++ drop (succ rlxRt) filenames
 --          groupZ = group removerlXrootPopu
@@ -74,6 +76,7 @@ createPopEneGnuplotFile input file dt' n rlxRt = do
                     Pop -> zip3 x hexColo tag
                     Ene -> zip3 x colors tag
                     Dyn -> zip3 x hexColo tag --hexColo tag does not matter here
+                    Tot -> zip3 x hexColo tag
           lol    = concat $ map jen groupZ -- lol :: [(PlotType, String, String)]
 --          almost = zipWith (\x y -> createPlotLine x y dt) lol removerlXtootfilename
           almost = zipWith (\x y -> createPlotLine x y dt) lol filenames
@@ -84,7 +87,8 @@ createPopEneGnuplotFile input file dt' n rlxRt = do
 createPlotLine :: (PlotType, String, String) -> FilePath -> String -> String
 createPlotLine (Pop,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 axes x1y2 w filledcurves x1 lt 1 lc rgb " ++ "\"" ++ c ++ "\"" ++ " t '" ++ d ++ " Population',"
 createPlotLine (Ene,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w lines lw 4 linecolor rgb " ++ "\"" ++ c ++ "\"" ++ " t " ++ "\"" ++ d ++ "\","
-createPlotLine (Dyn,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w lp ps 1 linecolor rgb \"black\" t \"RlxRoot\""
+createPlotLine (Dyn,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w lp ps 0.5 linecolor rgb \"black\" t \"RlxRoot\","
+createPlotLine (Tot,c,d) b dt = "\"" ++ b ++ "\"" ++ " u ($0*" ++ (fromAUtoFemtoDT dt) ++ "):1 w l linecolor rgb \"black\" t \"Total Energy\""
 
 fromAUtoFemtoDT :: String -> String
 fromAUtoFemtoDT dt = show ((read2 dt) / convFStoAU)

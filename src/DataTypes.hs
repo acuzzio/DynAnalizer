@@ -31,10 +31,11 @@ data Dinamica = Dinamica {
           getEnergies    :: [[Double]],
           getCoordinates :: [Vec Double],
           getOscStr      :: [Double],
-          getCharTran    :: [Double]
+          getCharTran    :: [Double],
+          getTotEn       :: [Double]
           } deriving Show
 
-data PlotType = Pop | Ene | Dyn deriving (Eq,Show)
+data PlotType = Pop | Ene | Dyn | Tot deriving (Eq,Show)
 
 --data PlotType2 = Red | Black | Hop deriving (Eq,Show)
 

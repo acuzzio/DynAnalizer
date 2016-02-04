@@ -24,7 +24,7 @@ readerData = do
 createDATAs input = do
    outs <- readShell $ "ls INFO/*.info"
    let outputs    = lines outs
-       chunks   = chunksOf 10 outputs
+       chunks   = chunksOf 1 outputs
        dataFold   = "DATA" 
        folder = getfolder input
    createDirectoryIfMissing True dataFold

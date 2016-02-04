@@ -1,0 +1,28 @@
+<massimo_zaniboni> dovresti rimplementare skipTill con una funzione che fa questo
+<massimo_zaniboni> fa un veloce skipAnyChar (non so il nome corretto della funzione) fin quando non trova "c" (head di "ciao")
+<massimo_zaniboni> poi controlla se c'e` "i", "a" ecc...
+<massimo_zaniboni> e al primo fallimento rifa il test dall'inizio senza backtraking (tanto e` uno skip) ripartendo da "c"
+<massimo_zaniboni> Nel caso della skipTillCase fai i test testando i due case "c" e "C"
+<alessio_> https://github.com/acuzzio/DynAnalyzer/blob/master/src/ParserFunctions.hs  <- linea 62 fa esattamente quello che dici. 
+<alessio_> e al primo fallimento rifa il test dall'inizio senza backtraking (tanto e` uno skip) ripartendo da "c" <- no, scusa ho scritto troppo presto, non ho ben capito questo.
+<massimo_zaniboni> si pero` tu usi "skipWhile" e "string", mentre io dico che devi usare il test sul singolo carattere
+<massimo_zaniboni> Tra l'altro a te va "grassa" perche` tutto sommato "skipTill" fa poco e testi una sola stringa. Se avessi avuto condizioni di test multiple, mi sa che dovevi usare un parser compilato (anche in Haskell) con Lexer, di modo che crea un automa a stati (il lexer).
+<massimo_zaniboni> Nel tuo caso l'automa a stati (il lexer) e` talmente banale che va benissimo scriverlo a mano o quasi come ti ho detto io.
+<alessio_> massimino tu mi piaci
+<massimo_zaniboni> notWord8 :: Word8 -> Parser Word8
+<massimo_zaniboni> Match any byte except the given one.
+<massimo_zaniboni> un bel `notWor8 (head miaStringa)` e fa uno skip velocissimo di tutti i caratteri che non sono quello iniziale
+<massimo_zaniboni> poi un un word8 del carattere dopo ed e` veloce
+<alessio_> e dici che lo "skipWhile (\x -> condition l x)" dove la condizione e' proprio "firstLetterU pattern" non e' la stessa cosa?
+<massimo_zaniboni> tutte funzioni nella sezione sicura/veloce di attoparsec: Data.Attoparsec.ByteString
+<alessio_> scusa ma quello che vedi e' il mio primo parser con attoparsec, io questi dettagli devo ancora vederli.
+<massimo_zaniboni> adesso devo andare, ma comunque su `skipWhile` non saprei quanto sia lento o veloce, e quanto ottimizzi il compilatore, ma word8 e notWord8 accettano un carattere o no, e piu` veloce di cosi` si muore
+<massimo_zaniboni> Devi solo creare la versione ricorsiva di skipTill che le usa
+<alessio_> oki.
+<massimo_zaniboni> Dovrebbe essere facilissimo.
+<alessio_> mi piace
+<massimo_zaniboni> Te lo farei io, ma non ho tempo. Se quando lo hai fatto ti da` problemi, dimmelo che secondo me e` per un problema banale.
+<alessio_> i mio problema sara' trovare il tempo
+<alessio_> comunque da domani inizio ad entrare qua piu' spesso.
+<massimo_zaniboni> L'unico dubbio e` se da qualche parte hai condizioni multiple di skipTill a <|> skipTill b allora hai un backtrack. Ma non mi sembra di averne viste.
+<alessio_> no, ma infatti stavo cercando di evitarle
