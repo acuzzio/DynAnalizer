@@ -57,17 +57,18 @@ rdInfoFile fn = do
 cutInfoFile :: FilePath -> Int -> IO ()
 cutInfoFile fn steps = do
   cont <- readFile fn
-  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:i:[]) = splitWhen (== "DIVISION") $ lines cont
       atomN        = read (head aN)   :: Int
       enepop       = splitWhen (== "SUBDIVISION") ene
       newEnepop    = map (take steps) enepop
       newCoord     = concat $ take steps $ chunksOf atomN f
       newOscStr    = concat $ take steps $ chunksOf atomN g
       newMullChar  = concat $ take steps $ chunksOf atomN h
+      newTotEner   = take steps i  
       div          = "DIVISION"
       subDiv       = "SUBDIVISION"
       energiesPop' = intercalate [subDiv] newEnepop
-      wholefile    = unlines $ intercalate [div] [aN,rNS,rlxS,dTS,aT,energiesPop',newCoord,newOscStr,newMullChar]
+      wholefile    = unlines $ intercalate [div] [aN,rNS,rlxS,dTS,aT,energiesPop',newCoord,newOscStr,newMullChar,newTotEner]
   writeFile (fn ++ "CUT") wholefile 
 
 checkInfoFiles :: FilePath -> IO()

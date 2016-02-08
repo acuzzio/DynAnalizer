@@ -23,7 +23,7 @@ plotEnergiesPopulations inputs = do
        let folder = getfolder inputs
        a <- readShell $ "ls INFO/*.info"
        let files    = lines a
-           chunks   = chunksOf 10 files
+           chunks   = chunksOf 1 files
        sequence_ $ fmap (parallelProcFiles (plotEnergiesPopulation inputs)) chunks   -- PARALLEL STUFF : D 
 --       mapM_ (plotEnergiesPopulation inputs) files
        putStrLn $ "\nYou can find those graphics into: " ++ folder ++ "/EnePop\n"

@@ -34,7 +34,7 @@ genTrajectories input = do
    let folder = getfolder input
    outs <- readShell $ "ls INFO/*.info"
    let outputs = lines outs
-       chunks   = chunksOf 10 outputs
+       chunks   = chunksOf 1 outputs
    sequence_ $ fmap (parallelProcFiles (genTrajectory input)) chunks   -- PARALLEL STUFF : D                    
 --   mapM_ (genTrajectory input) outputs
    putStrLn $ "\nTrajectories extracted into folder: " ++ folder ++ "/Trajectories\n"
