@@ -16,7 +16,7 @@ import IntCoor
 createInfoQM fileType path = do
        outs <- readShell $ "ls " ++ path
        let outputs = lines outs
-           chunks   = chunksOf 10 outputs
+           chunks   = chunksOf 1  outputs
        sequence_ $ fmap (parallelProcFiles $ genInfoFileQM fileType) chunks
 
 ---- Creates info files from molcas output   SEQUENTIAL VERSION
@@ -29,7 +29,7 @@ createInfoQM fileType path = do
 createInfoQMMM path = do
        outs <- readShell $ "ls " ++ path
        let outputs  = lines outs
-           chunks   = chunksOf 10 outputs
+           chunks   = chunksOf 1  outputs
        sequence_ $ fmap (parallelProcFiles genInfoFileQMMM) chunks   -- PARALLEL STUFF : D
 
 rdInfoFiles :: [FilePath] -> IO([Dinamica])
@@ -131,7 +131,7 @@ genInfoFileQM fileType fn = do
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
         chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
-        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
+        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr' ++ div ++ totEne
     writeFile infoname wholefile
     putStrLn $ fn ++ " done"
 
@@ -159,7 +159,8 @@ genInfoFileQMMM fn = do
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
         chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
-        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr'
+        totEne              = NADNANSAJ -- grep "Total Energy" $fn | awk '{print $3}'
+        wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr' ++ div ++ totEne
     writeFile infoname wholefile
     putStrLn $ fn ++ " done"
 
