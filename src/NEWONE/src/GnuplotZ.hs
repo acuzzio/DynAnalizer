@@ -35,21 +35,23 @@ plotEnergiesPopulation input file = do
    let popEne = getEnergies dina
        dt     = getDT dina 
        rlxRoot= getStartRlxRt dina
+       eToT   = getTotEn dina
        eneFol = "EnePop"
        fileZ  = takeWhile (/='.') file
-   writeGnuplots input dt rlxRoot file popEne 
+   writeGnuplots input dt rlxRoot file popEne eToT
    createDirectoryIfMissing True eneFol
    system $ "gnuplot < " ++ fileZ ++ "gnuplotScript"
    system $ "rm " ++ fileZ ++ "temptemp* " ++ fileZ ++ "gnuplotScript"
    system $ "mv " ++ fileZ ++ "EnergiesPopulation.png " ++ eneFol
    putStrLn $ file ++ ": done"
 
-writeGnuplots :: Inputs -> Double -> Int -> FilePath -> [[Double]] -> IO()
-writeGnuplots input dt rlxRoot file xss = do
-      let valuesS   = map (unlines . (map show)) xss
+writeGnuplots :: Inputs -> Double -> Int -> FilePath -> [[Double]] -> [Double] -> IO()
+writeGnuplots input dt rlxRoot file xss eTot = do
+      let valuesS   = map (unlines . (map show)) (xss ++ [eTot])
           fileZ  = takeWhile (/='.') file
           filenames = map (\x -> fileZ ++ "temptemp" ++ (show x)) [1..]
           lengthV   = length valuesS
+--      print values
       zipWithM writeFile filenames valuesS
       createPopEneGnuplotFile input file dt lengthV rlxRoot
 
@@ -75,7 +77,7 @@ createPopEneGnuplotFile input file dt' n rlxRt = do
                     Pop -> zip3 x hexColo tag
                     Ene -> zip3 x colors tag
                     Dyn -> zip3 x hexColo tag --hexColo tag does not matter here
-                    Tot -> zip3 x hexColo tag
+                    Tot -> zip3 x hexColo tag --hexColo tag does not matter here
           lol    = concat $ map jen groupZ -- lol :: [(PlotType, String, String)]
 --          almost = zipWith (\x y -> createPlotLine x y dt) lol removerlXtootfilename
           almost = zipWith (\x y -> createPlotLine x y dt) lol filenames

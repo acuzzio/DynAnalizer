@@ -33,7 +33,8 @@ data Dinamica = Dinamica {
           getEnergies    :: [[Double]],
           getCoordinates :: [Vec Double],
           getOscStr      :: [Double],
-          getCharTran    :: [Double]
+          getCharTran    :: [Double],
+          getTotEn       :: [Double]
           } deriving Show
 
 data PlotType = Pop | Ene | Dyn | Tot deriving (Eq,Show)

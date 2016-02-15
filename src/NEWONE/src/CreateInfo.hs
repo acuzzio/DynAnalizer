@@ -39,7 +39,7 @@ rdInfoFiles fns = do
 rdInfoFile  :: FilePath -> IO(Dinamica)
 rdInfoFile fn = do
     cont <- readFile fn
-    let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+    let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:i:[]) = splitWhen (== "DIVISION") $ lines cont
         atomN  = read (head aN)   :: Int
         rN     = read (head rNS)  :: Int
         rlx    = read (head rlxS) :: Int
@@ -47,54 +47,63 @@ rdInfoFile fn = do
         enepop = splitWhen (== "SUBDIVISION") ene 
         eneflo = map (map (\x -> read x :: Double)) enepop
         coord1 = parseTriplet $ unlines f
-        oscStr = map (\x-> read x :: Double) g
-        charT  = map (\x-> read x :: Double) h
-    return $ Dinamica fn atomN rN rlx dT aT eneflo coord1 oscStr charT
+        oscStr = map read2 g
+        charT  = map  read2 h
+        replaceD = map (\c -> if c =='D' then 'E' else c)
+        totEn  = map (read2 . replaceD) i
+    return $ Dinamica fn atomN rN rlx dT aT eneflo coord1 oscStr charT totEn
 
 -- to cut an infofile at "step" step, and make it smaller
 cutInfoFile :: FilePath -> Int -> IO ()
 cutInfoFile fn steps = do
   cont <- readFile fn
-  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:i:[]) = splitWhen (== "DIVISION") $ lines cont
       atomN        = read (head aN)   :: Int
       enepop       = splitWhen (== "SUBDIVISION") ene
       newEnepop    = map (take steps) enepop
       newCoord     = concat $ take steps $ chunksOf atomN f
       newOscStr    = concat $ take steps $ chunksOf atomN g
       newMullChar  = concat $ take steps $ chunksOf atomN h
+      newTotEner   = take steps i  
       div          = "DIVISION"
       subDiv       = "SUBDIVISION"
       energiesPop' = intercalate [subDiv] newEnepop
-      wholefile    = unlines $ intercalate [div] [aN,rNS,rlxS,dTS,aT,energiesPop',newCoord,newOscStr,newMullChar]
+      wholefile    = unlines $ intercalate [div] [aN,rNS,rlxS,dTS,aT,energiesPop',newCoord,newOscStr,newMullChar,newTotEner]
   writeFile (fn ++ "CUT") wholefile 
 
 checkInfoFiles :: FilePath -> IO()
 checkInfoFiles path = do
   outs <- readShell $ "ls " ++ path
   let outputs = lines outs
-  putStrLn "A Good one of 100 step should be like [98,98,98,98,98,100,99,100]"
-  putStrLn "Tully's energies/populations are STEP-2, then we have STEP geometries, STEP-1 Oscillator strength and STEP charge transfers (one for each geometry)"
+--  putStrLn "A Good one of 100 step should be like [98,98,98,98,98,100,99,100]"
+--  putStrLn "Tully's energies/populations are STEP-2, then we have STEP geometries, STEP-1 Oscillator strength and STEP charge transfers (one for each geometry)"
   mapM_ checkInfoFile outputs
 
 checkInfoFile :: FilePath -> IO()
 checkInfoFile fn = do
   cont <- readFile fn
-  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:[]) = splitWhen (== "DIVISION") $ lines cont
+  let (aN:rNS:rlxS:dTS:aT:ene:f:g:h:i:[]) = splitWhen (== "DIVISION") $ lines cont
       atomN        = read (head aN)   :: Int
       enepop       = splitWhen (== "SUBDIVISION") ene
       leng1        = map length enepop
       leng2        = length $ chunksOf atomN f
       leng3        = length g
       leng4        = length $ chunksOf atomN h
-      fstCheck     = map (\x-> head leng1 == x) leng1 -- all energies population equal?
-      sndCheck     = (head leng1) + 2 == leng2 -- STEP geometries
-      trdCheck     = (head leng1) + 1 == leng3 -- STEP-1 Oscillator strength
-      fthCheck     = (head leng1) + 2 == leng4 -- STEP charge transfers
-      allChecks    = and $ fstCheck ++ [sndCheck,trdCheck,fthCheck]
+      leng5        = length i
+      fstCheck     = map (\x-> head leng1 == x) leng1 -- these are new ones 
+      sndCheck     = (head leng1) == leng2 -- the olds
+      trdCheck     = (head leng1) == leng3 -- are  
+      fthCheck     = (head leng1) == leng4 -- below
+      sxtCheck     = (head leng1) == leng5
+--      fstCheck     = map (\x-> head leng1 == x) leng1 -- all energies population equal?
+--      sndCheck     = (head leng1) + 2 == leng2 -- STEP geometries
+--      trdCheck     = (head leng1) + 1 == leng3 -- STEP-1 Oscillator strength
+--      fthCheck     = (head leng1) + 2 == leng4 -- STEP charge transfers
+      allChecks    = and $ fstCheck ++ [sndCheck,fthCheck,sxtCheck] -- no third, i changed it no oscilaltor
       resultMsg    = case allChecks of
                        True  -> " ->  That's OK !"
                        False -> " ->  This one has problems !"
-  putStrLn $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4])) ++ " " ++ resultMsg
+  putStrLn $ fn ++ " " ++ (show (leng1 ++ [leng2] ++ [leng3] ++ [leng4] ++ [leng5])) ++ " " ++ resultMsg
 
 genInfoFileQM :: FileType -> String -> IO ()
 genInfoFileQM fileType fn = do
