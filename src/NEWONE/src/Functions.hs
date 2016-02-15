@@ -65,6 +65,14 @@ correctFolderName fn = if fn == "."
         let aa  = if (last fn == '/') then init fn else fn
         return aa
 
+stringOnBox :: String -> String
+stringOnBox xs = let 
+      n = length xs
+      a = "**" ++ (replicate n '*') ++ "**"
+      b = "* " ++ (replicate n ' ') ++ " *"
+      c = "* " ++        xs         ++ " *"
+      in intercalate "\n" [a,b,c,b,a]
+
 mosaic = map words . lines
 
 unmosaic = unlines . map unwords

@@ -61,7 +61,7 @@ createPopEneGnuplotFile input file dt' n rlxRt = do
           dt     = show dt'
 -- wanna new colors? http://www.2createawebsite.com/build/hex-colors.html#colorscheme
 --          hexColo= ["#FFF7F7","#F7FFF7","#E5FFFF","#FFF7F7","#FFFFF7","#F9F7FF","#FFF7FF"]
-          hexColo= ["#FF0600","#06FF00","#E5FFFF","#FFF7F7","#FFFFF7","#F9F7FF","#FFF7FF"]
+          hexColo= ["#FF0600","#06FF00","#00FFFF","#FFB400","#FFF600","#4E00FF","#FF00FC"]
           colors = ["#FF0600","#06FF00","#00FFFF","#FFB400","#FFF600","#4E00FF","#FF00FC"]
           tag    = map (\x -> "S" ++ (show x)) [0..]
           header = "set title \"" ++ fileZ ++ " Population and Energies\"\nset xlabel \"fs\"\nset key outside\nset format y \"%6.3f\"\nset y2range[0:1.001]\nset output '" ++ fileZ ++ "EnergiesPopulation.png'\nset style fill transparent solid 0.2 noborder\n" ++ gplOpt ++ "\nplot "

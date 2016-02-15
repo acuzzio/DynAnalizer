@@ -132,7 +132,7 @@ executeTasks input = do
   let tasks = getTasks input
   plottableForDataFile <- mapM (executeSingleTaskPreData input) tasks
   let plottableForDataFileNoEmpty = filter (/= Empty) plottableForDataFile
-  putStrLn "Creating DATA files:"
+  putStrLn $ stringOnBox "Creating DATA files:"
   createDATAs input plottableForDataFileNoEmpty
   atd <- readerData
   mapM_ (executeSingleTaskPostData input plottableForDataFileNoEmpty nroot atd) tasks
@@ -141,12 +141,15 @@ executeSingleTaskPreData :: Inputs -> Task -> IO (Plottable)
 executeSingleTaskPreData input task = do
   case task of
     EnergiesPopulation -> do
+                          putStrLn $ stringOnBox "Energy/populations graphics requested"
                           plotEnergiesPopulations input
                           return EnergyPop
     Trajectories       -> do
+                          putStrLn $ stringOnBox "Trajectories requested"
                           genTrajectories input
                           return Empty
     Internal     xs    -> do
+                          putStrLn $ stringOnBox $ "Internal coordinate analysis requested on " ++ show xs
                           plotBondAngleDihedrals input xs
                           return $ InternalPlot xs
 --    DihedralSingle xs
@@ -162,6 +165,7 @@ executeSingleTaskPostData input plottable nroot atd task = do
     EnergiesPopulation -> return ()
     Trajectories       -> return ()
     Internal     xs    -> do
+       putStrLn $ stringOnBox $ "Making global graphics for internal coordinate " ++ show xs
        let firstLabel  = "All"
            secondLabel = show $ InternalPlot xs      
        gnuplotG input firstLabel secondLabel nroot plottable (InternalPlot xs) atd     
