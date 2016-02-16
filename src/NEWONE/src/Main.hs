@@ -152,9 +152,11 @@ executeSingleTaskPreData input task = do
                           putStrLn $ stringOnBox $ "Internal coordinate analysis requested on " ++ show xs
                           plotBondAngleDihedrals input xs
                           return $ InternalPlot xs
+    Bla blai           -> do 
+                          putStrLn $ stringOnBox $ "BLA graphics requested on " ++ show blai
+                          return $ BlaPlot blai
 --    DihedralSingle xs
 --    DihedralGlobal xs 
---    Bla blai
 --    Internal xs
 --    Charge (label,xs  
 
@@ -169,4 +171,11 @@ executeSingleTaskPostData input plottable nroot atd task = do
        let firstLabel  = "All"
            secondLabel = show $ InternalPlot xs      
        gnuplotG input firstLabel secondLabel nroot plottable (InternalPlot xs) atd     
+    Bla         blai   -> do
+       putStrLn $ stringOnBox $ "Making global graphics for BLA using " ++ show blai
+       let firstLabel  = "All"
+           secondLabel = show $ BlaPlot blai
+       gnuplotG input firstLabel secondLabel nroot plottable (BlaPlot blai) atd
+
+
 

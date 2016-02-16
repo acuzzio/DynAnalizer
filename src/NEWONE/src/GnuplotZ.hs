@@ -101,16 +101,16 @@ findRlxRT a = let len           = length a
                   currentState  = fst . head $ filter (\x -> (head $ snd x) == (head tailA)) c
               in (currentState - states)
 
--- This plots single trajectory graphics
+-- This plots single trajectory graphics for Bonds Angles and Dihedrals
 plotBondAngleDihedrals :: Inputs -> [Int] -> IO()
 plotBondAngleDihedrals inputs xs = do
-   let folder = getfolder inputs
-   a <- readShell $ "ls INFO/*.info"
-   let files    = lines a        
-       chunks   = chunksOf 10 files
-   sequence_ $ fmap (parallelProcFiles (\x -> plotBondAngleDihedral inputs x xs)) chunks   -- PARALLEL STUFF : D 
+  let folder = getfolder inputs
+  a <- readShell $ "ls INFO/*.info"
+  let files    = lines a        
+      chunks   = chunksOf 10 files
+  sequence_ $ fmap (parallelProcFiles (\x -> plotBondAngleDihedral inputs x xs)) chunks   -- PARALLEL STUFF : D 
 --   mapM_ (\x -> plotBondAngleDihedral inputs x xs) files
-   putStrLn $ "\nYou can find those graphs into folder: " ++ folder ++ "/\n"
+  putStrLn $ "\nYou can find those graphs into folder: " ++ folder ++ "/\n"
 
 plotBondAngleDihedral :: Inputs -> FilePath -> [Int] -> IO()
 plotBondAngleDihedral inputs fn xs = do
@@ -180,7 +180,7 @@ gnuplotG input label label2 nRoot datalabels plotThis atd = do
   putStrLn "done"
 
 rangeOption plotThis = case plotThis of
-        BlaPlot -> "set yrange [-0.5:0.5]"
+        BlaPlot _ -> "set yrange [-0.5:0.5]"
         otherwise -> ""
 
 -- rightInd finds the right column of values in data files
@@ -192,8 +192,9 @@ rightInd datalabels plotThis nroot = let -- say we have [En,Int[1,2],Int[1,2,3,4
   in show $ (sum column) + 2 + 1 -- this is "10" -> the right column number of Int[1,2] in data files
 
 howManyColumns nroot x = case x of
-  EnergyPop -> (nroot * 2) + 1 + 2 -- even Jump and Root
+  EnergyPop      -> (nroot * 2) + 1 + 2 -- even Jump and Root
   InternalPlot _ -> 1
+  BlaPlot      _ -> 1
 
 ----gnuplotCT :: Inputs -> String -> Plottable -> AllTrajData -> Double -> IO()
 --gnuplotCT input label plotThis atd thresh = do

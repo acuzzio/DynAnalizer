@@ -41,7 +41,7 @@ data PlotType = Pop | Ene | Dyn | Tot deriving (Eq,Show)
 
 --data PlotType2 = Red | Black | Hop deriving (Eq,Show)
 
-data Plottable =  BlaPlot
+data Plottable =  BlaPlot [[(Int,Int)]]
                | Root 
                | Jump 
                | InternalPlot [Int]
@@ -52,17 +52,22 @@ data Plottable =  BlaPlot
 
 instance Show Plottable where
  --show (InternalPlot x) = "InternalPlot" ++ show x
- show (InternalPlot x) = let tr = intercalate "-" . map show 
-   in case length x of
-        2 -> "Bond"     ++ tr x
-        3 -> "Angle"    ++ tr x
-        4 -> "Dihedral" ++ tr x
+ show (InternalPlot x) = case length x of
+                              2 -> "Bond"     ++ tr x
+                              3 -> "Angle"    ++ tr x
+                              4 -> "Dihedral" ++ tr x
  show Root = "Root"
- show BlaPlot = "BlaPlot"
+ show (BlaPlot x) = "BlaPlot" ++ tr2 x
  show Jump = "Jump"
  show (ChargePlot x) = "ChargePlot" ++ show x
  show EnergyPop = "EnergyPop"
  show Empty = "Empty"
+
+-- from [1,2,3] to "1-2-3"
+tr = intercalate "-" . map show 
+-- from [[(1,2),(2,3),(4,5)],[(1,2),(2,3)]] to "1-2_2-3_4-5"
+tr2 = let fun (a,b) = (show a) ++ "-" ++ (show b)
+      in intercalate "_" . map fun . head 
 
 data Root = S0 | S1 | S2 | S3 | S4 | S5 | S6 deriving (Eq, Show, Read, Enum)
 

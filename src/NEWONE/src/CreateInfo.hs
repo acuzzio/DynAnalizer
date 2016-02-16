@@ -125,6 +125,7 @@ genInfoFileQM fileType fn = do
     coordinates             <- readShell $ "grep " ++ binaryGrep ++ " -A" ++ grepLength ++ " '       Old Coordinates (time' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep " ++ binaryGrep ++ " -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
     chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: *2/ {flag=1;next} /Expectation values of various properties for root number: *2/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
+    totEne                  <- readShell $ "grep 'Total Energy' " ++ fn ++ " | awk '{print $3}'"
     let infoname            = (reverse (dropWhile (/= '.') $ reverse fn )) ++ "info"
         div                 = "DIVISION\n"
         subDiv              = "SUBDIVISION\n"
@@ -154,12 +155,12 @@ genInfoFileQMMM fn = do
     coordinates             <- readShell $ "grep -A" ++ grepLength ++ " '       Old Coordinates (time= ' " ++ fn ++ " | sed /--/d | sed /Coordinates/d | sed /Atom/d | awk '{print $3, $4, $5}'"
     oscStr                  <- readShell $ "grep -A2 'Osc. strength.' " ++ fn ++ " | awk 'NR % 4 == 3' | awk '{print $3}'"
     chargeTr                <- readShell $ "awk '/Mulliken population Analysis for root number: 1/ {flag=1;next} /Expectation values of various properties for root number:  1/ {flag=0} flag {print}' " ++ fn ++ " | grep N-E | sed s/N-E//" 
+    totEne                  <- readShell $ "grep 'Total Energy' " ++ fn ++ " | awk '{print $3}'"
     let div                 = "DIVISION\n"
         subDiv              = "SUBDIVISION\n"
         atomTS'             = unlines $ map (\x -> head x :[]) $ lines atomTS 
         energiesPop'        = concat $ intersperse subDiv energiesPop
         chargeTr'           = unlines $ concat $ fmap words $ lines chargeTr
-        totEne              = NADNANSAJ -- grep "Total Energy" $fn | awk '{print $3}'
         wholefile           = atomNS ++ div ++ rootNS ++ div ++ rlxRtS ++ div ++ dTS ++ div ++ atomTS' ++ div ++ energiesPop' ++ div ++ coordinates ++ div ++ oscStr ++ div ++ chargeTr' ++ div ++ totEne
     writeFile infoname wholefile
     putStrLn $ fn ++ " done"

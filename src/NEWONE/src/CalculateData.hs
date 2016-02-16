@@ -67,7 +67,8 @@ createPLOTDATA a input listToPlot = do
                            4 -> [dihedro atlist geometries]
                            3 -> [angleStr atlist geometries]
                            2 -> [bondStr atlist geometries]
-                           otherwise -> [["some","error","occurred","the","user","asked","for","too","many","atoms"]]
+                           otherwise -> [["the","user","asked","for","too","many","atoms"]]
+    BlaPlot   blaList   -> [blaD blaList geometries] 
 --    Cccc            -> corrDihedro2 input $ dihedro ccccList geometries 
 --    CcccCorrected   -> corrDihedro3 $ dihedro ccccList geometries 
 --    Beta            -> corrDihedro2 input $ dihedro betaList geometries
@@ -82,7 +83,6 @@ createPLOTDATA a input listToPlot = do
 --                      beta = map read2 $ corrDihedro3 $ dihedro betaList geometries
 --                      delta= zipWith (-) cccc beta         
 --                      in prt delta
---    Bla             -> blaD blaList geometries  
 --    Ct              -> calculateCT cTFragment mullChar
 --    EnergyDyn       -> getEnergyOrPopulation energies S0 Dyn
 --    EnergyDiff x y  -> getEnergyDiff energies x y Ene
@@ -128,31 +128,21 @@ bondStr listAtom geometries = let
    bondV  = map bond $ map (\x -> map ( x !!) aLIndex) geometries
    in prt bondV
 
---blaD :: [[(Int,Int)]] -> [[Vec Double]] -> [String]
---blaD blaList geometries = let 
---    blaDV = map (blaPSB3 blaList) geometries
---    in prt blaDV
---
-----blaPSB3 :: [[(Int,Int)]] -> [Vec Double] -> Double
-----blaPSB3 blaList geometry = let 
-----    (a:b:c:[])      = blaList !! 0 
-----    (d:e:[])        = blaList !! 1
-----    blaBond (fS,sN) = bond [geometry!!(pred fS), geometry!!(pred sN)]
-----    doubles         = (blaBond a + blaBond b + blaBond c) / 3 
-----    singles         = (blaBond d + blaBond e) / 2 
-----    res             = singles - doubles
-----    in res
---
---blaPSB3 :: [[(Int,Int)]] -> [Vec Double] -> Double
---blaPSB3 blaList geometry = let 
---    double          = blaList !! 0
---    single          = blaList !! 1
---    blaBond (fS,sN) = bond [geometry!!(pred fS), geometry!!(pred sN)]
---    doubles         = (sum (map blaBond (double))) / (fromIntegral (length double))
---    singles         = (sum (map blaBond (single))) / (fromIntegral (length single))
---    res             = singles - doubles
---    in res
---
+blaD :: [[(Int,Int)]] -> [[Vec Double]] -> [String]
+blaD blaList geometries = let 
+    blaDV = map (blaCalc blaList) geometries
+    in prt blaDV
+
+blaCalc :: [[(Int,Int)]] -> [Vec Double] -> Double
+blaCalc blaList geometry = let 
+    double          = blaList !! 0
+    single          = blaList !! 1
+    blaBond (fS,sN) = bond [geometry!!(pred fS), geometry!!(pred sN)]
+    doubles         = (sum (map blaBond (double))) / (fromIntegral (length double))
+    singles         = (sum (map blaBond (single))) / (fromIntegral (length single))
+    res             = singles - doubles
+    in res
+
 --calculateCT :: [Int] -> [[Double]] -> [String]
 --calculateCT cTFragment charges = let
 --    cTFragmentI         = map pred cTFragment

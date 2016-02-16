@@ -9,7 +9,6 @@ import DataTypes
 import Verbatim
 import VerbatimParser
 
-
 data Task = DihedralSingle [Int] 
           | Bla [[(Int, Int)]]
           | DihedralS [Int] 
@@ -29,11 +28,11 @@ inputDefault = Inputs { getfolder = ".", getTasks = [], getgnuplotOptions = "set
 
 parseInput :: FilePath -> IO (Inputs)
 parseInput fnn = do
-     fn  <- correctFolderName fnn 
-     a   <- readFile (fn ++ "/input")
-     let tasks = readTasks a 
-         input = inputDefault { getfolder = fn, getTasks = tasks} 
-     return input
+  fn  <- correctFolderName fnn 
+  a   <- readFile (fn ++ "/input")
+  let tasks = readTasks a 
+      input = inputDefault { getfolder = fn, getTasks = tasks} 
+  return input
 
 readTasks :: String -> [Task]
 readTasks x = let
@@ -78,9 +77,9 @@ write your tasks here !!!
 
 writeInputTemplate :: FilePath -> IO()
 writeInputTemplate fn = do
-      let content = printVerbatim inputTempl
-      putStrLn $ "Template input file: " ++ fn ++ " written."
-      writeFile fn content
+  let content = printVerbatim inputTempl
+  putStrLn $ "Template input file: " ++ fn ++ " written."
+  writeFile fn content
 
 fromTasksToPlottables :: [Task] -> [Plottable]
 fromTasksToPlottables tasks = map fromTaskToPlottable tasks
@@ -89,7 +88,4 @@ fromTaskToPlottable :: Task -> Plottable
 fromTaskToPlottable task = case task of
   EnergiesPopulation -> EnergyPop 
   otherwise          -> error "what the fuck"
-
-
-
 
