@@ -196,6 +196,7 @@ howManyColumns nroot x = case x of
   InternalPlot _ -> 1
   BlaPlot      _ -> 1
 
+
 ----gnuplotCT :: Inputs -> String -> Plottable -> AllTrajData -> Double -> IO()
 --gnuplotCT input label plotThis atd thresh = do
 --  let folder        = getfolder input

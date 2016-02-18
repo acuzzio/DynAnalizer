@@ -9,21 +9,6 @@ import DataTypes
 import Verbatim
 import VerbatimParser
 
-data Task = DihedralSingle [Int] 
-          | Bla [[(Int, Int)]]
-          | DihedralS [Int] 
-          | EnergiesPopulation
-          | Trajectories
-          | Internal [Int]
-          | Charge (Root,[Int])
-          deriving Show
-
-data Inputs = Inputs { 
-     getfolder              :: String,
-     getTasks               :: [Task],
-     getgnuplotOptions      :: String
-     } deriving Show
-
 inputDefault = Inputs { getfolder = ".", getTasks = [], getgnuplotOptions = "set terminal pngcairo size 1224,830 enhanced font \", 12\""}
 
 parseInput :: FilePath -> IO (Inputs)
@@ -46,8 +31,9 @@ readTask line = let
   name  = map toUpper $ head noEqual
   atoms = tail noEqual
   task  = case name of
-     "DIHEDRALS"          -> let indexes = map readI atoms
-                             in DihedralS indexes
+     "DIHEDRAL"           -> let indexes = map readI atoms
+                                 (alpha,beta) = convertDihStringToAlphaBeta indexes
+                             in Dihedrals (alpha,beta)
      "BLA"                -> let indexes = map readI atoms
                              in Bla (takeBlaFormat indexes)
      "ENERGIESPOPULATION" -> EnergiesPopulation
@@ -62,6 +48,11 @@ readTask line = let
      otherwise        -> error "This keyword does not exist, double check your input file"
   in task
   
+convertDihStringToAlphaBeta xs = case length xs of
+     6         -> let [a,b,c,d,e,f] = xs
+                  in ([a,b,c,d],[e,b,c,f])
+     otherwise -> error "Error on the dihedral analysis string in input file"
+
 takeBlaFormat :: [Int] -> [[(Int, Int)]]
 takeBlaFormat x = let
   doubles = chunksOf 2 x

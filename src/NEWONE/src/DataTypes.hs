@@ -4,6 +4,21 @@ import Data.List
 
 import IntCoor
 
+data Task = Bla [[(Int, Int)]]
+--          | DihedralSingle [Int]  
+          | Dihedrals ([Int],[Int]) 
+          | EnergiesPopulation
+          | Trajectories
+          | Internal [Int]
+          | Charge (Root,[Int])
+          deriving Show
+
+data Inputs = Inputs { 
+     getfolder              :: String,
+     getTasks               :: [Task],
+     getgnuplotOptions      :: String
+     } deriving Show
+
 data Dynam = Dynam {
            gtRootN       :: Int,
            gtDT          :: Double,
@@ -47,6 +62,7 @@ data Plottable =  BlaPlot [[(Int,Int)]]
                | InternalPlot [Int]
                | ChargePlot [Int]
                | EnergyPop
+               | DihAna ([Int],[Int])
                | Empty
                deriving (Eq, Read)
 
@@ -62,6 +78,7 @@ instance Show Plottable where
  show (ChargePlot x) = "ChargePlot" ++ show x
  show EnergyPop = "EnergyPop"
  show Empty = "Empty"
+ show (DihAna (a,b)) = "DihedralAnalysisAlpha" ++ tr a ++ "Beta" ++ tr b
 
 -- from [1,2,3] to "1-2-3"
 tr = intercalate "-" . map show 

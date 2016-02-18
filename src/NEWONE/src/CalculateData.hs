@@ -54,10 +54,6 @@ createPLOTDATA a input listToPlot = do
       energies   = getEnergies a
       initialRlx = getStartRlxRt a
       mullChar   = chunksOf atomN $ getCharTran a
---      ccccList   = getccccList input
---      betaList   = getbetaList input
---      blaList    = getblaList input
---      cTFragment = getchargeTrFragment input
   case listToPlot of
     EnergyPop -> let enepop = map (map printZ12) energies 
                      root   = rootDiscov energies initialRlx
@@ -69,6 +65,17 @@ createPLOTDATA a input listToPlot = do
                            2 -> [bondStr atlist geometries]
                            otherwise -> [["the","user","asked","for","too","many","atoms"]]
     BlaPlot   blaList   -> [blaD blaList geometries] 
+    DihAna (alpha,beta) -> let al   = corrDihedro3 $ dihedro alpha geometries
+                               be   = corrDihedro3 $ dihedro beta geometries
+                               alV  = map read2 al
+                               beV  = map read2 be
+                               tau  = zipWith (\x y -> (x+y)*0.5) alV beV
+                               del  = zipWith (-) alV beV
+                               tauS = prt tau
+                               delS = prt del
+                           in al:be:tauS:delS:[]
+          
+
 --    Cccc            -> corrDihedro2 input $ dihedro ccccList geometries 
 --    CcccCorrected   -> corrDihedro3 $ dihedro ccccList geometries 
 --    Beta            -> corrDihedro2 input $ dihedro betaList geometries
@@ -109,7 +116,8 @@ createPLOTDATA a input listToPlot = do
 --                          Dyn    -> map printZ12 $ dyn  !! 0
 --    in listRigth
 --    -- in [" "," "] ++ listRigth  -- Correzioni per surfacehop elisa
---
+
+
 dihedro :: [Int] -> [[Vec Double]] -> [String]
 dihedro listAtom geometries = let
    aLIndex = map pred listAtom
@@ -150,16 +158,16 @@ blaCalc blaList geometry = let
 --    cTvalues            = map sumUp4CT charges
 --    in prt cTvalues
 --
---corrDihedro3 :: [String] -> [String]
---corrDihedro3 dihedListS = let 
---   dihedList = map read2 dihedListS 
---   firstDih  = head dihedList
---   corr  x   = corrDihedro $ corrDihedro x
---   in case isDihCloser firstDih 0 180 of
---           0   -> let result = corr dihedList
---                  in prt result
---           180 -> let result = if firstDih < 0 then corr dihedList else corr $ map (\x -> x-360.0) dihedList
---                  in prt result
+corrDihedro3 :: [String] -> [String]
+corrDihedro3 dihedListS = let 
+   dihedList = map read2 dihedListS 
+   firstDih  = head dihedList
+   corr  x   = corrDihedro $ corrDihedro x
+   in case isDihCloser firstDih 0 180 of
+           0   -> let result = corr dihedList
+                  in prt result
+           180 -> let result = if firstDih < 0 then corr dihedList else corr $ map (\x -> x-360.0) dihedList
+                  in prt result
 --
 --corrDihedro2 :: Inputs -> [String] -> [String] 
 --corrDihedro2 input xl = let 
@@ -168,35 +176,36 @@ blaCalc blaList geometry = let
 --   shiftDown x = if x > upperShift then x-360.0 else x
 --   in prt $ map shiftDown doubles
 --
----- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 
---isDihCloser :: Double -> Int -> Int -> Int
---isDihCloser float first second = let
---   integ      = floor float :: Int
---   a          = integ - 179
---   b          = integ + 180
---   downward y = if y > 180 then y - 360 else y
---   upward   y = if y <= (-180) then y + 360 else y
---   posOrNeg   = if signum float == 1 then map downward [a..b] else map upward [a..b]
---   Just fir   = elemIndex first posOrNeg
---   Just sec   = elemIndex second posOrNeg
---   one        = abs (179 - fir) -- integ will always be at index 179 in this array
---   two        = abs (179 - sec)
---   in if one < two then first else second
---
---correct :: Double -> Double -> Double
---correct x y = let 
---    a = abs $ x - y 
---    b = abs $ x - (y + 360)
---    c = abs $ x - (y - 360)
---    f = minimum [a,b,c]
---    in if a == f
---       then y else if b == f then (y + 360) else (y - 360) 
---
---corrDihedro :: [Double] -> [Double]
---corrDihedro (a:b:[]) = a : (correct a b) : []
---corrDihedro (a:b:xs) = a : corrDihedro ((correct a b) : xs)
---
+-- is dihedral angle (float :: Double) closer to (first :: Int) or (second :: Int) ? 
+isDihCloser :: Double -> Int -> Int -> Int
+isDihCloser float first second = let
+   integ      = floor float :: Int
+   a          = integ - 179
+   b          = integ + 180
+   downward y = if y > 180 then y - 360 else y
+   upward   y = if y <= (-180) then y + 360 else y
+   posOrNeg   = if signum float == 1 then map downward [a..b] else map upward [a..b]
+   Just fir   = elemIndex first posOrNeg
+   Just sec   = elemIndex second posOrNeg
+   one        = abs (179 - fir) -- integ will always be at index 179 in this array
+   two        = abs (179 - sec)
+   in if one < two then first else second
+
+correct :: Double -> Double -> Double
+correct x y = let 
+    a = abs $ x - y 
+    b = abs $ x - (y + 360)
+    c = abs $ x - (y - 360)
+    f = minimum [a,b,c]
+    in if a == f
+       then y else if b == f then (y + 360) else (y - 360) 
+
+corrDihedro :: [Double] -> [Double]
+corrDihedro (a:b:[]) = a : (correct a b) : []
+corrDihedro (a:b:xs) = a : corrDihedro ((correct a b) : xs)
+
 -- to explain getI : imagine a line like this (ene ene pop pop dyn)  0.54 0.57 0.01 0.99 0.57, we want this function to return the index of 0.57 (1), that is the root that has the same value as dyn value. To do this we do a ZIP, we dropWhile the value is different and we return the INDEX (snd).
+
 rootDiscov :: [[Double]] -> Int -> [String]
 rootDiscov energy rlxInit = let
     rootS          = div (length energy - 1) 2

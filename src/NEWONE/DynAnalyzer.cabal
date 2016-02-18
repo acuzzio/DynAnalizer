@@ -57,6 +57,7 @@ executable DynAnalyzer
     , ansi-terminal
     , template-haskell
     , syb
+    , terminal-size
 
   hs-source-dirs:      src 
   main-is: Main.hs

@@ -132,7 +132,7 @@ executeTasks input = do
   let tasks = getTasks input
   plottableForDataFile <- mapM (executeSingleTaskPreData input) tasks
   let plottableForDataFileNoEmpty = filter (/= Empty) plottableForDataFile
-  putStrLn $ stringOnBox "Creating DATA files:"
+  stringOnBox "Creating DATA files:"
   createDATAs input plottableForDataFileNoEmpty
   atd <- readerData
   mapM_ (executeSingleTaskPostData input plottableForDataFileNoEmpty nroot atd) tasks
@@ -141,41 +141,45 @@ executeSingleTaskPreData :: Inputs -> Task -> IO (Plottable)
 executeSingleTaskPreData input task = do
   case task of
     EnergiesPopulation -> do
-                          putStrLn $ stringOnBox "Energy/populations graphics requested"
+                          stringOnBox "Energy/populations graphics requested"
                           plotEnergiesPopulations input
                           return EnergyPop
     Trajectories       -> do
-                          putStrLn $ stringOnBox "Trajectories requested"
+                          stringOnBox "Trajectories requested"
                           genTrajectories input
                           return Empty
     Internal     xs    -> do
-                          putStrLn $ stringOnBox $ "Internal coordinate analysis requested on " ++ show xs
+                          stringOnBox $ "Internal coordinate analysis requested on " ++ show xs
                           plotBondAngleDihedrals input xs
                           return $ InternalPlot xs
     Bla blai           -> do 
-                          putStrLn $ stringOnBox $ "BLA graphics requested on " ++ show blai
+                          stringOnBox $ "BLA graphics requested on " ++ show blai
                           return $ BlaPlot blai
+    Dihedrals (a,b)    -> do
+                          stringOnBox $ "Dihedral analysis requested on alpha:" ++ show a ++ " and beta: " ++ show b
+                          return $ DihAna (a,b)
 --    DihedralSingle xs
 --    DihedralGlobal xs 
 --    Internal xs
 --    Charge (label,xs  
 
-
 executeSingleTaskPostData :: Inputs -> [Plottable] -> Int -> AllTrajData -> Task -> IO ()
 executeSingleTaskPostData input plottable nroot atd task = do
   case task of
-    EnergiesPopulation -> return ()
-    Trajectories       -> return ()
-    Internal     xs    -> do
-       putStrLn $ stringOnBox $ "Making global graphics for internal coordinate " ++ show xs
-       let firstLabel  = "All"
-           secondLabel = show $ InternalPlot xs      
+    EnergiesPopulation  -> return ()
+    Trajectories        -> return ()
+    Internal     xs     -> do
+       stringOnBox $ "Making global graphics for internal coordinate " ++ show xs
+       let firstLabel   = "All"
+           secondLabel  = show $ InternalPlot xs      
        gnuplotG input firstLabel secondLabel nroot plottable (InternalPlot xs) atd     
-    Bla         blai   -> do
-       putStrLn $ stringOnBox $ "Making global graphics for BLA using " ++ show blai
-       let firstLabel  = "All"
-           secondLabel = show $ BlaPlot blai
+    Bla         blai    -> do
+       stringOnBox $ "Making global graphics for BLA using " ++ show blai
+       let firstLabel   = "All"
+           secondLabel  = show $ BlaPlot blai
        gnuplotG input firstLabel secondLabel nroot plottable (BlaPlot blai) atd
-
+    Dihedrals (alpha,beta) -> do
+       stringOnBox $ "Dihedral Analysis -> alpha:" ++ show alpha ++ " and beta: " ++ show beta 
+       dihedralAnalysis alpha beta input atd
 
 

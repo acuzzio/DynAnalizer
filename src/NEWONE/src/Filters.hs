@@ -7,15 +7,19 @@ module Filters where
 --import Text.Printf
 --
 --import CalculateData
---import DataTypes
---import Functions
+import DataTypes
+import Functions
 --import GnuplotZ
 --import ParseInput
+
+dihedralAnalysis alpha beta input atd = do
+  let folder               = getfolder input
+      tasks                = getTasks input
+  print tasks
 
 --mainfilter input atd = do
 --    atd   <- readerData
 --    let plottable  = getListToPlot input
---        folder     = getfolder input
 --        checkPlots = map (\x -> x `elemIndex` plottable) [CcccCorrected, Ct, Jump]
 --        thereSNoth = Nothing `elem` checkPlots
 --    case thereSNoth of 

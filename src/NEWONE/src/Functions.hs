@@ -4,6 +4,7 @@ import Control.Concurrent.Async
 import Data.List.Split
 import Data.List
 import Text.Printf
+import System.Console.Terminal.Size
 import System.Directory
 import System.Process
 
@@ -65,13 +66,43 @@ correctFolderName fn = if fn == "."
         let aa  = if (last fn == '/') then init fn else fn
         return aa
 
-stringOnBox :: String -> String
-stringOnBox xs = let 
-      n = length xs
-      a = "**" ++ (replicate n '*') ++ "**"
-      b = "* " ++ (replicate n ' ') ++ " *"
-      c = "* " ++        xs         ++ " *"
-      in intercalate "\n" [a,b,c,b,a]
+--stringOnBox :: String -> String
+--stringOnBox xs = let 
+--      n = length xs
+--      a = "  **" ++ (replicate n '*') ++ "**"
+--      b = "  * " ++ (replicate n ' ') ++ " *"
+--      c = "  * " ++        xs         ++ " *"
+--      in intercalate "\n" [a,b,c,b,a]
+--
+stringOnBox :: String -> IO()
+stringOnBox xs = do
+      wdt <- terminalWidth
+      let n         = length xs
+          maxLeng   = fromIntegral $ wdt - 8
+          reformat  = if n > maxLeng then reformatBanner maxLeng xs else [xs]
+          len       = if n > maxLeng then maxLeng else n
+          a   = "  **" ++ (replicate len '*') ++ "**"
+          b   = "  * " ++ (replicate len ' ') ++ " *"
+          c x = "  * " ++        x            ++ " *"
+          d   = init $ unlines $ map c reformat
+          total = intercalate "\n" [a,b,d,b,a]
+      putStrLn total
+
+lol="jfkahsdfkjlhsakdfhjsadfhjasdfkhsafhwsdfksajdfjasdfkhsaf hhsdf hasdfksa fh wsd fsadfjksadfjksafsjadfjklasjdfhasklflasdf as dfas kdfhasldfh"
+
+reformatBanner maxLen str = let 
+  pieces = chunksOf maxLen str
+  in map (relength maxLen) pieces
+
+relength mln str = if ln < mln then str ++ spaces else str
+ where
+  ln     = length str
+  spaces = replicate (mln - ln) ' '
+
+terminalWidth :: IO (Integer)
+terminalWidth = do
+      Just win <- size
+      return $ width win
 
 mosaic = map words . lines
 
