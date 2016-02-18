@@ -62,7 +62,7 @@ data Plottable =  BlaPlot [[(Int,Int)]]
                | InternalPlot [Int]
                | ChargePlot [Int]
                | EnergyPop
-               | DihAna ([Int],[Int])
+               | DihAnaPlot ([Int],[Int])
                | Empty
                deriving (Eq, Read)
 
@@ -78,13 +78,13 @@ instance Show Plottable where
  show (ChargePlot x) = "ChargePlot" ++ show x
  show EnergyPop = "EnergyPop"
  show Empty = "Empty"
- show (DihAna (a,b)) = "DihedralAnalysisAlpha" ++ tr a ++ "Beta" ++ tr b
+ show (DihAnaPlot (a,b)) = "DihedralAnalysisAlpha" ++ tr a ++ "Beta" ++ tr b
 
 -- from [1,2,3] to "1-2-3"
 tr = intercalate "-" . map show 
--- from [[(1,2),(2,3),(4,5)],[(1,2),(2,3)]] to "1-2_2-3_4-5"
-tr2 = let fun (a,b) = (show a) ++ "-" ++ (show b)
-      in intercalate "_" . map fun . head 
+-- from [[(1,2),(2,3),(4,5)],[(1,2),(2,3)]] to "1=2-2=3-4=5"
+tr2 = let fun (a,b) = (show a) ++ "=" ++ (show b)
+      in intercalate "-" . map fun . head 
 
 data Root = S0 | S1 | S2 | S3 | S4 | S5 | S6 deriving (Eq, Show, Read, Enum)
 
@@ -103,6 +103,9 @@ data IsomType = Cis | Trans deriving (Show, Read)
 type AllTrajData = [SingleTrajData]
 type SingleTrajData = [PlottableData]
 type PlottableData = [String]
+type DataColumn = String
 
 data FileType = Binary | Normal deriving Show
+
+
 

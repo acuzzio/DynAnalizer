@@ -65,15 +65,15 @@ createPLOTDATA a input listToPlot = do
                            2 -> [bondStr atlist geometries]
                            otherwise -> [["the","user","asked","for","too","many","atoms"]]
     BlaPlot   blaList   -> [blaD blaList geometries] 
-    DihAna (alpha,beta) -> let al   = corrDihedro3 $ dihedro alpha geometries
-                               be   = corrDihedro3 $ dihedro beta geometries
-                               alV  = map read2 al
-                               beV  = map read2 be
-                               tau  = zipWith (\x y -> (x+y)*0.5) alV beV
-                               del  = zipWith (-) alV beV
-                               tauS = prt tau
-                               delS = prt del
-                           in al:be:tauS:delS:[]
+    DihAnaPlot (alpha,beta) -> let al   = corrDihedro3 $ dihedro alpha geometries
+                                   be   = corrDihedro3 $ dihedro beta geometries
+                                   alV  = map read2 al
+                                   beV  = map read2 be
+                                   tau  = zipWith (\x y -> (x+y)*0.5) alV beV
+                                   del  = zipWith (-) alV beV
+                                   tauS = prt tau
+                                   delS = prt del
+                               in al:be:tauS:delS:[]
           
 
 --    Cccc            -> corrDihedro2 input $ dihedro ccccList geometries 

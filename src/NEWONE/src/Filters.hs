@@ -9,13 +9,22 @@ module Filters where
 --import CalculateData
 import DataTypes
 import Functions
---import GnuplotZ
+import GnuplotZ
 --import ParseInput
 
-dihedralAnalysis alpha beta input atd = do
+dihedralAnalysis alpha beta nroot input plottable atd = do
   let folder               = getfolder input
       tasks                = getTasks input
-  print tasks
+      index                = rightInd plottable (DihAnaPlot (alpha,beta)) nroot
+      indexB               = show $ (read2 index) + 1
+      indexT               = show $ (read2 index) + 2
+      indexD               = show $ (read2 index) + 3
+  gnuplotG input "all" "alpha" nroot index  (DihAnaPlot (alpha,beta)) atd
+  gnuplotG input "all" "beta"  nroot indexB (DihAnaPlot (alpha,beta)) atd
+  gnuplotG input "all" "tau"   nroot indexT (DihAnaPlot (alpha,beta)) atd
+  gnuplotG input "all" "delta" nroot indexD (DihAnaPlot (alpha,beta)) atd
+  case -- you have to case if in plottable there is energy. If there is NO energy, stop here, if there is energy, go ahead and make the division hop/nohop etc.
+  
 
 --mainfilter input atd = do
 --    atd   <- readerData

@@ -157,7 +157,7 @@ executeSingleTaskPreData input task = do
                           return $ BlaPlot blai
     Dihedrals (a,b)    -> do
                           stringOnBox $ "Dihedral analysis requested on alpha:" ++ show a ++ " and beta: " ++ show b
-                          return $ DihAna (a,b)
+                          return $ DihAnaPlot (a,b)
 --    DihedralSingle xs
 --    DihedralGlobal xs 
 --    Internal xs
@@ -172,14 +172,16 @@ executeSingleTaskPostData input plottable nroot atd task = do
        stringOnBox $ "Making global graphics for internal coordinate " ++ show xs
        let firstLabel   = "All"
            secondLabel  = show $ InternalPlot xs      
-       gnuplotG input firstLabel secondLabel nroot plottable (InternalPlot xs) atd     
+           rightIndex   = rightInd plottable (InternalPlot xs) nroot
+       gnuplotG input firstLabel secondLabel nroot rightIndex (InternalPlot xs) atd     
     Bla         blai    -> do
        stringOnBox $ "Making global graphics for BLA using " ++ show blai
        let firstLabel   = "All"
            secondLabel  = show $ BlaPlot blai
-       gnuplotG input firstLabel secondLabel nroot plottable (BlaPlot blai) atd
+           rightIndex   = rightInd plottable (BlaPlot blai) nroot
+       gnuplotG input firstLabel secondLabel nroot rightIndex (BlaPlot blai) atd
     Dihedrals (alpha,beta) -> do
        stringOnBox $ "Dihedral Analysis -> alpha:" ++ show alpha ++ " and beta: " ++ show beta 
-       dihedralAnalysis alpha beta input atd
+       dihedralAnalysis alpha beta nroot input plottable atd
 
 

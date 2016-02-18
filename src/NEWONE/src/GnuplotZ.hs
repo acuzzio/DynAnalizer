@@ -148,9 +148,11 @@ extractBAD input fn atomL fun label = do
   system $ "mv " ++ fnLabe ++ ".png " ++ pngFol
   putStrLn $ fileN ++ ": done"
 
-gnuplotG :: Inputs -> String -> String -> Int -> [Plottable] -> Plottable -> AllTrajData -> IO ()
-gnuplotG input label label2 nRoot datalabels plotThis atd = do
+-- plotThis is not used anymore to intercept the right index, is used for the range instead.
+gnuplotG :: Inputs -> String -> String -> Int -> DataColumn -> Plottable -> AllTrajData -> IO ()
+gnuplotG input label label2 nRoot rightIndex plotThis atd = do
   let folder        = getfolder input
+      subfol        = show plotThis
       nRootI        = nRoot-1
       fileN         = folder ++ label ++ label2
       title         = folder ++ " " ++ label ++ " " ++ label2
@@ -159,7 +161,6 @@ gnuplotG input label label2 nRoot datalabels plotThis atd = do
       ps            = "2"
       gplOpt        = getgnuplotOptions input
       allJumps      = [(show x) ++ (show y) | x <- [0.. nRootI], y <- [0.. nRootI], x/=y]
-      rightIndex    = rightInd datalabels plotThis nRoot
       getHOP root   = filter (\x -> x /= []) $ map (filter (\x-> x!!3 == root)) atd -- this x!!3 supposes that Jump is on fourth column of data files
       getHOPs       = map getHOP allJumps
 --  putStrLn $ "WOOOOOOOOW " ++ rightIndex ++ " " ++ show nRootI
@@ -172,7 +173,7 @@ gnuplotG input label label2 nRoot datalabels plotThis atd = do
       wholeScript = header ++ wholePlotLine
       gnuplScriptName = fileN ++ "gnuplotScript"
   writeFile gnuplScriptName wholeScript
-  let folderName = "GlobalGraphics"
+  let folderName = subfol ++ "/GlobalGraphics"
   createDirectoryIfMissing True folderName
   system $ "gnuplot < " ++ (fileN ++ "gnuplotScript 2> /dev/null")
   system $ "mv " ++ gnuplScriptName ++ " " ++ folderName
@@ -182,19 +183,6 @@ gnuplotG input label label2 nRoot datalabels plotThis atd = do
 rangeOption plotThis = case plotThis of
         BlaPlot _ -> "set yrange [-0.5:0.5]"
         otherwise -> ""
-
--- rightInd finds the right column of values in data files
-rightInd :: [Plottable] -> Plottable -> Int -> String
-rightInd datalabels plotThis nroot = let -- say we have [En,Int[1,2],Int[1,2,3,4]] (Int[1,2])  
-  index = findIndM2 plotThis datalabels -- this is 1
-  shortPlottableList = take index datalabels -- this is [En,Int[1,2]]
-  column = map (howManyColumns nroot) shortPlottableList -- with nroot=2 this is [5,1]
-  in show $ (sum column) + 2 + 1 -- this is "10" -> the right column number of Int[1,2] in data files
-
-howManyColumns nroot x = case x of
-  EnergyPop      -> (nroot * 2) + 1 + 2 -- even Jump and Root
-  InternalPlot _ -> 1
-  BlaPlot      _ -> 1
 
 
 ----gnuplotCT :: Inputs -> String -> Plottable -> AllTrajData -> Double -> IO()

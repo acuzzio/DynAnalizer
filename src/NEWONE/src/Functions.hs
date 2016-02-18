@@ -111,4 +111,17 @@ unmosaic = unlines . map unwords
 convFStoAU = 41.3414472
 convAUtoFS =  0.0241888
 
+-- rightInd finds the right column of values in data files
+rightInd :: [Plottable] -> Plottable -> Int -> String
+rightInd datalabels plotThis nroot = let -- say we have [En,Int[1,2],Int[1,2,3,4]] (Int[1,2])  
+  index = findIndM2 plotThis datalabels -- this is 1
+  shortPlottableList = take index datalabels -- this is [En,Int[1,2]]
+  column = map (howManyColumns nroot) shortPlottableList -- with nroot=2 this is [5,1]
+  in show $ (sum column) + 2 + 1 -- this is "10" -> the right column number of Int[1,2] in data files
+
+howManyColumns nroot x = case x of
+  EnergyPop      -> (nroot * 2) + 1 + 2 -- even Jump and Root
+  InternalPlot _ -> 1
+  BlaPlot      _ -> 1
+  DihAnaPlot       _ -> 4
 
