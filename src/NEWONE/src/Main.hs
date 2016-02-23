@@ -5,7 +5,7 @@ import Control.Monad
 --import Control.Exception
 --import Data.List
 import System.Console.GetOpt
---import System.Console.ANSI
+import System.Console.ANSI
 import System.Directory
 import System.Environment (getArgs)
 import System.Exit
@@ -16,7 +16,7 @@ import System.ShQQ
 import CalculateData
 import CreateInfo
 import DataTypes
-import Filters
+import DihedralAnalysis
 import GnuplotZ
 import ParseInput
 --import Statistics
@@ -132,7 +132,7 @@ executeTasks input = do
   let tasks = getTasks input
   plottableForDataFile <- mapM (executeSingleTaskPreData input) tasks
   let plottableForDataFileNoEmpty = filter (/= Empty) plottableForDataFile
-  stringOnBox "Creating DATA files:"
+  stringOnBox '*' "Creating DATA files"
   createDATAs input plottableForDataFileNoEmpty
   atd <- readerData
   mapM_ (executeSingleTaskPostData input plottableForDataFileNoEmpty nroot atd) tasks
@@ -141,22 +141,22 @@ executeSingleTaskPreData :: Inputs -> Task -> IO (Plottable)
 executeSingleTaskPreData input task = do
   case task of
     EnergiesPopulation -> do
-                          stringOnBox "Energy/populations graphics requested"
+                          stringOnBoxColor Green '*' "Energy/populations graphics requested"
                           plotEnergiesPopulations input
                           return EnergyPop
     Trajectories       -> do
-                          stringOnBox "Trajectories requested"
+                          stringOnBoxColor Green '*' "Trajectories requested"
                           genTrajectories input
                           return Empty
     Internal     xs    -> do
-                          stringOnBox $ "Internal coordinate analysis requested on " ++ show xs
+                          stringOnBoxColor Green '*' $ "Internal coordinate analysis requested on " ++ show xs
                           plotBondAngleDihedrals input xs
                           return $ InternalPlot xs
     Bla blai           -> do 
-                          stringOnBox $ "BLA graphics requested on " ++ show blai
+                          stringOnBoxColor Green '*' $ "BLA graphics requested on " ++ show blai
                           return $ BlaPlot blai
     Dihedrals (a,b)    -> do
-                          stringOnBox $ "Dihedral analysis requested on alpha:" ++ show a ++ " and beta: " ++ show b
+                          stringOnBoxColor Green '*' $ "Dihedral analysis requested on alpha:" ++ show a ++ " and beta: " ++ show b
                           return $ DihAnaPlot (a,b)
 --    DihedralSingle xs
 --    DihedralGlobal xs 
@@ -169,19 +169,19 @@ executeSingleTaskPostData input plottable nroot atd task = do
     EnergiesPopulation  -> return ()
     Trajectories        -> return ()
     Internal     xs     -> do
-       stringOnBox $ "Making global graphics for internal coordinate " ++ show xs
+       stringOnBoxColor Cyan '*' $ "Making global graphics for internal coordinate " ++ show xs
        let firstLabel   = "All"
            secondLabel  = show $ InternalPlot xs      
            rightIndex   = rightInd plottable (InternalPlot xs) nroot
        gnuplotG input firstLabel secondLabel nroot rightIndex (InternalPlot xs) atd     
     Bla         blai    -> do
-       stringOnBox $ "Making global graphics for BLA using " ++ show blai
+       stringOnBoxColor Cyan '*' $ "Making global graphics for BLA using " ++ show blai
        let firstLabel   = "All"
            secondLabel  = show $ BlaPlot blai
            rightIndex   = rightInd plottable (BlaPlot blai) nroot
        gnuplotG input firstLabel secondLabel nroot rightIndex (BlaPlot blai) atd
     Dihedrals (alpha,beta) -> do
-       stringOnBox $ "Dihedral Analysis -> alpha:" ++ show alpha ++ " and beta: " ++ show beta 
+       stringOnBoxColor Cyan '*' $ "Dihedral Analysis -> alpha:" ++ show alpha ++ " and beta: " ++ show beta 
        dihedralAnalysis alpha beta nroot input plottable atd
 
 

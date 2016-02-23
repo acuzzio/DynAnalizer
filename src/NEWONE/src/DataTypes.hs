@@ -11,7 +11,7 @@ data Task = Bla [[(Int, Int)]]
           | Trajectories
           | Internal [Int]
           | Charge (Root,[Int])
-          deriving Show
+          deriving (Show,Eq)
 
 data Inputs = Inputs { 
      getfolder              :: String,
@@ -98,7 +98,7 @@ data Flag = Help
             | Label          String
             deriving (Show, Eq)
 
-data IsomType = Cis | Trans deriving (Show, Read)
+data IsomType = Cis | Trans deriving (Show, Read, Eq)
 
 type AllTrajData = [SingleTrajData]
 type SingleTrajData = [PlottableData]

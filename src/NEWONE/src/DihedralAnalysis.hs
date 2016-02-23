@@ -1,10 +1,12 @@
-module Filters where
+module DihedralAnalysis where
 
---import Data.List
+import System.Console.ANSI
+
+import Data.List
 --import System.Directory
 --import System.Process
 --import System.ShQQ
---import Text.Printf
+import Text.Printf
 --
 --import CalculateData
 import DataTypes
@@ -12,18 +14,64 @@ import Functions
 import GnuplotZ
 --import ParseInput
 
+dihedralAnalysis :: [Int] -> [Int] -> Int -> Inputs -> [Plottable] -> AllTrajData -> IO ()
 dihedralAnalysis alpha beta nroot input plottable atd = do
-  let folder               = getfolder input
-      tasks                = getTasks input
-      index                = rightInd plottable (DihAnaPlot (alpha,beta)) nroot
-      indexB               = show $ (read2 index) + 1
-      indexT               = show $ (read2 index) + 2
-      indexD               = show $ (read2 index) + 3
+  let folder                    = getfolder input
+      tasks                     = getTasks input
+      index                     = rightInd plottable (DihAnaPlot (alpha,beta)) nroot
+      indexForHaskLists    = (readI index) - 1 -- rightInd is for GNUPLOT, NOT for haskell lists
+      indexB                    = show $ (readI index) + 1
+      indexT                    = show $ (readI index) + 2
+      indexD                    = show $ (readI index) + 3
+      firstCCCCvalueofFirstTraj = (head $ head atd) !! indexForHaskLists
+      isomerType                = isCisorTrans $ read2 firstCCCCvalueofFirstTraj 
   gnuplotG input "all" "alpha" nroot index  (DihAnaPlot (alpha,beta)) atd
   gnuplotG input "all" "beta"  nroot indexB (DihAnaPlot (alpha,beta)) atd
   gnuplotG input "all" "tau"   nroot indexT (DihAnaPlot (alpha,beta)) atd
   gnuplotG input "all" "delta" nroot indexD (DihAnaPlot (alpha,beta)) atd
-  case -- you have to case if in plottable there is energy. If there is NO energy, stop here, if there is energy, go ahead and make the division hop/nohop etc.
+-- you have to case if in plottable there is energy. If there is NO energy, stop here, if there is energy, go ahead and make the division hop/nohop etc.
+  case (elem EnergiesPopulation $ getTasks input) of 
+       False -> stringOnBoxColor Red  '#' "If you want Hopping analysis, please add the ENERGIESPOPULATION option in input file !"
+       True  -> do
+         let (doHop,doesNotHop)   = whoHop input plottable nroot atd 
+             (doIsom,doesNotIsom) = whoIsom indexForHaskLists isomerType atd
+             (doLeft,doRight)     = whoLeftWhoRight indexForHaskLists plottable nroot isomerType $ fst doHopIsom
+             (doLeftNoIso,doRightNoIso) = whoLeftWhoRight indexForHaskLists plottable nroot isomerType  $ fst doHopNoIsom
+             allOfThem      = (atd, "all")
+             doHopIsom      = (intersect doHop doIsom, "HopAndIsom")
+             doHopNoIsom    = (intersect doHop doesNotIsom, "HopAndNoIsom")
+             noHopIsom      = (intersect doesNotHop doIsom, "NoHopAndIsom")
+             noHopNoIsom    = (intersect doesNotHop doesNotIsom, "NoHopNoIsom")
+             doHopIsomLeft  = (doLeft,  "HopIsomLeft")
+             doHopIsomRight = (doRight, "HopIsomRight")
+             noHopIsomLeft  = (doLeftNoIso,  "HopNoIsoGoLeft")
+             noHopIsomRight = (doRightNoIso, "HopNoIsoGoRight")
+             listOfThem     = [allOfThem, doHopIsom,doHopNoIsom,noHopIsom,noHopNoIsom,doHopIsomLeft,doHopIsomRight,noHopIsomLeft,noHopIsomRight]
+             fileN          = folder ++ show (DihAnaPlot (alpha,beta)) ++ "-Stats"
+--          mapM_ (\x -> makeBasicGraphs input (snd x) (fst x)) listOfThem
+         mapM_ (\x -> atdLogger fileN (snd x) (fst x)) listOfThem
+         let lf = length . fst
+             [all,yhyi,yhni,nhyi,nhni,hiL,hiR,hniL,hniR] = map lf listOfThem
+             z         = "\nSTATISTICS:\n\n                  Hop/NoHop(" ++ show (yhyi+yhni) ++ "/" ++ show (nhyi+nhni) ++ ")        TOTAL(" ++ (show all) ++ ")"
+             a         = "Hop and Isom:   | " ++ (printPercentage2 yhyi yhni all)
+             b         = "Hop not Isom:   | " ++ (printPercentage2 yhni yhyi all)
+             c         = "NoHop and Isom: | " ++ (printPercentage2 nhyi nhni all)
+             d         = "NoHop not Isom: | " ++ (printPercentage2 nhni nhyi all)
+             g         = "\n\nLEFT AND RIGHT SECTION:\n"
+             h         = "     HOP and ISOMERIZE             just Hop                  Total"
+             i         = "Left:    | " ++ printPercentage3 hiL (hiL+hiR) (hiL+hiR+hniL+hniR) all
+             j         = "Right:   | " ++ printPercentage3 hiR (hiL+hiR) (hiL+hiR+hniL+hniR) all
+             k         = "\n   HOP and NOT ISOMERIZE           just Hop                  Total"
+             l         = "Left:    | " ++ printPercentage3 hniL (hniL+hniR) (hiL+hiR+hniL+hniR) all
+             m         = "Right:   | " ++ printPercentage3 hniR (hniL+hniR) (hiL+hiR+hniL+hniR) all
+             n         = "\n       TOTAL                       just Hop                  Total"
+             o         = "Left:    | " ++ printPercentage3 (hiL+hniL) (hiL+hiR+hniL+hniR) (hiL+hiR+hniL+hniR) all
+             p         = "Right:   | " ++ printPercentage3 (hiR+hniR) (hiL+hiR+hniL+hniR) (hiL+hiR+hniL+hniR) all
+             stringToW = intercalate "\n" [z,a,b,c,d,g,h,i,j,k,l,m,n,o,p] 
+         putStrLn stringToW
+         appendFile fileN (stringToW ++ "\n")
+         putStrLn $ "\nEverything written down into file: " ++ fileN ++ " !!\n\n"
+
   
 
 --mainfilter input atd = do
@@ -74,25 +122,25 @@ dihedralAnalysis alpha beta nroot input plottable atd = do
 --          appendFile fileN (stringToW ++ "\n")
 --          putStrLn $ "\nEverything written down into file: " ++ fileN ++ " !!\n\n"
 --
---printPercentage2 :: Int -> Int -> Int -> String
---printPercentage2 x y all = let
---    percentage a b = printZ((fromIntegral2 a / fromIntegral2 b)*100.0) ++ "%"
---    goodString a b = (printf "%7s" (percentage a b) :: String) ++ " " ++ (printf "%-9s" ("(" ++ show a ++ "/" ++ show b ++ ")") :: String)
---    in (intercalate " | " [goodString x (x+y), goodString x all]) ++ " |"
---
---printPercentage3 :: Int -> Int -> Int -> Int -> String
---printPercentage3 x y allS allB = let 
---    percentage a b = printZ((fromIntegral2 a / fromIntegral2 b)*100.0) ++ "%"
---    goodString a b = (printf "%7s" (percentage a b) :: String) ++ " " ++ (printf "%-9s" ("(" ++ show a ++ "/" ++ show b ++ ")") :: String)
---    in (intercalate " | " [goodString x y, goodString x allS, goodString x allB]) ++ " |"
---
---atdLogger filN lab atd = do
---          let trajNum x   = map (\x -> x!!0!!0) x
---          appendFile filN $ "\n" ++ lab ++ " " 
---          appendFile filN $ show $ length $ trajNum atd
---          appendFile filN $ ":\n" ++ (unwords $ trajNum atd)
---          appendFile filN "\n"
---
+printPercentage2 :: Int -> Int -> Int -> String
+printPercentage2 x y all = let
+    percentage a b = printZ((fromIntegral2 a / fromIntegral2 b)*100.0) ++ "%"
+    goodString a b = (printf "%7s" (percentage a b) :: String) ++ " " ++ (printf "%-9s" ("(" ++ show a ++ "/" ++ show b ++ ")") :: String)
+    in (intercalate " | " [goodString x (x+y), goodString x all]) ++ " |"
+
+printPercentage3 :: Int -> Int -> Int -> Int -> String
+printPercentage3 x y allS allB = let 
+    percentage a b = printZ((fromIntegral2 a / fromIntegral2 b)*100.0) ++ "%"
+    goodString a b = (printf "%7s" (percentage a b) :: String) ++ " " ++ (printf "%-9s" ("(" ++ show a ++ "/" ++ show b ++ ")") :: String)
+    in (intercalate " | " [goodString x y, goodString x allS, goodString x allB]) ++ " |"
+
+atdLogger filN lab atd = do
+          let trajNum x   = map (\x -> x!!0!!0) x
+          appendFile filN $ "\n" ++ lab ++ " " 
+          appendFile filN $ show $ length $ trajNum atd
+          appendFile filN $ ":\n" ++ (unwords $ trajNum atd)
+          appendFile filN "\n"
+
 --makeBasicGraphs input lab atd = do
 --    let folder      = getfolder input
 --        label       = folder ++ lab 
@@ -118,43 +166,40 @@ dihedralAnalysis alpha beta nroot input plottable atd = do
 --   Just x  -> x
 --   Nothing -> 0
 --
---whoIsom :: Inputs -> AllTrajData -> (AllTrajData,AllTrajData)
---whoIsom input atd = partition ( isoOrNot input ) atd
---
---isoOrNot :: Inputs -> SingleTrajData -> Bool
---isoOrNot input std = let
---   listPlot  = getListToPlot input 
---   index     = findInd CcccCorrected listPlot
---   lastPoint = last std
---   lastValue = read2 $ lastPoint !! index
---   isomCond  = snd $ getUpperAndIsomCond $ getisomType input 
---   in isomCond lastValue
---
---whoHop :: Inputs -> AllTrajData -> (AllTrajData,AllTrajData)
---whoHop input atd = let
---   listPlot      = getListToPlot input
---   indeX         = findInd Jump listPlot
---   in partition ( doThisHopOrNot indeX ) atd
---
---doThisHopOrNot :: Int -> SingleTrajData -> Bool
---doThisHopOrNot index std = let
---   jumpColumn = map (\x-> x!!index) std  
---   in any (\x -> x == "10") jumpColumn
---
---whoLeftWhoRight :: Inputs-> AllTrajData -> (AllTrajData,AllTrajData)
---whoLeftWhoRight input atd = partition (leftRight input) atd
---
----- this DOES NOT WORK IN CASE OF 20 (from S2 to S0) last hop correct plz
---leftRight :: Inputs -> SingleTrajData -> Bool
---leftRight input std = let
---   listPlot  = getListToPlot input
---   indexC    = findInd CcccCorrected listPlot
---   indexJ    = findInd Jump listPlot
---   hoppingCC = read2 $ (last $ filter (\x -> x!!indexJ == "10") std ) !! indexC -- here is why it will not work. It just looks for "10" transitions
---   in case getisomType input of
---           Cis   -> if hoppingCC >  0   then True else False
---           Trans -> if hoppingCC > -180 then True else False
---   
+whoIsom :: Int -> IsomType -> AllTrajData -> (AllTrajData,AllTrajData)
+whoIsom index isomer atd = partition ( isoOrNot index isomer ) atd
+
+isoOrNot :: Int -> IsomType -> SingleTrajData -> Bool
+isoOrNot index isomer std = let
+   lastPoint = last std
+   lastValue = read2 $ lastPoint !! index
+   finalIsomer = isCisorTrans lastValue
+   in not (isomer == finalIsomer)
+
+whoHop :: Inputs -> [Plottable] -> Int -> AllTrajData -> (AllTrajData,AllTrajData)
+whoHop input plottable nroot atd = let
+   indeX           = rightInd plottable EnergyPop nroot
+   jumpColumnIndex = readI indeX  -- Indexes in HAskell starts from 0, but we need the second columns, so -1 +1 and we're done
+   in partition ( doThisHopOrNot jumpColumnIndex ) atd
+
+doThisHopOrNot :: Int -> SingleTrajData -> Bool
+doThisHopOrNot index std = let
+   jumpColumn = map (\x-> x!!index) std  
+   in any (\x -> x == "10") jumpColumn
+
+whoLeftWhoRight :: Int -> [Plottable] -> Int -> IsomType -> AllTrajData -> (AllTrajData,AllTrajData)
+whoLeftWhoRight index plottable nroot isom atd = partition (leftRight index plottable nroot isom) atd
+
+-- this DOES NOT WORK IN CASE OF 20 (from S2 to S0) last hop correct plz
+leftRight :: Int -> [Plottable] -> Int -> IsomType -> SingleTrajData -> Bool
+leftRight index plottable nroot isom std = let
+   indeXJump        = rightInd plottable EnergyPop nroot
+   jumpColumnIndex  = readI indeXJump  -- Indexes in HAskell starts from 0, but we need the second columns, so -1 +1 and we're done
+   hoppingCC = read2 $ (last $ filter (\x -> x!!jumpColumnIndex == "10") std ) !! index -- here is why it will not work. It just looks for "10" transitions
+   in case isom of
+           Cis   -> if hoppingCC >  0   then True else False
+           Trans -> if hoppingCC > -180 then True else False
+   
 --filterHoppingPointsAll :: AllTrajData -> AllTrajData
 --filterHoppingPointsAll atd = map filterHoppingPoints atd
 --

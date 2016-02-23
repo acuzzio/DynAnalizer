@@ -61,6 +61,6 @@ executable DynAnalyzer
 
   hs-source-dirs:      src 
   main-is: Main.hs
-  other-modules: CreateInfo, IntCoor, Functions, ParseInput, DataTypes, Verbatim, VerbatimParser
+  other-modules: CreateInfo, IntCoor, Functions, ParseInput, DataTypes, Verbatim, VerbatimParser, DihedralAnalysis
 
 

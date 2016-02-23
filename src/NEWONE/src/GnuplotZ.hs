@@ -178,7 +178,7 @@ gnuplotG input label label2 nRoot rightIndex plotThis atd = do
   system $ "gnuplot < " ++ (fileN ++ "gnuplotScript 2> /dev/null")
   system $ "mv " ++ gnuplScriptName ++ " " ++ folderName
   system $ "mv *" ++ label2 ++ "* " ++ folderName
-  putStrLn "done"
+  putStrLn $ "Graphic " ++ folderName ++ "/" ++ pngName ++ ": done"
 
 rangeOption plotThis = case plotThis of
         BlaPlot _ -> "set yrange [-0.5:0.5]"

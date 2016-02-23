@@ -4,6 +4,7 @@ import Control.Concurrent.Async
 import Data.List.Split
 import Data.List
 import Text.Printf
+import System.Console.ANSI
 import System.Console.Terminal.Size
 import System.Directory
 import System.Process
@@ -74,21 +75,37 @@ correctFolderName fn = if fn == "."
 --      c = "  * " ++        xs         ++ " *"
 --      in intercalate "\n" [a,b,c,b,a]
 --
-stringOnBox :: String -> IO()
-stringOnBox xs = do
+
+stringOnBoxColor :: Color -> Char -> String -> IO()
+stringOnBoxColor color char xs = do
       wdt <- terminalWidth
       let n         = length xs
           maxLeng   = fromIntegral $ wdt - 8
           reformat  = if n > maxLeng then reformatBanner maxLeng xs else [xs]
           len       = if n > maxLeng then maxLeng else n
-          a   = "  **" ++ (replicate len '*') ++ "**"
-          b   = "  * " ++ (replicate len ' ') ++ " *"
-          c x = "  * " ++        x            ++ " *"
+          a   = "  " ++ [char] ++ [char] ++ (replicate len char) ++ [char] ++ [char]
+          b   = "  " ++ [char] ++ " " ++ (replicate len ' ') ++ " " ++ [char]
+          c x = "  " ++ [char] ++ " " ++        x            ++ " " ++ [char]
+          d   = init $ unlines $ map c reformat
+          total = intercalate "\n" [a,b,d,b,a]
+      setSGR [SetColor Foreground Vivid color]
+      putStrLn total
+      setSGR [Reset]
+
+
+stringOnBox :: Char -> String -> IO()
+stringOnBox char xs = do
+      wdt <- terminalWidth
+      let n         = length xs
+          maxLeng   = fromIntegral $ wdt - 8
+          reformat  = if n > maxLeng then reformatBanner maxLeng xs else [xs]
+          len       = if n > maxLeng then maxLeng else n
+          a   = "  " ++ [char] ++ [char] ++ (replicate len char) ++ [char] ++ [char]
+          b   = "  " ++ [char] ++ " " ++ (replicate len ' ') ++ " " ++ [char]
+          c x = "  " ++ [char] ++ " " ++        x            ++ " " ++ [char]
           d   = init $ unlines $ map c reformat
           total = intercalate "\n" [a,b,d,b,a]
       putStrLn total
-
-lol="jfkahsdfkjlhsakdfhjsadfhjasdfkhsafhwsdfksajdfjasdfkhsaf hhsdf hasdfksa fh wsd fsadfjksadfjksafsjadfjklasjdfhasklflasdf as dfas kdfhasldfh"
 
 reformatBanner maxLen str = let 
   pieces = chunksOf maxLen str
@@ -125,3 +142,5 @@ howManyColumns nroot x = case x of
   BlaPlot      _ -> 1
   DihAnaPlot       _ -> 4
 
+isCisorTrans :: Double -> IsomType
+isCisorTrans x = if (x > 90.0 || x < -90.0) then Trans else Cis
