@@ -153,7 +153,11 @@ getExpression flag =
        case (getchargeTrFragment input) == [9999] of
           True  -> do putStrLn "There is a problem into input file."
           False -> do putStrLn fn
-                      luismaAsk input
+                      createDATAs input
+                      mainfilter input
+                      putStrLn "Now doing the CT part:"
+                      chargeTmap input
+                      putStrLn "Done"
     Dani fnn -> do
        fn <- correctFolderName fnn
        setCurrentDirectory fn

@@ -43,19 +43,20 @@ parseFile = do
   dt     <- parseDT
   aType  <- parseAtomTypes
   let nAtom = B.length aType
-  all    <- many' $ parseMDStep nAtom nRoot
+  all    <- many' $ parseMDStepDBG nAtom nRoot
   return $ [nR,dt,aType] ++ all
 
 -- This function for debug purposes
 parseMDStepDBG :: Int -> Int -> Parser B.ByteString
 parseMDStepDBG nAtom nRoot = do
---  a     <- B.intercalate "\n" <$> count nRoot parseWF
---  a     <- parseGeom nAtom
---  b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
---  c     <- parseEnePop
---  d     <- parseGradient nAtom
-  e     <- parseInVelo nAtom
-  return $ e
+  a     <- B.intercalate "\n" <$> count nRoot parseWF
+  aa    <- parseGeom nAtom
+  b     <- B.intercalate "\n" <$> count nRoot parseSingleCharge
+  c     <- parseEnePop
+  d     <- parseGradient nAtom
+--  e     <- parseInVelo nAtom
+  return $ B.intercalate "\n" [a,aa,b,c,d]
+
 
 -- this structure is repeated nStep times
 parseMDStep :: Int -> Int -> Parser B.ByteString
@@ -86,10 +87,10 @@ parseSingleLineWF = do
 parseKinTot :: Parser B.ByteString
 parseKinTot = do
   let condition x =  any (==x) [' ','\n'] 
-  skipTillCase "kinetic energy" 
+  skipTill "kinetic energy" 
   option "" (skipSpace *> string "(Hartree) is:")
   x <- skipSpace *> takeTill condition
-  skipTillCase "total energy"
+  skipTill "Total Energy"
   option "" (skipSpace *> string "(Hartree) is:")
   y <- skipSpace *> takeTill condition
   let replaceD = map (\c -> if c =='D' then 'E' else c)

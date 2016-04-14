@@ -52,9 +52,11 @@ treatTriplets = B.init . B.unlines . map trimDoubleSpaces
 
 -- | Throw away everything until the string pattern
 --   TODO nota ho aggiunto qua il parametro ignoreCase tanto e` un test veloce che non rallenta niente
---
-skipTill :: Bool -> B.ByteString -> Parser ()
-skipTill ignoreCase pattern = consume patternStart
+
+--skipTill :: Bool -> B.ByteString -> Parser ()
+--skipTill ignoreCase pattern = consume patternStart
+skipTill :: B.ByteString -> Parser ()
+skipTill pattern = consume patternStart
   
   where
 
@@ -76,7 +78,8 @@ skipTill ignoreCase pattern = consume patternStart
              -- reached end of input
 
         Just ch2
-          -> case (ch1 == ch2) || (ignoreCase && (B.toLower ch1 == B.toLower ch2)) of
+          -> case (ch1 == ch2) of
+--          -> case (ch1 == ch2) || (ignoreCase && (B.toLower ch1 == B.toLower ch2)) of
                True
                  -> do anyChar
                        consume (B.uncons rs)
