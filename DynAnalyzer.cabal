@@ -36,7 +36,7 @@ Flag debug
 
 
 executable DynAnalyzer
-  ghc == 7.* 
+  ghc  
   ghc-options:
     -O2
     -rtsopts
@@ -50,7 +50,7 @@ executable DynAnalyzer
 --    , ParsecTools
     , MissingH  
     , transformers 
-    , process   == 1.1.*
+    , process   
     , split
     , shqq
     , async
