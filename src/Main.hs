@@ -126,9 +126,9 @@ getExpression flag =
        case (getchargeTrFragment input) == [9999] of
           True  -> do putStrLn "There is a problem into input file."
           False -> do plotEnergiesPopulations input 
-                      plotBondAngleDihedrals input $ getccccList input 
+--                      plotBondAngleDihedrals input $ getccccList input 
                       createDATAs input
-                      genTrajectories input 
+--                      genTrajectories input 
                       graphicLifeTime3 input 2 
                       mainfilter input
                       putStrLn "Now doing the CT part:"

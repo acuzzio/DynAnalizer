@@ -36,7 +36,6 @@ Flag debug
 
 
 executable DynAnalyzer
-  ghc  
   ghc-options:
     -O2
     -rtsopts
